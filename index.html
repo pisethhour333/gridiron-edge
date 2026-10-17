@@ -67,12 +67,15 @@ header p{margin:.4rem 0 0;color:var(--muted);max-width:60ch}
 .chk input{width:11rem;flex:0 1 auto;padding:.35rem .5rem}
 .tdl{margin:0;padding-left:1.4rem;display:flex;flex-direction:column;gap:6px}
 .tdl li .pv{float:right;margin-left:8px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#q-sum{font-weight:600;color:var(--turf);margin:0}
 .pk{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .pk button{font:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:8px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:6px}
 .pk button[aria-pressed="true"],.qs[aria-pressed="true"],.qo[aria-pressed="true"]{border-color:var(--turf);background:var(--turf-soft);color:var(--turf);font-weight:600}
 .pk button span:last-child{font-family:var(--mono)}
-nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding-block:12px;margin-top:8px}
-nav button{font-family:var(--display);font-weight:700;font-size:.95rem;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:.55rem .25rem;border-radius:6px;cursor:pointer}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;overflow-x:auto;scrollbar-width:none;gap:6px;padding-block:12px;margin-top:8px}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:0 0 auto;padding-inline:.9rem!important;font-family:var(--display);font-weight:700;font-size:.95rem;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:.55rem .25rem;border-radius:6px;cursor:pointer}
 nav button[aria-selected="true"]{background:var(--turf);border-color:var(--turf);color:var(--bg)}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--flag);outline-offset:2px}
 section.panel{display:flex;flex-direction:column;gap:16px}
@@ -323,15 +326,15 @@ details p{margin:.5rem 0 0;max-width:62ch}
       <label class="f"><span class="lab">Type</span><select id="b-type"><option>Moneyline</option><option>Spread</option><option>Total</option><option>Parlay</option><option>Prop</option></select></label>
     </div>
     <div id="quick" style="display:flex;flex-direction:column;gap:8px"></div>
-    <div class="grid2">
-      <label class="f"><span class="lab">Game name</span><input id="b-game" required placeholder="e.g. Bengals @ Steelers"></label>
-      <label class="f"><span class="lab">Your pick</span><input id="b-pick" required placeholder="e.g. Steelers +1.5"></label>
+    <div class="grid2" id="manual">
+      <label class="f"><span class="lab">Game name</span><input id="b-game" placeholder="e.g. Bengals @ Steelers"></label>
+      <label class="f"><span class="lab">Your pick</span><input id="b-pick" placeholder="e.g. Steelers +1.5"></label>
     </div>
-    <div class="grid2">
+    <div class="pair">
       <label class="f"><span class="lab">Odds</span><input type="number" id="b-odds" required value="-110"></label>
       <label class="f"><span class="lab">Stake ($)</span><input type="number" id="b-stake" required min="0" step="0.01" value="10"></label>
     </div>
-    <div class="grid2">
+    <div class="pair">
       <label class="f"><span class="lab">Date</span><input type="date" id="b-date"></label>
       <label class="f"><span class="lab">Result</span><select id="b-res"><option value="pending">Pending</option><option value="won">Won</option><option value="lost">Lost</option><option value="push">Push</option></select></label>
     </div>
@@ -701,6 +704,7 @@ $("bkLoad").addEventListener("click",()=>{try{const a=JSON.parse($("bkText").val
 
 $("betForm").addEventListener("submit",async e=>{
   e.preventDefault();
+  if(!$("b-game").value.trim()||!$("b-pick").value.trim()){$("b-msg").textContent=Q.g?"Tap your pick first (and enter the line for spreads and totals).":"Choose a game from the list, or type the game and your pick.";return}
   const o=num("b-odds");if(!dec(o)){$("b-msg").textContent="Odds must be -100 or lower, or +100 or higher.";return}
   const b={date:$("b-date").value||today(),game:$("b-game").value.trim(),pick:$("b-pick").value.trim(),type:$("b-type").value,odds:o,stake:num("b-stake"),result:$("b-res").value,createdAt:Date.now(),...betMeta()};
   if(!store){$("b-msg").textContent="Still connecting, try again in a moment.";return}
@@ -745,12 +749,14 @@ function updPick(){const g=Q.g;if(!g)return;const t=$("b-type").value;let s="";
   if(t==="Moneyline"&&Q.side)s=short(g,Q.side)+" ML";
   if(t==="Spread"&&Q.side)s=short(g,Q.side)+(Q.line!=null?" "+sgn(Q.line):"");
   if(t==="Total"&&Q.ou)s=(Q.ou==="over"?"Over":"Under")+(Q.line!=null?" "+Q.line:"");
-  if(s)$("b-pick").value=s}
-function renderQuick(){const g=Q.g,box=$("quick");if(!g){box.innerHTML="";return}const t=$("b-type").value;let h="";
+  if(s)$("b-pick").value=s;const q=$("q-sum");if(q)q.textContent=s?"Your pick: "+s:""}
+function syncManual(){const t=$("b-type").value,auto=!!Q.g&&["Moneyline","Spread","Total"].includes(t);$("b-game").closest("label").hidden=!!Q.g;$("b-pick").closest("label").hidden=auto;$("manual").hidden=!!Q.g&&auto}
+function renderQuick(){const g=Q.g,box=$("quick");if(!g){box.innerHTML="";syncManual();return}const t=$("b-type").value;let h="";
   if(t==="Moneyline"||t==="Spread")h=`<div class="pk">${[g.away,g.home].map(c=>`<button type="button" class="qs" aria-pressed="${Q.side===c}" data-s="${esc(c)}"><span>${esc(short(g,c))}</span><span class="note">${c===g.home?"home":"away"}</span></button>`).join("")}</div>`+(t==="Spread"?`<label class="f"><span class="lab">Spread for your team</span><input type="number" inputmode="decimal" step="0.5" id="q-line" placeholder="e.g. -3.5 or 7" value="${Q.line??""}"></label>`:"");
   else if(t==="Total")h=`<div class="pk">${["over","under"].map(o=>`<button type="button" class="qo" aria-pressed="${Q.ou===o}" data-o="${o}"><span>${o==="over"?"Over":"Under"}</span><span></span></button>`).join("")}</div><label class="f"><span class="lab">Total points line</span><input type="number" inputmode="decimal" step="0.5" id="q-line" placeholder="e.g. 44.5" value="${Q.line??""}"></label>`;
   else h=`<p class="note">Type your pick below.</p>`;
-  box.innerHTML=h;
+  box.innerHTML=h+`<p id="q-sum"></p>`;syncManual();
+  updPick();
   box.querySelectorAll(".qs").forEach(b=>b.addEventListener("click",()=>{Q.side=b.dataset.s;updPick();renderQuick()}));
   box.querySelectorAll(".qo").forEach(b=>b.addEventListener("click",()=>{Q.ou=b.dataset.o;updPick();renderQuick()}));
   const li=$("q-line");if(li)li.addEventListener("input",()=>{const v=parseFloat(li.value);Q.line=isFinite(v)?v:null;updPick()});
