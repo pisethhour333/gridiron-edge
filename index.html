@@ -69,7 +69,7 @@ header p{margin:.4rem 0 0;color:var(--muted);max-width:60ch}
 .tdl li .pv{float:right;margin-left:8px}
 .pk{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .pk button{font:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:8px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:6px}
-.pk button[aria-pressed="true"]{border-color:var(--turf);background:var(--turf-soft);color:var(--turf);font-weight:600}
+.pk button[aria-pressed="true"],.qs[aria-pressed="true"],.qo[aria-pressed="true"]{border-color:var(--turf);background:var(--turf-soft);color:var(--turf);font-weight:600}
 .pk button span:last-child{font-family:var(--mono)}
 nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding-block:12px;margin-top:8px}
 nav button{font-family:var(--display);font-weight:700;font-size:.95rem;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:.55rem .25rem;border-radius:6px;cursor:pointer}
@@ -319,11 +319,15 @@ details p{margin:.5rem 0 0;max-width:62ch}
   <form class="card" id="betForm">
     <h3>Log a bet</h3>
     <div class="grid2">
-      <label class="f"><span class="lab">Game</span><input id="b-game" required placeholder="e.g. Bengals @ Steelers"></label>
+      <label class="f"><span class="lab">Game</span><select id="b-gsel"><option value="">Choose a game, or type it below</option></select></label>
+      <label class="f"><span class="lab">Type</span><select id="b-type"><option>Moneyline</option><option>Spread</option><option>Total</option><option>Parlay</option><option>Prop</option></select></label>
+    </div>
+    <div id="quick" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div class="grid2">
+      <label class="f"><span class="lab">Game name</span><input id="b-game" required placeholder="e.g. Bengals @ Steelers"></label>
       <label class="f"><span class="lab">Your pick</span><input id="b-pick" required placeholder="e.g. Steelers +1.5"></label>
     </div>
-    <div class="grid3">
-      <label class="f"><span class="lab">Type</span><select id="b-type"><option>Moneyline</option><option>Spread</option><option>Total</option><option>Parlay</option><option>Prop</option></select></label>
+    <div class="grid2">
       <label class="f"><span class="lab">Odds</span><input type="number" id="b-odds" required value="-110"></label>
       <label class="f"><span class="lab">Stake ($)</span><input type="number" id="b-stake" required min="0" step="0.01" value="10"></label>
     </div>
@@ -525,7 +529,7 @@ function renderGames(){
       ${side(g.away,md&&md.pA,md&&!favH)}${side(g.home,md&&md.pH,md&&favH)}
       ${md?`<div class="bar" aria-hidden="true"><i style="width:${(md.pA*100).toFixed(1)}%;opacity:.45"></i></div>`:""}
       <div class="row" style="justify-content:space-between"><span class="note">${md?(live?"Live win chance":`Model line: ${esc(short(g,md.m>0?g.home:g.away))} ${sp?"-"+sp:"pick'em"}`):(fin?"Final score":"No stats for one of these teams yet")}</span>
-      <button class="btn sm ghost dig" data-id="${esc(g.id)}">Dig in</button></div></div>`}).join("");
+      <span class="row" style="gap:6px"><button class="btn sm ghost dig" data-id="${esc(g.id)}">Dig in</button><button class="btn sm ghost" data-log="${esc(JSON.stringify({key:g.lg+":"+g.id}))}">Log bet</button></span></div></div>`}).join("");
   document.querySelectorAll(".dig").forEach(b=>b.addEventListener("click",()=>digIn(gs.find(g=>g.id===b.dataset.id))));
   renderParlays(gs);
 }
@@ -544,7 +548,7 @@ function renderParlays(gs){
   [2,3,4].forEach(n=>{if(L.length<n)return;const set=L.slice(0,n);const p=set.reduce((s,l)=>s*l.p,1);
     out.push(`<div class="pl"><div class="hd"><h3>${n}-team parlay</h3><span class="chance">${pct(p,0)} to hit</span></div>
     <ul>${set.map(l=>`<li><b>${esc(tname(l.g,l.team))}</b> to win <span class="note">(${pct(l.p,0)}, ${esc(LEAGUES[l.g.lg].label)}, ${esc(whenTxt(l.g))})</span></li>`).join("")}</ul>
-    <div class="note">Fair odds ${fairOdds(p)}. Only bet it if DraftKings pays more than that.</div></div>`)});
+    <div class="row" style="justify-content:space-between"><span class="note">Fair odds ${fairOdds(p)}. Only bet it if DraftKings pays more.</span><button class="btn sm ghost" data-log="${esc(JSON.stringify({type:"Parlay",game:n+"-team parlay",pick:set.map(l=>short(l.g,l.team)).join(" + "),date:localDate(set[0].g.start_time)}))}">Log bet</button></div></div>`)});
   $("bestParlays").innerHTML=out.join("")||`<div class="empty">Need at least two upcoming games with stats.</div>`;
   const up=gs.filter(g=>upcoming(g)&&model(g));
   Object.keys(picks).forEach(id=>{if(!up.some(g=>g.id===id))delete picks[id]});
@@ -596,7 +600,7 @@ async function refresh(force){
     jobs.push(loadScores(lg).catch(()=>{feedErr=true}));
     if(force||!D[lg].teams||Date.now()-(D[lg].teams.at||0)>6*3600e3)jobs.push(loadStandings(lg).catch(()=>{}));
   });
-  feedErr=false;await Promise.all(jobs);setTag();renderGames();
+  feedErr=false;await Promise.all(jobs);setTag();renderGames();if(typeof fillGameSelect==="function"){fillGameSelect();autoSettle()}
 }
 function initData(){
   Object.keys(LEAGUES).forEach(lg=>{const t=cache.get(lg+"-teams");if(t)D[lg].teams=t;const l=cache.get(lg+"-live");if(l){D[lg].live=l.live;D[lg].recs=l.recs;D[lg].liveAt=l.at}});
@@ -655,11 +659,13 @@ async function renderProps(){
           <div class="pr"><span class="lab">${cfg.label}</span><span class="pv">Proj ${Math.round(pr.proj)}</span></div>
           <div class="chips">${cfg.lines.map(L=>`<span class="chip">${L}+ <b>${pct(overP(pr,L),0)}</b></span>`).join("")}
           ${pr.anyTD!=null?`<span class="chip td">Anytime TD <b>${pct(pr.anyTD,0)}</b></span>`:""}${pr.twoPass!=null?`<span class="chip td">2+ pass TD <b>${pct(pr.twoPass,0)}</b></span>`:""}</div>
-          <div class="row chk"><input type="number" inputmode="decimal" step="0.5" placeholder="Your line, e.g. ${cfg.lines[1]-0.5}" id="ln-${esc(g.id)}-${esc(tid)}-${i}" data-proj="${pr.proj.toFixed(2)}" data-sd="${pr.sd.toFixed(2)}" class="lineIn" aria-label="Check a ${cfg.label} line for ${esc(p.name)}"><span class="note lineOut"></span></div></div>`}).join("");
+          <div class="row chk"><input type="number" inputmode="decimal" step="0.5" placeholder="Your line, e.g. ${cfg.lines[1]-0.5}" id="ln-${esc(g.id)}-${esc(tid)}-${i}" data-proj="${pr.proj.toFixed(2)}" data-sd="${pr.sd.toFixed(2)}" class="lineIn" aria-label="Check a ${cfg.label} line for ${esc(p.name)}"><span class="note lineOut"></span><button type="button" class="btn sm ghost logprop" data-key="${esc("nfl:"+g.id)}" data-name="${esc(p.name)}" data-lab="${esc(cfg.label.toLowerCase())}">Log bet</button></div></div>`}).join("");
       return`<div class="pteam"><h3>${esc(tname(g,tid))}</h3>${rows||`<p class="note">Player stats not available yet.</p>`}</div>`}).join("");
     return`<div class="gm"><div class="meta"><span>${esc(whenTxt(g))}</span><span>${esc(short(g,g.away))} @ ${esc(short(g,g.home))}</span></div>${teams}</div>`}).join("");
   document.querySelectorAll(".lineIn").forEach(inp=>inp.addEventListener("input",()=>{const L=parseFloat(inp.value),o=inp.parentNode.querySelector(".lineOut");if(!isFinite(L)){o.textContent="";return}
     const p=Phi((+inp.dataset.proj-L)/+inp.dataset.sd);o.innerHTML=`Over <b>${pct(p,0)}</b> · Under <b>${pct(1-p,0)}</b>`}));
+  document.querySelectorAll(".logprop").forEach(b=>b.addEventListener("click",()=>{const L=b.parentNode.querySelector(".lineIn").value;const g=findGame(b.dataset.key);
+    startLog({type:"Prop",key:b.dataset.key,pick:`${b.dataset.name} ${L?"Over "+L+" ":""}${b.dataset.lab}`})}));
   tds.sort((a,b)=>b.ch-a.ch);
   $("tdBoard").innerHTML=tds.length?`<ol class="tdl">${tds.slice(0,10).map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(t.p.pos)}, ${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))}</span></span><span class="pv">${pct(t.ch,0)}</span></li>`).join("")}</ol>`:`<p class="note">No touchdown data yet.</p>`;
 }
@@ -696,9 +702,9 @@ $("bkLoad").addEventListener("click",()=>{try{const a=JSON.parse($("bkText").val
 $("betForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const o=num("b-odds");if(!dec(o)){$("b-msg").textContent="Odds must be -100 or lower, or +100 or higher.";return}
-  const b={date:$("b-date").value||today(),game:$("b-game").value.trim(),pick:$("b-pick").value.trim(),type:$("b-type").value,odds:o,stake:num("b-stake"),result:$("b-res").value,createdAt:Date.now()};
+  const b={date:$("b-date").value||today(),game:$("b-game").value.trim(),pick:$("b-pick").value.trim(),type:$("b-type").value,odds:o,stake:num("b-stake"),result:$("b-res").value,createdAt:Date.now(),...betMeta()};
   if(!store){$("b-msg").textContent="Still connecting, try again in a moment.";return}
-  try{await store.add(b);$("b-msg").textContent="Saved.";$("b-pick").value="";$("b-game").value="";$("b-res").value="pending"}catch(err){$("b-msg").textContent="Couldn't save that bet. Check your connection and try again."}
+  try{await store.add(b);$("b-msg").textContent="Saved.";$("b-pick").value="";$("b-game").value="";$("b-res").value="pending";$("b-msg").textContent="Saved.";resetQuick()}catch(err){$("b-msg").textContent="Couldn't save that bet. Check your connection and try again."}
 });
 
 function profit(b){const d=dec(b.odds)||1;return b.result==="won"?b.stake*(d-1):b.result==="lost"?-b.stake:0}
@@ -718,7 +724,7 @@ function render(){
     <td class="n">${esc(b.date||"")}</td>
     <td><div>${esc(b.pick)}</div><div class="note">${esc(b.type)} · ${esc(b.game)}</div></td>
     <td class="n">${sgn(b.odds)}</td><td class="n">${money(+b.stake||0)}</td>
-    <td><select data-id="${esc(b.id)}" class="res" aria-label="Result">${["pending","won","lost","push"].map(r=>`<option value="${r}" ${r===b.result?"selected":""}>${r[0].toUpperCase()+r.slice(1)}</option>`).join("")}</select></td>
+    <td><select data-id="${esc(b.id)}" class="res" aria-label="Result">${["pending","won","lost","push"].map(r=>`<option value="${r}" ${r===b.result?"selected":""}>${r[0].toUpperCase()+r.slice(1)}</option>`).join("")}</select>${b.auto?`<div class="note">auto-graded</div>`:""}</td>
     <td class="n ${pr>0?"pos":pr<0?"neg":""}">${b.result==="pending"?"—":money(pr)}</td>
     <td><button class="btn sm danger del" data-id="${esc(b.id)}">${armed===b.id?"Confirm":"Delete"}</button></td></tr>`}).join("")}</tbody></table></div>`;
   document.querySelectorAll(".res").forEach(s=>s.addEventListener("change",()=>store.update(s.dataset.id,{result:s.value}).catch(()=>{})));
@@ -726,6 +732,52 @@ function render(){
 }
 render();
 })();
+/* --- quick logging & auto-grading --- */
+var Q={g:null,side:null,ou:null,line:null};
+function localDate(s){const d=new Date(s);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function allGames(){const out=[],now=Date.now();Object.keys(LEAGUES).forEach(lg=>{const s=D[lg];((s.live&&s.live.games)||[]).forEach(g=>out.push({...g,lg}))});
+  return out.filter(g=>g.status!=="postponed"&&Date.parse(g.start_time)>now-14*3600e3).sort((a,b)=>Date.parse(a.start_time)-Date.parse(b.start_time))}
+function findGame(key){if(!key)return null;const i=key.indexOf(":"),lg=key.slice(0,i),id=key.slice(i+1);const s=D[lg];const g=s&&((s.live&&s.live.games)||[]).find(x=>x.id===id);return g?{...g,lg}:null}
+function fillGameSelect(){const sel=$("b-gsel");if(!sel||document.activeElement===sel)return;const cur=sel.value;
+  sel.innerHTML=`<option value="">Choose a game, or type it below</option>`+allGames().map(g=>`<option value="${esc(g.lg+":"+g.id)}">${esc(LEAGUES[g.lg].label)} · ${esc(whenTxt(g))} · ${esc(short(g,g.away))} @ ${esc(short(g,g.home))}</option>`).join("");
+  if(cur)sel.value=cur}
+function updPick(){const g=Q.g;if(!g)return;const t=$("b-type").value;let s="";
+  if(t==="Moneyline"&&Q.side)s=short(g,Q.side)+" ML";
+  if(t==="Spread"&&Q.side)s=short(g,Q.side)+(Q.line!=null?" "+sgn(Q.line):"");
+  if(t==="Total"&&Q.ou)s=(Q.ou==="over"?"Over":"Under")+(Q.line!=null?" "+Q.line:"");
+  if(s)$("b-pick").value=s}
+function renderQuick(){const g=Q.g,box=$("quick");if(!g){box.innerHTML="";return}const t=$("b-type").value;let h="";
+  if(t==="Moneyline"||t==="Spread")h=`<div class="pk">${[g.away,g.home].map(c=>`<button type="button" class="qs" aria-pressed="${Q.side===c}" data-s="${esc(c)}"><span>${esc(short(g,c))}</span><span class="note">${c===g.home?"home":"away"}</span></button>`).join("")}</div>`+(t==="Spread"?`<label class="f"><span class="lab">Spread for your team</span><input type="number" inputmode="decimal" step="0.5" id="q-line" placeholder="e.g. -3.5 or 7" value="${Q.line??""}"></label>`:"");
+  else if(t==="Total")h=`<div class="pk">${["over","under"].map(o=>`<button type="button" class="qo" aria-pressed="${Q.ou===o}" data-o="${o}"><span>${o==="over"?"Over":"Under"}</span><span></span></button>`).join("")}</div><label class="f"><span class="lab">Total points line</span><input type="number" inputmode="decimal" step="0.5" id="q-line" placeholder="e.g. 44.5" value="${Q.line??""}"></label>`;
+  else h=`<p class="note">Type your pick below.</p>`;
+  box.innerHTML=h;
+  box.querySelectorAll(".qs").forEach(b=>b.addEventListener("click",()=>{Q.side=b.dataset.s;updPick();renderQuick()}));
+  box.querySelectorAll(".qo").forEach(b=>b.addEventListener("click",()=>{Q.ou=b.dataset.o;updPick();renderQuick()}));
+  const li=$("q-line");if(li)li.addEventListener("input",()=>{const v=parseFloat(li.value);Q.line=isFinite(v)?v:null;updPick()});
+}
+function chooseGame(key){Q={g:findGame(key),side:null,ou:null,line:null};const g=Q.g;
+  if(g){$("b-gsel").value=key;$("b-game").value=`${short(g,g.away)} @ ${short(g,g.home)}`;$("b-date").value=localDate(g.start_time)}renderQuick()}
+$("b-gsel").addEventListener("change",e=>chooseGame(e.target.value));
+$("b-type").addEventListener("change",()=>{renderQuick();updPick()});
+function betMeta(){const g=Q.g;if(!g)return{};const t=$("b-type").value,m={gameId:g.id,lg:g.lg};
+  if(t==="Moneyline"&&Q.side)Object.assign(m,{kind:"ml",side:Q.side});
+  else if(t==="Spread"&&Q.side&&Q.line!=null)Object.assign(m,{kind:"spread",side:Q.side,line:Q.line});
+  else if(t==="Total"&&Q.ou&&Q.line!=null)Object.assign(m,{kind:"total",ou:Q.ou,line:Q.line});
+  return m}
+function resetQuick(){Q={g:null,side:null,ou:null,line:null};$("b-gsel").value="";renderQuick()}
+function startLog(opts){show("tracker");window.scrollTo(0,0);resetQuick();$("b-game").value="";$("b-pick").value="";
+  if(opts.type)$("b-type").value=opts.type;if(opts.key)chooseGame(opts.key);
+  if(opts.game)$("b-game").value=opts.game;if(opts.pick)$("b-pick").value=opts.pick;if(opts.date)$("b-date").value=opts.date;
+  renderQuick();$("b-msg").textContent="Now enter the odds and stake from your DraftKings slip.";$("b-odds").focus()}
+function autoSettle(){if(!store)return;bets.filter(b=>b.result==="pending"&&b.gameId&&b.kind).forEach(b=>{
+  const s=D[b.lg];const g=s&&((s.live&&s.live.games)||[]).find(x=>x.id===b.gameId);if(!g||g.status!=="closed"||!g.score)return;
+  const sc=g.score,tot=(sc[g.home]||0)+(sc[g.away]||0);let d=null;
+  if(b.kind==="ml"||b.kind==="spread"){const other=b.side===g.home?g.away:g.home;d=(sc[b.side]||0)-(sc[other]||0)+(b.kind==="spread"?b.line:0)}
+  if(b.kind==="total")d=b.ou==="over"?tot-b.line:b.line-tot;
+  if(d!=null)store.update(b.id,{result:d>0?"won":d<0?"lost":"push",auto:true})})}
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-log]");if(!t)return;
+  try{startLog(JSON.parse(t.dataset.log))}catch(err){}});
+fillGameSelect();setTimeout(autoSettle,800);
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
 
