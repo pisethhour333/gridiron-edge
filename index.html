@@ -735,7 +735,6 @@ function render(){
   document.querySelectorAll(".del").forEach(btn=>btn.addEventListener("click",()=>{const id=btn.dataset.id;if(armed===id){armed=null;store.remove(id).catch(()=>{})}else{armed=id;render()}}));
 }
 render();
-})();
 /* --- quick logging & auto-grading --- */
 var Q={g:null,side:null,ou:null,line:null};
 function localDate(s){const d=new Date(s);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
@@ -784,6 +783,7 @@ function autoSettle(){if(!store)return;bets.filter(b=>b.result==="pending"&&b.ga
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-log]");if(!t)return;
   try{startLog(JSON.parse(t.dataset.log))}catch(err){}});
 fillGameSelect();setTimeout(autoSettle,800);
+})();
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
 
