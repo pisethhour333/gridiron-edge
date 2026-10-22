@@ -126,6 +126,8 @@ label.f .stp{width:100%}label.f .stp input{flex:1;width:auto!important}
 table.ptab{font-size:.88rem}table.ptab td,table.ptab th{white-space:normal;padding:7px 5px;vertical-align:top}
 table.ptab td:first-child{white-space:nowrap}
 .dkc{color:var(--flag-ink)}
+h3.evt{margin:2px 0 4px;font-size:1.15rem}
+.fchk .chk select{max-width:46%}
 .pk{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .pk button{font:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:8px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:6px}
 .pk button[aria-pressed="true"],.qs[aria-pressed="true"],.qo[aria-pressed="true"]{border-color:var(--turf);background:var(--turf-soft);color:var(--turf);font-weight:600}
@@ -460,6 +462,13 @@ details p{margin:.5rem 0 0;max-width:62ch}
     <details><summary>Spread (Asian handicap)</summary><p>Soccer's version of a spread, like -0.5 or +1.5 goals. A -0.5 is the same as picking that team to win outright.</p></details>
   </div>
   <div class="card">
+    <h2>Golf and racing bets</h2>
+    <details open><summary>Outright winner</summary><p>Pick who wins the whole tournament or race. Big fields mean long odds: even the favorite often wins less than 1 in 4 times. Use <b>Odds check</b> on the event card to type DraftKings' odds and see whether the price is worth it.</p></details>
+    <details><summary>Top 5, top 10, top 20 and podium</summary><p>Your player only has to finish in that group. In golf, ties at the cut-off are “dead heats” and pay a fraction, which lowers what these bets are really worth.</p></details>
+    <details><summary>Matchups</summary><p>Pick which of two players or drivers finishes ahead. The rest of the field doesn't matter. Use <b>Matchup</b> on the event card.</p></details>
+    <details><summary>1st-round leader (golf)</summary><p>Who leads after Thursday's round. Lots of players are tied or close after one round, so prices are long.</p></details>
+  </div>
+  <div class="card">
     <h2>Tennis and UFC bets</h2>
     <details open><summary>Tennis: match winner and set betting</summary><p>Match winner is a moneyline on the match. Set betting picks the exact score in sets, like 2-0 or 2-1. Total sets over 2.5 wins if a best-of-3 match goes to a third set. Grand Slam men's matches are best of 5.</p></details>
     <details><summary>Tennis: how the app rates players</summary><p>It uses official ranking points, which reward results over the past year. It doesn't know about surface, recent form or injuries, so a player returning from injury can look weaker than they are.</p></details>
@@ -605,8 +614,8 @@ if(TABS.includes(location.hash.slice(1)))show(location.hash.slice(1));
 /* --- games & parlays --- */
 const LEAGUES={nfl:{label:"NFL",feed:"nfl",sd:13.5,hfa:1.5,avg:22.5,tsd:13.5,teamsd:9.5},cfb:{label:"College",feed:"ncaafb",sd:16,hfa:2.5,avg:28,tsd:17,teamsd:12},nba:{label:"NBA",feed:"nba",sd:12.5,hfa:2.5,avg:114,tsd:17,teamsd:11},soc:{label:"Soccer",feed:"soccer",sd:1.6,hfa:0,avg:1.35,tsd:1.6,teamsd:1.1},
   mlb:{label:"MLB",sd:4.4,hfa:0.35,avg:4.4,tsd:4.4,teamsd:3.1},nhl:{label:"NHL",sd:2.4,hfa:0.25,avg:3.1,tsd:2.3,teamsd:1.6},wnba:{label:"WNBA",sd:11.5,hfa:2.5,avg:82,tsd:15,teamsd:10},
-  ncaab:{label:"NCAAB",sd:11,hfa:3.2,avg:72,tsd:15,teamsd:10},ncaaw:{label:"NCAAW",sd:12,hfa:3,avg:67,tsd:15,teamsd:10},ten:{label:"Tennis",sd:1,hfa:0,avg:0,tsd:1,teamsd:1},mma:{label:"UFC",sd:1,hfa:0,avg:0,tsd:1,teamsd:1}};
-const D={nfl:{},cfb:{},nba:{},soc:{},mlb:{},nhl:{},wnba:{},ncaab:{},ncaaw:{},ten:{},mma:{}};let DF="all";try{DF=localStorage.getItem("ge-df")||"all"}catch(e){}let picks={},LG="all";
+  ncaab:{label:"NCAAB",sd:11,hfa:3.2,avg:72,tsd:15,teamsd:10},ncaaw:{label:"NCAAW",sd:12,hfa:3,avg:67,tsd:15,teamsd:10},ten:{label:"Tennis",sd:1,hfa:0,avg:0,tsd:1,teamsd:1},mma:{label:"UFC",sd:1,hfa:0,avg:0,tsd:1,teamsd:1},golf:{label:"Golf",sd:1,hfa:0,avg:0,tsd:1,teamsd:1},f1:{label:"F1",sd:1,hfa:0,avg:0,tsd:1,teamsd:1},nas:{label:"NASCAR",sd:1,hfa:0,avg:0,tsd:1,teamsd:1}};
+const D={nfl:{},cfb:{},nba:{},soc:{},mlb:{},nhl:{},wnba:{},ncaab:{},ncaaw:{},ten:{},mma:{},golf:{},f1:{},nas:{}};let DF="all";try{DF=localStorage.getItem("ge-df")||"all"}catch(e){}let picks={},LG="all";
 try{LG=localStorage.getItem("ge-lg")||"all"}catch(e){}
 const norm=c=>c==="JAX"?"JAC":c;
 const DONE=["closed","complete","completed","cancelled","canceled","postponed"];
@@ -624,6 +633,7 @@ function remaining(g){
   const el=(Date.now()-Date.parse(g.start_time))/60000;return Math.min(1,Math.max(0.02,1-el/(g.lg==="cfb"?210:g.lg==="nhl"?150:["nba","wnba","ncaab","ncaaw"].includes(g.lg)?135:190)));
 }
 function model(g){
+  if(g.field)return null;
   if(g.lg==="ten")return tennisModel(g);
   if(g.lg==="mma")return mmaModel(g);
   if(g.lg==="soc"){const P=socModel(g);return P?{m:P.lh-P.la,pH:P.full.H,pA:P.full.A,pD:P.full.D}:null}
@@ -639,26 +649,27 @@ function whenTxt(g){return new Date(g.start_time).toLocaleString([], {weekday:"s
 function slate(){
   const now=Date.now(),out=[];
   Object.keys(LEAGUES).forEach(lg=>{if(LG!=="all"&&LG!==lg)return;const s=D[lg];const src=(s.live&&s.live.games)||(s.sched&&s.sched.games)||[];
-    src.forEach(g0=>{const g={...g0,lg};if(g.status!=="postponed"&&(isLive(g)||(Date.parse(g.start_time)>now-(DONE.includes(g.status)?14:4)*3600e3&&Date.parse(g.start_time)<now+8*864e5)))out.push(g)})});
+    src.forEach(g0=>{const g={...g0,lg};if(g.status!=="postponed"&&(isLive(g)||(g.field&&!DONE.includes(g.status)&&Date.parse(g.start_time)>now-5*864e5&&Date.parse(g.start_time)<now+8*864e5)||(Date.parse(g.start_time)>now-(DONE.includes(g.status)?14:4)*3600e3&&Date.parse(g.start_time)<now+8*864e5)))out.push(g)})});
   return out.sort((a,b)=>Date.parse(a.start_time)-Date.parse(b.start_time));
 }
 function rec(g,c){if(g.lg==="ten"){const r=tenRank(c,tname(g,c),g.tour);return r?"#"+r.rank:""}const t=teamInfo(g.lg,c);return (t&&t.rec)||(g.teams&&g.teams[c]&&g.teams[c].rec)||""}
 function renderLg(){document.querySelectorAll(".lgsel button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lg===LG))}
 function renderGames(){
-  const ae=document.activeElement;if(ae&&ae.classList&&(ae.classList.contains("ouIn")||ae.classList.contains("pIn")||ae.classList.contains("socIn")||ae.classList.contains("spIn"))){pendingRender=true;return}
+  const ae=document.activeElement;if(ae&&ae.classList&&(ae.classList.contains("ouIn")||ae.classList.contains("pIn")||ae.classList.contains("socIn")||ae.classList.contains("spIn")||ae.classList.contains("fOdds"))){pendingRender=true;return}
   renderLg();
   const notes=[];const n=D.nfl.teams,c=D.cfb.teams,b=D.nba.teams,sh=k=>LG==="all"||LG===k;
   if(n&&n.asOf&&sh("nfl"))notes.push(`NFL season stats updated ${n.asOf}.`);
   if(c&&c.asOf&&sh("cfb"))notes.push(`College season stats updated ${c.asOf}. College picks are rougher, since schedules vary so much.`);
   Object.keys(TEAMLG).forEach(k=>{const t=D[k].teams;if(t&&t.asOf&&sh(k))notes.push(`${LEAGUES[k].label} ratings updated ${t.asOf}${k==="ncaab"||k==="ncaaw"?", blended with last season early on. College picks are rougher because schedules vary so much":", blended with last season early on"}.`)});
   if(D.ten.teams&&sh("ten"))notes.push("Tennis chances use official ATP and WTA ranking points.");if(sh("mma")&&D.mma.live)notes.push("UFC chances use each fighter's pro record and are rough.");
+  if(sh("golf")&&D.golf.live)notes.push("Golf chances use season scoring averages.");if((sh("f1")||sh("nas"))&&(D.f1.live||D.nas.live))notes.push("Racing chances use points per race this season.");
   const so=D.soc.teams;if(so&&so.asOf&&sh("soc"))notes.push(`Soccer ratings from each league table (goals scored and allowed), updated ${so.asOf}. Champions League picks are rougher, since teams come from different leagues.`);
   if(b&&b.asOf&&sh("nba"))notes.push(`NBA ratings updated ${b.asOf}, blending this season with last season while it's early.`);
   $("statsAsOf").textContent=notes.join(" ")+(notes.length?" Source: ESPN.":"");
   const gs=slate();
   const loaded=Object.values(D).some(s=>s.live);
   if(!gs.length){$("dayFilter").innerHTML="";$("gameList").innerHTML=`<div class="empty">${loaded?"No games in the next week.":"Loading this week's games…"}</div>`;renderParlays([]);return}
-  const dayKey=g=>localDate(g.start_time),todayK=localDate(Date.now()),tomK=localDate(Date.now()+864e5);
+  const dayKey=g=>localDate(effT(g)),todayK=localDate(Date.now()),tomK=localDate(Date.now()+864e5);
   const liveN=gs.filter(isLive).length,days=[...new Set(gs.map(dayKey))];
   if(DF!=="all"&&DF!=="live"&&DF<todayK){DF="all";try{localStorage.setItem("ge-df",DF)}catch(e){}}
   const df=DF;if(df!=="all"&&df!=="live"&&!days.includes(df)){days.push(df);days.sort()}
@@ -671,8 +682,9 @@ function renderGames(){
   let lastDay="";
   $("gameList").innerHTML=shown.map(g=>{
     const fin=DONE.includes(g.status),md=fin?null:model(g),sc=g.score||{},live=isLive(g);
-    const day=new Date(g.start_time).toLocaleDateString([], {weekday:"long",month:"short",day:"numeric"});
+    const day=new Date(effT(g)).toLocaleDateString([], {weekday:"long",month:"short",day:"numeric"});
     const head=day!==lastDay?`<h3 style="margin-top:6px">${esc(day)}</h3>`:"";lastDay=day;
+    if(g.field)return head+fieldCardHtml(g);
     const side=(c,p,fav)=>`<div class="tm${fav?" fav":""}"><div class="nm">${esc(tname(g,c))}<small>${esc(rec(g,c))}</small></div><div class="sc">${(live||fin)&&sc[c]!=null?sc[c]:""}</div><div class="pc">${md?pct(p,0):fin?"":"—"}</div></div>`;
     const favH=md&&md.pH>=md.pA;const sp=md?Math.round(Math.abs(md.m)*2)/2:0;
     return`${head}<div class="gm"><div class="meta"><span>${live?`<span class="live">Live</span> ${esc(g.detail||"")}`:fin?"Final":esc(whenTxt(g))}</span><span class="lgtag">${icon(g.lg)}${esc(LEAGUES[g.lg].label)}${g.title?" · "+esc(g.title):""}</span></div>
@@ -683,6 +695,7 @@ function renderGames(){
       <span class="row" style="gap:6px">${g.lg!=="nfl"&&g.lg!=="cfb"?"":`<button class="btn sm ghost dig" data-id="${esc(g.id)}">Dig in</button>`}<button class="btn sm ghost" data-log="${esc(JSON.stringify({key:g.lg+":"+g.id}))}">Log bet</button></span></div></div>`}).join("");
   document.querySelectorAll(".dig").forEach(b=>b.addEventListener("click",()=>digIn(shown.find(g=>g.id===b.dataset.id))));
   document.querySelectorAll("#gameList .pchk").forEach(pchkCalc);
+  document.querySelectorAll("#gameList .fev").forEach(fchkCalc);
   renderParlays(gs);
 }
 function digIn(g){
@@ -695,9 +708,9 @@ function digIn(g){
 const upcoming=g=>!isLive(g)&&Date.parse(g.start_time)>Date.now();
 function legs(gs){return gs.filter(upcoming).map(g=>{const md=model(g);if(!md)return null;const h=md.pH>=md.pA;return{g,team:h?g.home:g.away,p:h?md.pH:md.pA}}).filter(Boolean)}
 function fairOdds(p){const a=toAm(1/p);return a==null?"—":sgn(a)}
-const LGN={all:"All sports",nfl:"NFL",cfb:"College football",nba:"NBA",soc:"Soccer",mlb:"MLB",nhl:"NHL",wnba:"WNBA",ncaab:"Men's college basketball",ncaaw:"Women's college basketball",ten:"Tennis",mma:"UFC"};
+const LGN={all:"All sports",nfl:"NFL",cfb:"College football",nba:"NBA",soc:"Soccer",mlb:"MLB",nhl:"NHL",wnba:"WNBA",ncaab:"Men's college basketball",ncaaw:"Women's college basketball",ten:"Tennis",mma:"UFC",golf:"Golf",f1:"F1",nas:"NASCAR"};
 function filterText(){return `${LGN[LG]||"All sports"} · ${DF==="all"?"All days":DF==="live"?"Live":dayLabel(DF)}`}
-function dateFilter(gs){return DF==="all"||DF==="live"?gs:gs.filter(g=>localDate(g.start_time)===DF)}
+function dateFilter(gs){return DF==="all"||DF==="live"?gs:gs.filter(g=>localDate(effT(g))===DF)}
 function renderParlays(gs){
   gs=dateFilter(slate());
   $("parlayFilterNote").textContent=`Showing: ${filterText()}. Change this on the Games tab.`+(DF==="live"?" Parlays use games that haven't started, so every upcoming day is included.":"");
@@ -724,6 +737,8 @@ function stat(e,n){const s=(e.stats||[]).find(x=>x.name===n);return s&&s.value!=
 function collectEntries(o,out){if(!o||typeof o!=="object")return;if(Array.isArray(o.entries))o.entries.forEach(e=>{if(e&&e.team)out.push(e)});if(o.standings)collectEntries(o.standings,out);(o.children||[]).forEach(c=>collectEntries(c,out))}
 const cache={get(k){try{return JSON.parse(localStorage.getItem("ge-c-"+k)||"null")}catch(e){return null}},set(k,v){try{localStorage.setItem("ge-c-"+k,JSON.stringify(v))}catch(e){}}};
 async function loadStandings(lg){
+  if(lg==="golf")return loadGolfStats();
+  if(RACE[lg])return loadRaceStandings(lg);
   if(lg==="ten")return loadTennisRanks();
   if(lg==="mma"){D.mma.teams=D.mma.teams||{asOf:"",at:Date.now(),teams:{}};return}
   if(TEAMLG[lg])return loadBlendTeams(lg);
@@ -758,6 +773,8 @@ function parseEvents(j,recs){
     return g}).filter(Boolean);
 }
 async function loadScores(lg){
+  if(lg==="golf")return loadGolfEvent();
+  if(RACE[lg])return loadRaceEvents(lg);
   if(lg==="ten")return loadTennisScores();
   if(lg==="mma")return loadMmaScores();
   if(TEAMLG[lg])return loadDayScores(lg);
@@ -836,10 +853,12 @@ const ICO={
   soccer:'<circle cx="12" cy="12" r="9.4"/><path d="M12 8.3l3.3 2.4-1.3 3.9h-4l-1.3-3.9z"/><path d="M12 8.3V2.7M15.3 10.7l5-1.7M14 14.6l3 4.3M10 14.6l-3 4.3M8.7 10.7l-5-1.7"/>',
   tennis:'<circle cx="12" cy="12" r="9.4"/><path d="M4.4 6.4c3.4 2.4 3.4 8.8 0 11.2M19.6 6.4c-3.4 2.4-3.4 8.8 0 11.2"/>',
   octagon:'<path d="M8.3 2.8h7.4l5.5 5.5v7.4l-5.5 5.5H8.3l-5.5-5.5V8.3z"/><path d="M9.7 6.4h4.6l3.3 3.3v4.6l-3.3 3.3H9.7l-3.3-3.3V9.7z" stroke-width="1.2"/>',
+  flag:'<path d="M6 21V3.5"/><path d="M6 4h12.5l-2.4 4.2 2.4 4.3H6"/><path d="M10.2 4v8.5M14.4 4v8.5M6 8.2h11.5" stroke-width="1.1"/>',
+  golf:'<path d="M8 20.5V3l9 3.8-9 3.8"/><ellipse cx="11" cy="20.5" rx="6.5" ry="1.5"/>',
   all:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/>'};
-const LGICON={nfl:"football",cfb:"football",nba:"basketball",wnba:"basketball",ncaab:"basketball",ncaaw:"basketball",mlb:"baseball",nhl:"hockey",soc:"soccer",ten:"tennis",mma:"octagon",all:"all"};
+const LGICON={nfl:"football",cfb:"football",nba:"basketball",wnba:"basketball",ncaab:"basketball",ncaaw:"basketball",mlb:"baseball",nhl:"hockey",soc:"soccer",ten:"tennis",mma:"octagon",golf:"golf",f1:"flag",nas:"flag",all:"all"};
 const icon=(lg,cls="sico")=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[LGICON[lg]]||""}</svg>`;
-const LGBTN=[["all","All"],["nfl","NFL"],["cfb","NCAAF"],["nba","NBA"],["ncaab","NCAAB"],["ncaaw","NCAAW"],["wnba","WNBA"],["mlb","MLB"],["nhl","NHL"],["soc","Soccer"],["ten","Tennis"],["mma","UFC"]];
+const LGBTN=[["all","All"],["nfl","NFL"],["cfb","NCAAF"],["nba","NBA"],["ncaab","NCAAB"],["ncaaw","NCAAW"],["wnba","WNBA"],["mlb","MLB"],["nhl","NHL"],["soc","Soccer"],["ten","Tennis"],["mma","UFC"],["golf","Golf"],["f1","F1"],["nas","NASCAR"]];
 document.querySelectorAll(".lgsel").forEach(box=>{box.innerHTML=LGBTN.map(([k,t])=>`<button class="btn sm ghost" data-lg="${k}">${icon(k)}${t}</button>`).join("");
   box.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{LG=b.dataset.lg;try{localStorage.setItem("ge-lg",LG)}catch(e){}renderGames()}))});
 /* --- tennis and UFC --- */
@@ -913,6 +932,82 @@ async function loadMmaScores(){const c=SBC.mma;if(c&&Date.now()-c.at<120e3){D.mm
   for(const d of [...ds].slice(0,3)){try{games=games.concat(parseMma(await getJSON(`${ESPN}/site/v2/sports/mma/ufc/scoreboard?dates=${d}`)))}catch(e){}}
   const seen=new Set();games=games.filter(g=>!seen.has(g.id)&&seen.add(g.id));SBC.mma={at:Date.now(),v:games};
   D.mma.live={games};D.mma.liveAt=Date.now();D.mma.teams=D.mma.teams||{asOf:"",at:Date.now(),teams:{}};cache.set("mma-live",{live:D.mma.live,recs:{},at:D.mma.liveAt})}
+/* --- golf and racing (field events) --- */
+const effT=g=>g.field&&isLive(g)?Date.now():g.start_time;
+function rnorm(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+const FDATA={golfStats:null},SIMC={};
+const GOLFBY=y=>`https://site.web.api.espn.com/apis/common/v3/sports/golf/pga/statistics/byathlete?region=us&lang=en&contentorigin=espn&isqualified=false&page=1&limit=400&sort=general.cupPoints:desc&season=${y}`;
+async function loadGolfStats(){const c=cache.get("golf-stats");let v=c&&Date.now()-c.at<12*3600e3?c.v:null;
+  if(!v){const y=seasonYear(true);let raw={};try{raw=parseBy(await getJSON(GOLFBY(y)))}catch(e){}if(Object.keys(raw).length<50){try{raw={...parseBy(await getJSON(GOLFBY(y-1))),...raw}}catch(e){}}
+    v={};let sw=0,ss=0;Object.entries(raw).forEach(([id,p])=>{const sa=p.v["general.scoringAverage"],rp=p.v["general.roundsPlayed"]||0;if(sa&&rp){v[id]={sa,rp,name:p.name};if(rp>=20){sw+=rp;ss+=sa*rp}}});
+    v.__avg=sw?ss/sw:70.9;if(Object.keys(v).length>10)cache.set("golf-stats",{at:Date.now(),v})}
+  FDATA.golfStats=v;D.golf.teams={asOf:new Date().toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"}),at:Date.now(),teams:{}}}
+function golfSkill(id){const S=FDATA.golfStats||{},p=S[id];if(!p)return -0.6;return(S.__avg-p.sa)*p.rp/(p.rp+15)}
+function parseGolf(j){const ev=(j.events||[])[0];if(!ev)return[];const c=(ev.competitions||[])[0]||{};const st=(c.status||ev.status||{}).type||{},state=st.state;
+  const players=(c.competitors||[]).map(x=>{const a=x.athlete||{},s=x.status||{},pos=(s.position&&s.position.displayName)||"",sn=((s.type&&s.type.name)||"")+" "+(s.detail||"")+" "+pos;
+    const sv=typeof x.score==="object"&&x.score?(x.score.displayValue??x.score.value):x.score;let tp=sv==="E"?0:parseInt(sv,10);if(!isFinite(tp)){const q=(x.statistics||[]).find(z=>z.name==="scoreToPar");tp=q?+q.value||0:0}
+    const R=+(s.period||1),thru=+(s.thru||0),ps=(s.type&&s.type.state)||"pre";let left=72;
+    if(state==="post")left=0;else if(state==="in"){left=ps==="in"?(4-R)*18+(18-thru):ps==="post"||thru>=18?(4-R)*18:(4-R+1)*18}
+    return{id:String(x.id||a.id||""),name:a.displayName||a.shortName||"",toPar:state==="pre"?0:tp,pos:pos==="-"?"":pos,thru,R,left:Math.max(0,left),out:/CUT|WD|DQ|MDF|DNS/i.test(sn)}}).filter(p=>p.id&&p.name);
+  const status=state==="pre"?"scheduled":state==="in"?"inprogress":(st.completed?"closed":"postponed");
+  return[{id:"g"+ev.id,field:true,kind:"golf",start_time:ev.date,title:ev.name||"",status,detail:(c.status&&c.status.type&&c.status.type.shortDetail)||st.shortDetail||"",players,sig:players.map(p=>p.toPar+":"+p.left).join(",").length+":"+players.reduce((t,p)=>t+p.toPar*7+p.left,0)}]}
+async function loadGolfEvent(){const sb=await getJSON(`${ESPN}/site/v2/sports/golf/pga/scoreboard`);const ev=(sb.events||[])[0];let games=[];
+  if(ev){try{games=parseGolf(await getJSON(`https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga&event=${ev.id}`))}catch(e){}
+    if(!games.length)games=parseGolf(sb)}
+  D.golf.live={games};D.golf.liveAt=Date.now();cache.set("golf-live",{live:D.golf.live,recs:{},at:D.golf.liveAt})}
+function golfSim(g){const k=g.id+":"+g.sig+":"+(FDATA.golfStats?1:0);if(SIMC[k])return SIMC[k];
+  const ps=g.players.filter(p=>!p.out),n=ps.length;if(!n)return null;const N=4000,c={win:new Float64Array(n),t5:new Float64Array(n),t10:new Float64Array(n),t20:new Float64Array(n)};
+  const mu=ps.map(p=>p.toPar-golfSkill(p.id)*p.left/18),sd=ps.map(p=>2.75*Math.sqrt(p.left/18)),f=new Float64Array(n),ix=[...Array(n).keys()];
+  for(let s=0;s<N;s++){for(let i=0;i<n;i++)f[i]=Math.round(mu[i]+sd[i]*rnorm())+Math.random()*0.5;ix.sort((a,b)=>f[a]-f[b]);c.win[ix[0]]++;for(let q=0;q<Math.min(20,n);q++){if(q<5)c.t5[ix[q]]++;if(q<10)c.t10[ix[q]]++;c.t20[ix[q]]++}}
+  let frl=null;if(g.status==="scheduled"){frl=new Float64Array(n);const r=new Float64Array(n);for(let s=0;s<2500;s++){let best=1e9;for(let i=0;i<n;i++){r[i]=Math.round(-golfSkill(ps[i].id)+2.75*rnorm());if(r[i]<best)best=r[i]}let cnt=0;for(let i=0;i<n;i++)if(r[i]===best)cnt++;for(let i=0;i<n;i++)if(r[i]===best)frl[i]+=1/cnt}}
+  const rows=ps.map((p,i)=>({...p,mu:mu[i],sd:sd[i],win:c.win[i]/N,t5:c.t5[i]/N,t10:c.t10[i]/N,t20:c.t20[i]/N,frl:frl?frl[i]/2500:null})).sort((a,b)=>b.win-a.win||a.mu-b.mu);
+  return SIMC[k]=rows}
+const RACE={f1:{path:"racing/f1",c:0.6,p:1.7,label:"F1"},nas:{path:"racing/nascar-premier",c:4,p:2.2,label:"NASCAR"}};
+async function loadRaceStandings(lg){const C=RACE[lg],k=lg+"-stand";const c=cache.get(k);let v=c&&Date.now()-c.at<12*3600e3?c.v:null;
+  if(!v){const j=await getJSON(`${ESPN}/v2/sports/${C.path}/standings`);const es=[];(function walk(o){if(!o||typeof o!=="object")return;if(Array.isArray(o.entries))o.entries.forEach(e=>{if(e&&e.athlete)es.push(e)});if(o.standings)walk(o.standings);(o.children||[]).forEach(walk)})(j);v={};
+    es.forEach(e=>{const a=e.athlete||{};if(!a.id||v[String(a.id)])return;const st=e.stats||[];const pts=(st.find(x=>/championshippts|points/i.test(x.name||""))||{}).value;const played=st.filter(x=>x.played===true||x.played==="true").length;const rk=(st.find(x=>x.name==="rank")||{}).value;
+      if(pts!=null)v[String(a.id)]={name:a.displayName||"",pts:+pts,gp:played||1,rank:rk!=null?+rk:null}});
+    if(Object.keys(v).length)cache.set(k,{at:Date.now(),v})}
+  D[lg].stand=v;D[lg].teams={asOf:new Date().toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"}),at:Date.now(),teams:{}}}
+function parseRace(j,lg){const out=[];(j.events||[]).forEach(ev=>{const cs=ev.competitions||[];const race=cs.find(c=>/race/i.test(((c.type||{}).abbreviation||(c.type||{}).text||"")))||cs[cs.length-1];if(!race)return;
+  const st=(race.status||ev.status||{}).type||{},state=st.state;const res=(race.competitors||[]).map(x=>({id:String(x.id||(x.athlete&&x.athlete.id)||""),name:(x.athlete&&(x.athlete.displayName||x.athlete.fullName))||"",order:+x.order||99,winner:!!x.winner})).sort((a,b)=>a.order-b.order);
+  out.push({id:"r"+(race.id||ev.id),field:true,kind:"race",lg,start_time:race.date||ev.date,title:ev.name||ev.shortName||"",status:state==="pre"?"scheduled":state==="in"?"inprogress":(st.completed?"closed":"postponed"),detail:st.shortDetail||"",results:state==="post"?res:[],sig:"r"})});return out}
+const ymdUTC=t=>{const d=new Date(t);return `${d.getUTCFullYear()}${String(d.getUTCMonth()+1).padStart(2,"0")}${String(d.getUTCDate()).padStart(2,"0")}`};
+async function loadRaceEvents(lg){const C=RACE[lg],j=await getJSON(`${ESPN}/site/v2/sports/${C.path}/scoreboard`);let games=parseRace(j,lg);const now=Date.now(),ds=new Set();
+  ((((j.leagues||[])[0]||{}).calendar)||[]).forEach(x=>{const sd=typeof x==="string"?x:(x&&(x.endDate||x.startDate));const t=Date.parse(sd);if(t&&t>now-864e5&&t<now+15*864e5)ds.add(ymdUTC(t))});
+  for(const d of [...ds].slice(0,2)){try{games=games.concat(parseRace(await getJSON(`${ESPN}/site/v2/sports/${C.path}/scoreboard?dates=${d}`),lg))}catch(e){}}
+  const seen=new Set();games=games.filter(g=>!seen.has(g.id)&&seen.add(g.id));D[lg].live={games};D[lg].liveAt=Date.now();cache.set(lg+"-live",{live:D[lg].live,recs:{},at:D[lg].liveAt})}
+function raceSim(g){const k=g.id+":"+g.lg;if(SIMC[k])return SIMC[k];const C=RACE[g.lg],S=D[g.lg].stand||{};
+  let ds=Object.entries(S).map(([id,s])=>({id,name:s.name,ppr:s.pts/s.gp,gp:s.gp}));if(g.lg==="nas"){const mx=Math.max(...ds.map(d=>d.gp),1);ds=ds.filter(d=>d.gp>=mx*0.5)}
+  ds=ds.filter(d=>d.name);const n=ds.length;if(!n)return null;const w=ds.map(d=>Math.pow(Math.max(0,d.ppr)+C.c,C.p)),N=5000,cnt={win:new Float64Array(n),t3:new Float64Array(n),t5:new Float64Array(n),t10:new Float64Array(n)};
+  for(let s=0;s<N;s++){const rem=w.slice();let tot=rem.reduce((a,b)=>a+b,0);for(let q=0;q<Math.min(10,n);q++){let r=Math.random()*tot,i=0;for(;i<n;i++){r-=rem[i];if(r<=0)break}if(i>=n)i=rem.findIndex(x=>x>0);
+    if(q===0)cnt.win[i]++;if(q<3)cnt.t3[i]++;if(q<5)cnt.t5[i]++;cnt.t10[i]++;tot-=rem[i];rem[i]=0}}
+  return SIMC[k]=ds.map((d,i)=>({...d,w:w[i],win:cnt.win[i]/N,t3:cnt.t3[i]/N,t5:cnt.t5[i]/N,t10:cnt.t10[i]/N})).sort((a,b)=>b.win-a.win)}
+function fieldCardHtml(g){const live=isLive(g),fin=DONE.includes(g.status),b=x=>pct(x,x<0.01?1:0),key=g.lg+":"+g.id;
+  const head=`<div class="meta"><span>${live?`<span class="live">Live</span> ${esc(g.detail||"")}`:fin?"Final":esc(whenTxt(g))}</span><span class="lgtag">${icon(g.lg)}${esc(LEAGUES[g.lg].label)}</span></div><h3 class="evt">${esc(g.title)}</h3>`;
+  if(g.kind==="race"&&fin&&g.results.length)return`<div class="gm">${head}<ol class="tdl">${g.results.slice(0,10).map(r=>`<li><span><b>${esc(r.name)}</b></span></li>`).join("")}</ol></div>`;
+  const rows=g.kind==="golf"?golfSim(g):raceSim(g);if(!rows||!rows.length)return`<div class="gm">${head}<p class="note">${g.kind==="golf"?"The field isn't posted yet.":"Driver standings aren't available yet."}</p></div>`;
+  const cols=g.kind==="golf"?[["win","Win"],["t5","Top 5"],["t10","Top 10"],["t20","Top 20"]]:[["win","Win"],["t3","Podium"],["t5","Top 5"],["t10","Top 10"]];
+  const sub=p=>g.kind==="golf"?(live||fin?`${esc(p.pos||"")} · ${p.toPar>0?"+":""}${p.toPar===0?"E":p.toPar}${p.left>0&&live?` · thru ${p.thru}`:""}`:""):`${(p.ppr).toFixed(1)} pts/race`;
+  const tr=p=>`<tr><td><b>${esc(p.name)}</b><div class="note">${sub(p)}</div></td>${cols.map(([k])=>`<td class="n">${b(p[k])}</td>`).join("")}</tr>`;
+  const table=list=>`<div class="tablewrap"><table class="ptab"><thead><tr><th>${g.kind==="golf"?"Golfer":"Driver"}</th>${cols.map(([,t])=>`<th>${t}</th>`).join("")}</tr></thead><tbody>${list.map(tr).join("")}</tbody></table></div>`;
+  const opt=rows.map((p,i)=>`<option value="${i}" data-win="${p.win}" data-t1="${p[cols[1][0]]}" data-t2="${p[cols[2][0]]}" data-t3="${p[cols[3][0]]}" data-mu="${g.kind==="golf"?p.mu:0}" data-sd="${g.kind==="golf"?p.sd:0}" data-w="${p.w||0}"${p.frl!=null?` data-frl="${p.frl}"`:""}>${esc(p.name)}</option>`).join("");
+  const mk=[["win","Win"],["t1",cols[1][1]],["t2",cols[2][1]],["t3",cols[3][1]]].concat(rows[0].frl!=null?[["frl","1st-round leader"]]:[]);
+  const frl=rows[0].frl!=null?`<p class="note">1st-round leader favorites: ${rows.slice().sort((a,b)=>b.frl-a.frl).slice(0,3).map(p=>`${esc(p.name)} <b>${b(p.frl)}</b>`).join(" · ")}</p>`:"";
+  return`<div class="gm fev" data-g="${esc(key)}">${head}${table(rows.slice(0,12))}${rows.length>12?`<details class="tot"><summary>Show the rest of the ${g.kind==="golf"?"field":"grid"} (${rows.length-12})</summary>${table(rows.slice(12))}</details>`:""}${frl}
+  <details class="tot" data-k="${esc(key+":m")}"${openMem.has(key+":m")?" open":""}><summary>Matchups and odds check</summary>
+   <div class="fchk"><div class="row chk"><span class="lab tl">Matchup</span><select class="fA">${opt}</select><span class="note">vs</span><select class="fB">${opt.replace('value="1"','value="1" selected')}</select></div><p class="note fMOut"></p></div>
+   <div class="fchk"><div class="row chk"><span class="lab tl">Odds check</span><select class="fP">${opt}</select><select class="fM">${mk.map(([k,t])=>`<option value="${k}">${t}</option>`).join("")}</select></div>
+   <div class="row chk ou"><span class="lab tl">DraftKings odds</span><input type="number" inputmode="numeric" class="fOdds" placeholder="+1200" aria-label="DraftKings odds"></div><p class="note fOOut"></p></div>
+   <p class="note">${g.kind==="golf"?"Golf chances come from each player's season scoring average, simulated over the holes left. Ties count as a dead heat on DraftKings, which pays less, so top-5/10/20 chances here are a little high at the cut-off.":"Race chances come from each driver's points per race this season. Live running order isn't in the free feed, so they don't change during the race."}</p></details>
+  <div class="row"><button class="btn sm ghost" data-log="${esc(JSON.stringify({type:"Prop",game:g.title,date:localDate(g.start_time)}))}">Log bet</button></div></div>`}
+function fchkCalc(card){if(!card)return;const k=card.dataset.g,g=findGame(k);const A=card.querySelector(".fA"),B=card.querySelector(".fB"),o1=card.querySelector(".fMOut");
+  if(A&&B&&o1){const a=A.selectedOptions[0],bb=B.selectedOptions[0];if(a&&bb&&a.value!==bb.value){let p;if(g&&g.kind==="golf"){const d=(+bb.dataset.mu)-(+a.dataset.mu),s=Math.sqrt((+a.dataset.sd)**2+(+bb.dataset.sd)**2+0.3);p=s<0.01?(d>0?1:d<0?0:0.5):Phi(d/s)}else{const wa=+a.dataset.w,wb=+bb.dataset.w;p=wa+wb?wa/(wa+wb):0.5}
+    o1.innerHTML=`${esc(a.textContent)} finishes ahead <b>${pct(p,0)}</b> · ${esc(bb.textContent)} <b>${pct(1-p,0)}</b>`}else o1.textContent=""}
+  const P=card.querySelector(".fP"),M=card.querySelector(".fM"),O=card.querySelector(".fOdds"),o2=card.querySelector(".fOOut");
+  if(P&&M&&O&&o2){const op=P.selectedOptions[0],p=op?+(op.dataset[M.value]||0):0,od=parseFloat(O.value),d=dec(od);
+    if(!d||!op){o2.textContent="";return}const ev=(p*(d-1)-(1-p))*100;o2.innerHTML=`DraftKings implies <b>${pct(impl(od),1)}</b> · model says <b>${pct(p,1)}</b> · expected ${ev>=0?"profit":"loss"} <b class="${ev>=0?"pos":"neg"}">${money(Math.abs(ev))}</b> per $100${ev>0?" (value)":""}`}}
+["input","change"].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(!t.closest)return;const card=t.closest(".fev");if(card&&t.closest(".fchk"))fchkCalc(card)}));
 /* --- NBA data --- */
 const NBA_SEASON=(()=>{const d=new Date();return d.getMonth()>=7?d.getFullYear()+1:d.getFullYear()})();
 const NBA_REST=1.5;
@@ -1283,11 +1378,12 @@ const STEPCFG=[
   [".ouIn,.pTot,.socIn,.xIn,.nline,.totIn,.lineIn",{step:0.5}],
   [".pSpr,.sprIn,.spIn,#h-sp,#q-line",{step:0.5,sign:true}],
   ["#b-odds,#a-ml,#h-ml,#o-odds,#v-a,#v-b",{step:5,sign:true,odds:true}],
+  [".fOdds",{step:50,sign:true,odds:true,start:500}],
   ["#b-stake,#o-stake,#pl-stake",{step:5,min:0}],
   ["#o-prob",{step:1,min:0,max:100}]];
 const halfUp=x=>Math.floor(x)+0.5;
 function stepStart(el,cfg){const d=el.dataset,box=el.closest(".pchk,.xchk,.prop");
-  if(cfg.odds)return -110;
+  if(cfg.start!=null)return cfg.start;if(cfg.odds)return -110;
   if(el.id==="q-line"&&typeof Q!=="undefined"&&Q.g){const P=gameProj(Q.g),md=model(Q.g);if($("b-type").value==="Total")return halfUp(P?P.tot:44);if(md&&Q.side)return halfUp(String(Q.side)===String(Q.g.home)?-md.m:md.m)}if(cfg.min===0&&cfg.step===5)return 10;if(el.id==="o-prob")return 50;
   if(d.proj)return halfUp(+d.proj);if(d.tot)return halfUp(+d.tot);if(d.m&&(el.classList.contains("sprIn")||el.classList.contains("spIn")))return halfUp(-(+d.m));
   if(box){const op=(box.querySelector(".pSel,.xSel,.nsel")||{}).selectedOptions;const o=op&&op[0];
@@ -1539,7 +1635,7 @@ render();
 /* --- quick logging & auto-grading --- */
 var Q={g:null,side:null,ou:null,line:null};
 function localDate(s){const d=new Date(s);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
-function allGames(){const out=[],now=Date.now();Object.keys(LEAGUES).forEach(lg=>{const s=D[lg];((s.live&&s.live.games)||[]).forEach(g=>out.push({...g,lg}))});
+function allGames(){const out=[],now=Date.now();Object.keys(LEAGUES).forEach(lg=>{const s=D[lg];((s.live&&s.live.games)||[]).forEach(g=>{if(!g.field)out.push({...g,lg})})});
   return out.filter(g=>g.status!=="postponed"&&Date.parse(g.start_time)>now-14*3600e3).sort((a,b)=>Date.parse(a.start_time)-Date.parse(b.start_time))}
 function findGame(key){if(!key)return null;const i=key.indexOf(":"),lg=key.slice(0,i),id=key.slice(i+1);const s=D[lg];const g=s&&((s.live&&s.live.games)||[]).find(x=>x.id===id);return g?{...g,lg}:null}
 function fillGameSelect(){const sel=$("b-gsel");if(!sel||document.activeElement===sel)return;const cur=sel.value;
