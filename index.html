@@ -1609,7 +1609,7 @@ $("betForm").addEventListener("submit",async e=>{
 });
 
 function profit(b){const d=dec(b.odds)||1;return b.result==="won"?b.stake*(d-1):b.result==="lost"?-b.stake:0}
-let armed=null;
+var armed=null;
 function render(){
   const list=[...bets].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.createdAt||0)-(a.createdAt||0));
   const w=bets.filter(b=>b.result==="won").length,l=bets.filter(b=>b.result==="lost").length,p=bets.filter(b=>b.result==="push").length;
