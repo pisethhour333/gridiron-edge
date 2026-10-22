@@ -184,6 +184,15 @@ details p{margin:.5rem 0 0;max-width:62ch}
 .ex-line{font-family:var(--mono);font-size:.82rem;background:var(--bg);border-radius:6px;padding:6px 8px;margin-top:6px}
 .warnbox{font-size:.85rem;border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.field .ball{transition:none}}
+.lw .sit{font-size:.85rem;color:var(--muted)}
+.swing{font-size:.8rem;font-weight:700;color:var(--good)}
+.badge{display:inline-block;font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 7px;border-radius:99px;border:1px solid currentColor;white-space:nowrap;vertical-align:1px}
+.st-out{color:var(--bad)}.st-dbt{color:var(--bad);opacity:.8}.st-q{color:var(--warn)}.st-dtd{color:var(--muted)}
+.injrow{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:baseline;padding:7px 0;border-top:1px solid var(--line);font-size:.88rem}
+.injrow .why{grid-column:2;color:var(--muted);font-size:.8rem}
+.lwgrp{border:1px solid var(--line);border-radius:8px;padding:8px 10px}.lwgrp summary{cursor:pointer;font-weight:600}.lwgrp summary .note{display:block;font-family:var(--body);text-transform:none;letter-spacing:0;font-size:.8rem;font-weight:400;margin:2px 0 0 18px}.lwgrp h4,.lwx h4{margin:10px 0 2px;font-size:.85rem}
+.lwx summary{cursor:pointer;font-size:.85rem;font-weight:600;color:var(--turf)}
+.plays{margin:4px 0;padding-left:18px}.plays li{font-size:.85rem;margin:3px 0}
 </style>
 
 </head>
@@ -191,11 +200,12 @@ details p{margin:.5rem 0 0;max-width:62ch}
 <div class="wrap">
 <header>
   <h1>Line<span>check</span></h1>
-  <p>NFL, NBA, MLB, NHL, college, WNBA and soccer research and math for betting on DraftKings. Your own win estimate, compared with the line. You place every bet yourself.</p>
+  <p>Research and math for football, basketball, baseball, hockey, soccer, tennis, UFC, golf and racing. Built for betting on DraftKings. Your own win estimate, compared with the line. You place every bet yourself.</p>
 </header>
 
 <nav role="tablist">
   <button role="tab" id="t-games" aria-selected="true" data-tab="games">Games</button>
+  <button role="tab" id="t-live" aria-selected="false" data-tab="live">Live</button>
   <button role="tab" id="t-parlay" aria-selected="false" data-tab="parlay">Parlays</button>
   <button role="tab" id="t-props" aria-selected="false" data-tab="props">Props</button>
   <button role="tab" id="t-analyze" aria-selected="false" data-tab="analyze">Analyze</button>
@@ -214,6 +224,22 @@ details p{margin:.5rem 0 0;max-width:62ch}
     <p class="note" id="statsAsOf"></p>
   </div>
   <div id="gameList" style="display:flex;flex-direction:column;gap:10px"><div class="empty">Loading this week's games…</div></div>
+</section>
+
+<!-- LIVE -->
+<section class="panel" id="p-live" hidden>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h2>Live watch</h2><span class="tag" id="lwTag">Loading…</span></div>
+    <p class="fnote" id="lwFilterNote"></p>
+    <p class="note">Scores and win chances update every 30 seconds while this tab is open. <b>Upset watch</b> means the team the model favored before the game is losing. <b>Close finish</b> means the game is late and still up for grabs. A green arrow shows a big swing in the last few minutes. Tap a game for the latest plays, top performers and in-game injuries.</p>
+  </div>
+  <div id="lwList" style="display:flex;flex-direction:column;gap:10px"><div class="empty">Loading…</div></div>
+  <div class="card">
+    <h2>Player status</h2>
+    <p class="note">Who's out, doubtful, questionable or day-to-day for the games in your filter, plus anyone who left a game early. Covers NFL, NBA, WNBA, MLB and NHL. Updates every 10 minutes. Source: ESPN.</p>
+    <div id="lwLeft"></div>
+    <div id="lwInj" style="display:flex;flex-direction:column;gap:8px"><div class="empty">Loading…</div></div>
+  </div>
 </section>
 
 <!-- PARLAYS -->
@@ -436,6 +462,7 @@ details p{margin:.5rem 0 0;max-width:62ch}
   </div>
   <div class="card">
     <h2>Bet types, plainly</h2>
+    <details><summary>Live tab and player status</summary><p>The Live tab follows the sport picked on the Games tab. It shows games happening now with live win chances, plus games starting in the next 3 hours and today's finals. <b>Upset watch</b> flags a pregame favorite that is losing. <b>Close finish</b> flags a late game that is still near 50/50. Player status lists each team's injury report: Out and Suspended players won't play, Doubtful players probably won't, Questionable is close to a coin flip, and Day-to-day is minor. <b>Left early</b> means a news note says the player exited a game in the last day. Check status before betting a player prop. Books usually void a prop if the player doesn't play at all, but not if he leaves early.</p></details>
     <details open><summary>Moneyline</summary><p>Pick who wins. Negative odds show what you risk to win $100; positive odds show what $100 wins.</p><div class="ex-line">-150: bet $150 to win $100 · +130: bet $100 to win $130</div></details>
     <details><summary>Point spread</summary><p>The favorite must win by more than the spread; the underdog covers by losing by less (or winning). Most spreads are priced near -110 on both sides, so you need to win about 52.4% to break even.</p><div class="ex-line">Steelers -3.5: they must win by 4 or more</div></details>
     <details><summary>Total (over/under)</summary><p>Bet on the combined score of both teams going over or under a number. Weather, pace and injuries to offensive stars move totals most.</p><div class="ex-line">O/U 44.5: a 24-21 final (45) goes over</div></details>
@@ -605,7 +632,7 @@ document.querySelectorAll("#p-odds input").forEach(el=>el.addEventListener("inpu
 odds();
 
 /* --- tabs --- */
-const TABS=["games","parlay","props","analyze","odds","tracker","guide"];
+const TABS=["games","live","parlay","props","analyze","odds","tracker","guide"];
 function show(t){document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));TABS.forEach(x=>$("p-"+x).hidden=x!==t);try{localStorage.setItem("ge-tab",t)}catch(e){}}
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.tab)));
 try{const t=localStorage.getItem("ge-tab");if(t&&$("p-"+t))show(t)}catch(e){}
@@ -791,7 +818,7 @@ async function refresh(force){
     jobs.push(loadScores(lg).catch(()=>{feedErr=true}));
     if(force||!D[lg].teams||Date.now()-(D[lg].teams.at||0)>6*3600e3)jobs.push(loadStandings(lg).catch(()=>{}));
   });
-  feedErr=false;await Promise.all(jobs);setTag();renderGames();if(!$("p-props").hidden&&typeof renderLiveTd==="function")renderLiveTd();if(typeof fillGameSelect==="function"){fillGameSelect();autoSettle()}
+  feedErr=false;await Promise.all(jobs);setTag();renderGames();if(!$("p-props").hidden&&typeof renderLiveTd==="function")renderLiveTd();if(!$("p-live").hidden&&typeof renderLive==="function")renderLive();if(typeof fillGameSelect==="function"){fillGameSelect();autoSettle()}
 }
 function initData(){
   Object.keys(LEAGUES).forEach(lg=>{const t=cache.get(lg+"-teams");if(t)D[lg].teams=t;const l=cache.get(lg+"-live");if(l){D[lg].live=l.live;D[lg].recs=l.recs;D[lg].liveAt=l.at}});
@@ -1632,6 +1659,99 @@ function render(){
   document.querySelectorAll(".del").forEach(btn=>btn.addEventListener("click",()=>{const id=btn.dataset.id;if(armed===id){armed=null;store.remove(id).catch(()=>{})}else{armed=id;render()}}));
 }
 render();
+/* --- live watch & player status --- */
+const INJLG={nfl:"football/nfl",nba:"basketball/nba",wnba:"basketball/wnba",mlb:"baseball/mlb",nhl:"hockey/nhl"};
+const LW={hist:{},open:{},grp:{},sum:{},inj:{},timer:null,busy:false};
+const LEFTRX=/won't return|will not return|not return to|did not return|didn't return|left (the |[A-Za-z']+ )?(game|contest|match)|exited|ruled out for the (rest|remainder)|(questionable|doubtful) to return|return is (questionable|doubtful)|went to the locker room|injured during the play|helped off|carted off/i;
+function stSev(s){s=String(s||"");return /out|suspen|reserve|ir\b/i.test(s)?0:/doubt/i.test(s)?1:/question/i.test(s)?2:/day/i.test(s)?3:4}
+function stCls(s){return["st-out","st-dbt","st-q","st-dtd","st-dtd"][stSev(s)]}
+function lwTrack(g,p){if(p==null)return;const h=LW.hist[g.id]||(LW.hist[g.id]=[]),now=Date.now();if(!h.length||now-h[h.length-1][0]>20e3)h.push([now,p]);while(h.length&&now-h[0][0]>15*60e3)h.shift()}
+function lwSwing(g,p){const h=LW.hist[g.id];if(!h||p==null)return null;const now=Date.now();const ref=h.find(x=>now-x[0]>=90e3&&now-x[0]<=10*60e3);if(!ref)return null;const d=p-ref[1];if(Math.abs(d)<0.04)return null;
+  const mins=Math.max(1,Math.round((now-ref[0])/60e3));return{d,mins}}
+function lwPlayText(p){return String((p&&(p.text||p.shortText||(p.type&&p.type.text)))||"").trim()}
+function lwPlayTime(p){const per=p&&p.period&&(p.period.displayValue||p.period.number),ck=p&&p.clock&&p.clock.displayValue;return [per&&(/^\d+$/.test(String(per))?"P"+per:per),ck].filter(Boolean).join(" ")}
+async function lwSummary(g,maxAge){const k=g.lg+":"+g.id,c=LW.sum[k];if(c&&Date.now()-c.at<(maxAge||25e3))return c.v;
+  const path=g.lg==="soc"?(g.sl?"soccer/"+g.sl:null):SPORTPATH[g.lg];if(!path)return null;
+  try{const j=await getJSON(`${ESPN}/site/v2/sports/${path}/summary?event=${g.id}`);let plays=[];
+    if(g.lg==="nfl"||g.lg==="cfb"){const dr=j.drives||{};(dr.previous||[]).forEach(d=>(d.plays||[]).forEach(p=>plays.push(p)));if(dr.current)(dr.current.plays||[]).forEach(p=>{if(!plays.some(q=>q.id&&q.id===p.id))plays.push(p)})}
+    else if(g.lg==="soc")plays=(j.keyEvents||[]).slice();else plays=(j.plays||[]).slice();
+    const recent=plays.filter(p=>lwPlayText(p)).slice(-6).reverse().map(p=>({t:lwPlayText(p),w:lwPlayTime(p),s:!!p.scoringPlay}));
+    const hurt=[];plays.forEach(p=>{const t=lwPlayText(p);if(/injur|helped off|carted off|left the game/i.test(t)){const sent=(t.match(/[^.]*?(injur|helped off|carted off|left the game)[^.]*\.?(\s*(His|Her) return is \w+\.?)?/i)||[t])[0].trim();hurt.push({t:sent.slice(0,180),w:lwPlayTime(p)})}});
+    const leaders=[];(j.leaders||[]).forEach(t=>{const tid=String((t.team&&t.team.id)||"");(t.leaders||[]).slice(0,3).forEach(cat=>{const top=(cat.leaders||[])[0];if(top&&top.athlete)leaders.push({tid,cat:cat.displayName||cat.name||"",who:top.athlete.shortName||top.athlete.displayName||"",v:top.displayValue||""})})});
+    const v={recent,hurt,leaders};LW.sum[k]={at:Date.now(),v};return v}catch(e){return c?c.v:null}}
+async function lwInjuries(lg){const c=LW.inj[lg];if(c&&Date.now()-c.at<10*60e3)return c.v;
+  try{const j=await getJSON(`${ESPN}/site/v2/sports/${INJLG[lg]}/injuries`);const v={};
+    (j.injuries||[]).forEach(t=>{const tid=String(t.id||"");v[tid]=(t.injuries||[]).filter(i=>i&&i.athlete&&!/^active$/i.test(i.status||"")).map(i=>{const d=i.details||{};
+      return{n:i.athlete.displayName||"",pos:(i.athlete.position&&i.athlete.position.abbreviation)||"",st:i.status||"",date:i.date||"",
+        why:[d.side&&d.side!=="Not Specified"?d.side:"",d.type||"",d.detail&&d.detail!==d.type?d.detail:""].filter(Boolean).join(" "),ret:d.returnDate||"",c:i.shortComment||""}})});
+    LW.inj[lg]={at:Date.now(),v};cache.set("inj-"+lg,{at:Date.now(),v});return v}
+  catch(e){const s=cache.get("inj-"+lg);if(s){LW.inj[lg]={at:Date.now()-9*60e3,v:s.v};return s.v}return null}}
+function lwLeftEarly(i){if(!LEFTRX.test(i.c||""))return false;const t=Date.parse(i.date);return isFinite(t)&&Date.now()-t<20*3600e3}
+function lwGames(){const all=[];Object.keys(LEAGUES).forEach(lg=>{if(LG!=="all"&&LG!==lg)return;const s=D[lg];((s.live&&s.live.games)||[]).forEach(g0=>all.push({...g0,lg}))});return all}
+function lwBody(g){const v=LW.sum[g.lg+":"+g.id];if(!v)return`<p class="note">Loading…</p>`;const s=v.v;if(!s)return`<p class="note">No play-by-play for this game yet.</p>`;let h="";
+  if(s.hurt.length)h+=`<h4>Injuries during this game</h4><ul class="plays">${s.hurt.slice(-4).reverse().map(x=>`<li><span class="badge st-out">Hurt</span> ${esc(x.w?x.w+" · ":"")}${esc(x.t)}</li>`).join("")}</ul>`;
+  if(s.recent.length)h+=`<h4>${g.lg==="soc"?"Key moments":"Latest plays"}</h4><ul class="plays">${s.recent.map(x=>`<li>${x.s?"<b>":""}${esc(x.w?x.w+" · ":"")}${esc(x.t.slice(0,200))}${x.s?"</b>":""}</li>`).join("")}</ul>`;
+  if(s.leaders.length){const by={};s.leaders.forEach(l=>(by[l.tid]=by[l.tid]||[]).push(l));h+=`<h4>Top performers</h4>`+[g.away,g.home].map(c=>by[String(c)]?`<p class="note"><b>${esc(short(g,c))}:</b> ${by[String(c)].map(l=>`${esc(l.cat)} ${esc(l.who)} ${esc(l.v)}`).join(" · ")}</p>`:"").join("")}
+  return h||`<p class="note">No play-by-play for this game yet.</p>`}
+function lwCard(g){const fin=DONE.includes(g.status),live=isLive(g),sc=g.score||{};
+  if(g.field)return`<div class="gm lw"><div class="meta"><span>${live?`<span class="live">Live</span> ${esc(g.detail||"")}`:esc(whenTxt(g))}</span><span class="lgtag">${icon(g.lg)}${esc(LEAGUES[g.lg].label)}</span></div><div class="nm">${esc(g.name||g.title||"Event")}</div><p class="note">The leaderboard and finishing chances are on the Games tab.</p></div>`;
+  const md=fin?null:model(g);if(live&&md)lwTrack(g,md.pH);
+  const L=LEAGUES[g.lg];let badges="";
+  if(live&&md&&L.sd&&g.lg!=="ten"&&g.lg!=="mma"){const pre=g.lg==="soc"?null:Phi(md.m/L.sd),sh=sc[g.home],sa=sc[g.away];const r=remaining(g);
+    if(pre!=null&&sh!=null&&sa!=null&&((pre>=0.6&&sa>sh)||(pre<=0.4&&sh>sa)))badges+=`<span class="badge st-q">Upset watch</span> `;
+    if(r<0.25&&md.pH>0.25&&md.pH<0.75)badges+=`<span class="badge st-out">Close finish</span> `}
+  const side=(c,p)=>`<div class="tm"><div class="nm">${esc(tname(g,c))}<small>${esc(rec(g,c))}</small></div><div class="sc">${(live||fin)&&sc[c]!=null?sc[c]:""}</div><div class="pc">${md&&p!=null?pct(p,0):""}</div></div>`;
+  let sit="";if(live){if(g.sit&&g.sit.dd){const pa=g.teams&&g.teams[g.sit.poss];sit=`${pa?esc(short(g,g.sit.poss))+" ball · ":""}${esc(g.sit.dd)}${g.sit.rz?" · Red zone":""}`}
+    else if(g.lg==="ten"&&g.sets)sit="Sets: "+g.sets.h.map((v,i)=>`${v}-${g.sets.a[i]??0}`).join(", ");}
+  let sw="";if(live&&md){const s=lwSwing(g,md.pH);if(s){const up=s.d>0?g.home:g.away;sw=`<span class="swing up">▲ ${esc(short(g,up))} +${Math.round(Math.abs(s.d)*100)} pts in ${s.mins} min</span>`}}
+  const v=LW.sum[g.lg+":"+g.id],last=v&&v.v&&v.v.recent[0];const k=g.lg+":"+g.id;const canX=live&&g.lg!=="ten"&&g.lg!=="mma";
+  return`<div class="gm lw"><div class="meta"><span>${live?`<span class="live">Live</span> ${esc(g.detail||"")}`:fin?"Final":esc(whenTxt(g))}</span><span class="lgtag">${icon(g.lg)}${esc(L.label)}</span></div>
+    ${badges?`<div>${badges}</div>`:""}${side(g.away,md&&md.pA)}${side(g.home,md&&md.pH)}${md&&md.pD!=null?`<div class="tm"><div class="nm drw">Draw</div><div class="sc"></div><div class="pc">${pct(md.pD,0)}</div></div>`:""}
+    ${md&&g.lg!=="soc"?`<div class="bar" aria-hidden="true"><i style="width:${(md.pA*100).toFixed(1)}%;opacity:.45"></i></div>`:""}
+    ${sit?`<div class="sit">${sit}</div>`:""}${sw?`<div>${sw}</div>`:""}${live&&last?`<div class="sit">Last: ${esc(last.t.slice(0,140))}</div>`:""}
+    ${canX?`<details class="lwx" data-k="${esc(k)}"${LW.open[k]?" open":""}><summary>Plays, top performers and injuries</summary><div class="lwbody">${lwBody(g)}</div></details>`:""}</div>`}
+function lwInjRow(i){return`<div class="injrow"><span class="badge ${stCls(i.st)}">${esc(lwLeftEarly(i)?"Left early":i.st)}</span><span><b>${esc(i.n)}</b> ${esc(i.pos)}${i.why?" · "+esc(i.why):""}${i.ret&&stSev(i.st)<=1?` · back ${esc(new Date(i.ret+"T12:00:00").toLocaleDateString([], {month:"short",day:"numeric"}))}?`:""}</span>${i.c?`<span class="why">${esc(i.c.slice(0,220))}</span>`:""}</div>`}
+async function renderInjuries(gs){const box=$("lwInj"),lb=$("lwLeft");const use=gs.filter(g=>INJLG[g.lg]&&!g.field&&!DONE.includes(g.status));
+  if(!use.length){lb.innerHTML="";box.innerHTML=`<div class="empty">${LG!=="all"&&!INJLG[LG]?`The injury report covers NFL, NBA, WNBA, MLB and NHL. ${esc(LEAGUES[LG].label)} isn't included.`:"No NFL, NBA, WNBA, MLB or NHL games in this filter."}</div>`;return}
+  const lgs=[...new Set(use.map(g=>g.lg))];const R={};await Promise.all(lgs.map(async l=>{R[l]=await lwInjuries(l)}));
+  const left=[];
+  use.forEach(g=>{const inj=R[g.lg];if(!inj)return;[g.away,g.home].forEach(c=>(inj[String(c)]||[]).forEach(i=>{if(lwLeftEarly(i))left.push({g,c,i})}));
+    const s=LW.sum[g.lg+":"+g.id];if(s&&s.v)s.v.hurt.forEach(h=>{const dup=left.some(x=>x.i&&x.g===g&&h.t.toLowerCase().includes(String(x.i.n).split(" ").slice(-1)[0].toLowerCase()));if(!dup)left.push({g,h})})});
+  lb.innerHTML=left.length?`<h3>Left the game early</h3>`+left.map(x=>x.i?`<p class="note"><span class="badge st-out">Left early</span> <b>${esc(x.i.n)}</b> (${esc(short(x.g,x.c))}) · ${esc(x.i.c.slice(0,200))}</p>`:`<p class="note"><span class="badge st-out">Hurt</span> ${esc(short(x.g,x.g.away))} @ ${esc(short(x.g,x.g.home))}${x.h.w?" · "+esc(x.h.w):""} · ${esc(x.h.t)}</p>`).join(""):"";
+  const failed=lgs.filter(l=>!R[l]);
+  box.innerHTML=(failed.length?`<p class="note">Couldn't load the ${failed.map(l=>LEAGUES[l].label).join(", ")} injury report. Check your connection.</p>`:"")+use.map(g=>{const inj=R[g.lg];if(!inj)return"";
+    const list=c=>(inj[String(c)]||[]).slice().sort((a,b)=>(lwLeftEarly(b)-lwLeftEarly(a))||stSev(a.st)-stSev(b.st));const a=list(g.away),h=list(g.home);
+    const out=[...a,...h].filter(i=>stSev(i.st)===0).length,q=[...a,...h].filter(i=>stSev(i.st)>0&&stSev(i.st)<3).length;const k=g.lg+":"+g.id,op=LW.grp[k]!=null?LW.grp[k]:isLive(g);
+    return`<details class="lwgrp" data-k="${esc(k)}"${op?" open":""}><summary>${isLive(g)?`<span class="live">Live</span> `:""}${icon(g.lg)} ${esc(short(g,g.away))} @ ${esc(short(g,g.home))} <span class="note">${esc(isLive(g)?(g.detail||""):whenTxt(g))} · ${out||q?`${out} out${q?`, ${q} doubtful or questionable`:""}`:"no injuries listed"}</span></summary>
+      ${[[g.away,a],[g.home,h]].map(([c,l])=>`<h4>${esc(tname(g,c))}</h4>${l.length?l.map(lwInjRow).join(""):`<p class="note">No players listed.</p>`}`).join("")}</details>`}).join("");
+  box.querySelectorAll(".lwgrp").forEach(d=>d.addEventListener("toggle",()=>{LW.grp[d.dataset.k]=d.open}))}
+function lwDraw(live,soon,fin){const sec=(t,l)=>l.length?`<h3 style="margin-top:6px">${t}</h3>`+l.map(lwCard).join(""):"";const y=window.scrollY;
+  $("lwList").innerHTML=(live.length?"":`<div class="empty">No ${LG==="all"?"":esc(LEAGUES[LG].label)+" "}games are live right now.${soon.length?" Here's what starts soon.":""}</div>`)+sec("Live now",live)+sec("Starting soon",soon)+sec("Final today",fin.slice(0,8));
+  $("lwList").querySelectorAll(".lwx").forEach(d=>d.addEventListener("toggle",async()=>{const k=d.dataset.k;LW.open[k]=d.open;if(d.open){const g=live.find(x=>x.lg+":"+x.id===k);if(g){await lwSummary(g);const b=d.querySelector(".lwbody");if(b)b.innerHTML=lwBody(g)}}}));
+  if(window.scrollY!==y)window.scrollTo(0,y)}
+async function renderLive(){if($("p-live").hidden)return;
+  $("lwFilterNote").textContent=`Showing: ${filterText()}. Change this on the Games tab. Scores always show what's live now. The day filter applies to Player status.`;
+  const all=lwGames(),now=Date.now();
+  const live=all.filter(g=>isLive(g)&&g.status!=="postponed");
+  const soon=all.filter(g=>!isLive(g)&&!DONE.includes(g.status)&&!g.field&&Date.parse(g.start_time)>now-30*60e3&&Date.parse(g.start_time)<now+3*3600e3).sort((a,b)=>Date.parse(a.start_time)-Date.parse(b.start_time));
+  const fin=all.filter(g=>DONE.includes(g.status)&&g.status!=="postponed"&&!g.field&&Date.parse(g.start_time)>now-8*3600e3).sort((a,b)=>Date.parse(b.start_time)-Date.parse(a.start_time));
+  $("lwTag").textContent=live.length?`${live.length} live`:"None live";
+  lwDraw(live,soon,fin);
+  const sl=dateFilter(slate()).filter(g=>DF!=="live"||isLive(g));
+  await renderInjuries(sl).catch(()=>{});
+  if(LW.busy)return;LW.busy=true;
+  try{const need=live.filter(g=>g.lg!=="ten"&&g.lg!=="mma"&&!g.field);if(!need.length)return;
+    await Promise.all(need.map(g=>lwSummary(g,LW.open[g.lg+":"+g.id]?25e3:55e3)));
+    if($("p-live").hidden)return;lwDraw(live,soon,fin);await renderInjuries(sl).catch(()=>{})}
+  finally{LW.busy=false}}
+async function lwTick(){if($("p-live").hidden||document.hidden)return;const now=Date.now();
+  const lgs=Object.keys(LEAGUES).filter(lg=>(LG==="all"||LG===lg)&&((D[lg].live&&D[lg].live.games)||[]).some(g=>isLive(g)||(!DONE.includes(g.status)&&Math.abs(Date.parse(g.start_time)-now)<20*60e3)));
+  if(lgs.length){await Promise.all(lgs.map(lg=>loadScores(lg).catch(()=>{})));setTag();renderGames()}
+  renderLive()}
+function lwStart(){clearInterval(LW.timer);LW.timer=setInterval(lwTick,30000);renderLive()}
+document.querySelector('nav button[data-tab="live"]').addEventListener("click",lwStart);
+if(!$("p-live").hidden)setTimeout(lwStart,600);
+
 /* --- quick logging & auto-grading --- */
 var Q={g:null,side:null,ou:null,line:null};
 function localDate(s){const d=new Date(s);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
