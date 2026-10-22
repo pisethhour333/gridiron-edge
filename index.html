@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1E6B45">
+<meta name="theme-color" content="#0B1220">
+<script>try{document.documentElement.dataset.skin=localStorage.getItem("ge-skin")||"midnight"}catch(e){document.documentElement.dataset.skin="midnight"}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -28,6 +29,16 @@
   --bg:#0E1512; --surface:#16211C; --ink:#E6EEEA; --muted:#93A69D; --line:#2A3A33;
   --turf:#4FB585; --turf-soft:#1C3329; --flag:#F2C531; --flag-ink:#F2C531;
   --good:#5CC285; --bad:#F07A6C; --warn:#E8B84A; color-scheme:dark}
+
+:root[data-skin="midnight"]{--bg:#EEF1F7;--surface:#FFFFFF;--ink:#111A2C;--muted:#5A6479;--line:#D4DAE6;--turf:#A65F00;--turf-soft:#FCEBD2;--flag:#0E8F88;--flag-ink:#0B6F6A;--good:#1E7A3E;--bad:#B23A2E;--warn:#8A6100}
+@media (prefers-color-scheme:dark){:root[data-skin="midnight"]:not([data-theme="light"]){--bg:#0B1220;--surface:#121B2E;--ink:#E8EDF6;--muted:#8E9BB4;--line:#24324D;--turf:#F5A524;--turf-soft:#2B2416;--flag:#45D1C9;--flag-ink:#45D1C9;--good:#4CC38A;--bad:#FF7466;--warn:#F5C451;color-scheme:dark}}
+:root[data-skin="hardwood"]{--bg:#F6F0E8;--surface:#FFFDF9;--ink:#2A1E14;--muted:#6E5C4B;--line:#E4D7C7;--turf:#B8471A;--turf-soft:#FBE2D3;--flag:#8A6400;--flag-ink:#7A5800;--good:#1E7A3E;--bad:#B23A2E;--warn:#8A6100}
+@media (prefers-color-scheme:dark){:root[data-skin="hardwood"]:not([data-theme="light"]){--bg:#16110D;--surface:#201913;--ink:#F3EADF;--muted:#B3A28F;--line:#3B2F25;--turf:#FF7A33;--turf-soft:#3A2416;--flag:#F2C531;--flag-ink:#F2C531;--good:#5CC285;--bad:#FF6B6B;--warn:#F2C531;color-scheme:dark}}
+.skinpick{display:flex;flex-direction:column;gap:8px}
+.skin{display:flex;gap:12px;align-items:center;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer}
+.skin[aria-pressed="true"]{border-color:var(--turf);box-shadow:0 0 0 1px var(--turf)}
+.skin .note{display:block}
+.sw{display:flex;flex:0 0 auto}.sw i{display:block;width:18px;height:28px}.sw i:first-child{border-radius:4px 0 0 4px}.sw i:last-child{border-radius:0 4px 4px 0}
 *{box-sizing:border-box}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0}
@@ -89,6 +100,14 @@ details.gm:not([open])>summary::after{content:"Tap to open";font-size:.75rem}
 @media (prefers-reduced-motion:no-preference){.ldot{animation:blink 1.6s ease-in-out infinite}}
 @keyframes blink{50%{opacity:.35}}
 .fnote{margin:0;font-size:.85rem;font-weight:600;color:var(--turf)}
+details.tot>summary{cursor:pointer;font-weight:600;color:var(--turf);font-size:.88rem}
+details.tot{display:flex;flex-direction:column;gap:6px}
+details.tot[open]{padding-bottom:4px}
+.ou .tl{min-width:9.5rem;display:inline-flex;gap:6px;align-items:baseline}
+.ou input{width:7rem!important}
+.nm.drw{font-family:var(--body);font-size:.9rem;font-weight:500;color:var(--muted);text-transform:none}
+table.soc td:first-child{font-weight:600;white-space:nowrap}
+table.soc td{white-space:normal;vertical-align:top}
 .pk{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .pk button{font:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:8px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:6px}
 .pk button[aria-pressed="true"],.qs[aria-pressed="true"],.qo[aria-pressed="true"]{border-color:var(--turf);background:var(--turf-soft);color:var(--turf);font-weight:600}
@@ -152,7 +171,7 @@ details p{margin:.5rem 0 0;max-width:62ch}
 <div class="wrap">
 <header>
   <h1>Gridiron <span>Edge</span></h1>
-  <p>NFL, college football and NBA research and math for betting on DraftKings. Your own win estimate, compared with the line. You place every bet yourself.</p>
+  <p>NFL, college football, NBA and soccer research and math for betting on DraftKings. Your own win estimate, compared with the line. You place every bet yourself.</p>
 </header>
 
 <nav role="tablist">
@@ -169,7 +188,7 @@ details p{margin:.5rem 0 0;max-width:62ch}
 <section class="panel" id="p-games">
   <div class="card">
     <div class="row" style="justify-content:space-between"><h2>This week's games</h2><span class="row" style="gap:6px"><span class="tag" id="liveTag">Loading…</span><button class="btn sm ghost" id="refreshBtn">Refresh</button></span></div>
-    <div class="row lgsel" role="group" aria-label="League"><button class="btn sm ghost" data-lg="nfl">NFL</button><button class="btn sm ghost" data-lg="cfb">College</button><button class="btn sm ghost" data-lg="nba">NBA</button><button class="btn sm ghost" data-lg="all">All</button></div>
+    <div class="row lgsel" role="group" aria-label="League"><button class="btn sm ghost" data-lg="nfl">NFL</button><button class="btn sm ghost" data-lg="cfb">College</button><button class="btn sm ghost" data-lg="nba">NBA</button><button class="btn sm ghost" data-lg="soc">Soccer</button><button class="btn sm ghost" data-lg="all">All</button></div>
     <p class="note">Win chances come from each team's season results plus home field. They don't use DraftKings' odds. Injuries aren't included for football, so tap <b>Dig in</b> to add them. NBA picks include back-to-back rest. While the app is open, scores and chances refresh every minute.</p>
     <div class="row dfsel" id="dayFilter" role="group" aria-label="Filter by date"></div>
     <p class="note" id="statsAsOf"></p>
@@ -206,10 +225,15 @@ details p{margin:.5rem 0 0;max-width:62ch}
     <div id="propList-nba" style="display:flex;flex-direction:column;gap:10px"></div>
   </div>
   <div id="propsNfl" style="display:flex;flex-direction:column;gap:10px">
+    <div id="liveTd-nfl" style="display:flex;flex-direction:column;gap:10px"></div>
     <div class="card"><h2>NFL props</h2><p class="note" id="propIntro-nfl"></p><h3 id="boardH-nfl">Most likely touchdown scorers</h3><p class="note" id="boardNote-nfl"></p><div id="tdBoard-nfl"></div></div>
     <div id="propList-nfl" style="display:flex;flex-direction:column;gap:10px"></div>
   </div>
-  <div class="empty" id="propsNone" hidden>Player props cover the NFL and NBA. Choose NFL, NBA or All on the Games tab.</div>
+  <div id="propsSoc" style="display:flex;flex-direction:column;gap:10px">
+    <div class="card"><h2>Soccer props</h2><p class="note" id="propIntro-soc"></p><h3 id="boardH-soc">Most likely goalscorers</h3><p class="note" id="boardNote-soc">Anytime goalscorer chance, with first-goal chance.</p><div id="tdBoard-soc"></div></div>
+    <div id="propList-soc" style="display:flex;flex-direction:column;gap:10px"></div>
+  </div>
+  <div class="empty" id="propsNone" hidden>Player props cover the NFL, NBA and soccer. Choose one of those, or All, on the Games tab.</div>
 </section>
 
 <!-- ANALYZE -->
@@ -378,15 +402,36 @@ details p{margin:.5rem 0 0;max-width:62ch}
 <!-- GUIDE -->
 <section class="panel" id="p-guide" hidden>
   <div class="card">
+    <h2>App colors</h2>
+    <p class="note">Pick a look. It applies right away and the app remembers it. Light or dark follows your phone's setting.</p>
+    <div class="skinpick" id="skinPick"></div>
+  </div>
+  <div class="card">
     <h2>Bet types, plainly</h2>
     <details open><summary>Moneyline</summary><p>Pick who wins. Negative odds show what you risk to win $100; positive odds show what $100 wins.</p><div class="ex-line">-150: bet $150 to win $100 · +130: bet $100 to win $130</div></details>
     <details><summary>Point spread</summary><p>The favorite must win by more than the spread; the underdog covers by losing by less (or winning). Most spreads are priced near -110 on both sides, so you need to win about 52.4% to break even.</p><div class="ex-line">Steelers -3.5: they must win by 4 or more</div></details>
     <details><summary>Total (over/under)</summary><p>Bet on the combined score of both teams going over or under a number. Weather, pace and injuries to offensive stars move totals most.</p><div class="ex-line">O/U 44.5: a 24-21 final (45) goes over</div></details>
     <details><summary>Parlay</summary><p>Several bets tied into one. Every leg must win. Payouts grow fast, but so does the book's edge, because the margin compounds on each leg.</p><div class="ex-line">Three -110 legs pay about +596, but hit only ~13% if each is a true coin flip</div></details>
     <details><summary>Teaser</summary><p>A parlay where you move the spreads in your favor (usually 6 points in football) in exchange for a smaller payout. The classic version crosses the key numbers 3 and 7.</p><div class="ex-line">Two-team 6-pt teaser: +7.5 becomes +1.5 underdog → +13.5</div></details>
+    <details><summary>Team total</summary><p>An over/under on one team's points only, not both teams. Open “Totals and team totals” on any game to compare DraftKings' line with the app's projection.</p><div class="ex-line">Chiefs team total 26.5: Chiefs score 27+ = over</div></details>
     <details><summary>Props</summary><p>Bets on events inside a game, like a player's passing yards or who scores first. Books often have bigger margins on props.</p></details>
+    <details><summary>Anytime, first and next TD</summary><p>Anytime TD pays if the player scores a touchdown at any point. First TD pays only if he scores the game's first touchdown. Next TD is a live bet on who scores the next touchdown from now. First and next TD pay much more because so many players could score.</p><div class="ex-line">The Props tab shows Anytime and First TD before kickoff, and a live tracker with Next TD during games</div></details>
     <details><summary>Push</summary><p>When the result lands exactly on the line, the bet is refunded. Half-point lines (like 3.5) can't push.</p></details>
     <details><summary>Key numbers</summary><p>NFL games end with a 3- or 7-point margin far more often than other margins, so a half point around 3 or 7 is worth more than one around 5.</p></details>
+  </div>
+  <div class="card">
+    <h2>Halves and quarters</h2>
+    <p class="note">Every NFL, college and NBA game has a “Halves and quarters” section with the projected score, winner chance, model spread and total for the 1st half, 2nd half and each quarter. During a game, finished periods show the final score and the current period updates live. Pick a period, then type DraftKings' total or spread to see your chance. Football quarters end tied fairly often, which usually pushes a 2-way quarter bet.</p>
+  </div>
+  <div class="card">
+    <h2>Soccer bets, plainly</h2>
+    <details open><summary>Moneyline (3-way)</summary><p>Pick the home team, the away team or a draw, after 90 minutes plus stoppage time. If you back a team and it ends in a draw, you lose.</p><div class="ex-line">Arsenal +120 · Draw +250 · Chelsea +230</div></details>
+    <details><summary>Double chance and draw no bet</summary><p>Double chance covers two of the three results, like “Arsenal or draw”. Draw no bet refunds your stake if it's a draw. Both pay less but win more often.</p></details>
+    <details><summary>Total goals</summary><p>Over or under a number of goals, most often 2.5. Over 2.5 needs at least 3 goals.</p></details>
+    <details><summary>Both teams to score</summary><p>Yes wins if each team scores at least once. The final score doesn't matter.</p></details>
+    <details><summary>Correct score and 1st half</summary><p>Correct score pays big but rarely hits. 1st half bets cover only the first 45 minutes, which usually has fewer goals than the second half.</p></details>
+    <details><summary>Goalscorer bets</summary><p>Anytime goalscorer pays if the player scores at any point in 90 minutes. First goalscorer pays only if he scores the match's first goal. A player who doesn't start usually voids or loses the bet depending on the book's rules, so check the lineups before betting.</p></details>
+    <details><summary>Spread (Asian handicap)</summary><p>Soccer's version of a spread, like -0.5 or +1.5 goals. A -0.5 is the same as picking that team to win outright.</p></details>
   </div>
   <div class="card">
     <h2>NBA bets, plainly</h2>
@@ -404,6 +449,7 @@ details p{margin:.5rem 0 0;max-width:62ch}
   <div class="card">
     <h2>How the model works</h2>
     <p class="note">Each team's points for minus points against gives its strength per game. Early in the season that's pulled toward average, since a few games say little. Home field adds 1.5 points. A backup QB costs 5.5 points, each other key player out costs 1 point, a bye adds 1 and a short week costs 1. The resulting margin turns into a win chance using the typical NFL game-to-game spread of about 13.5 points.</p>
+    <p class="note"><b>Soccer:</b> each team's goals scored and allowed per game, compared with its league average and pulled toward average early in the season. Home teams get about a 12% scoring boost. Those expected goals feed a Poisson model that gives every score's chance, which adds up to win, draw, totals and both-teams-to-score chances. During a game it uses the current score and the minutes left.</p>
     <p class="note"><b>NBA:</b> each team's points scored minus points allowed per game, blended with last season (pulled 40% toward average for roster changes) until about 10 games are played. Home court adds 2.5 points, and a team on the second night of a back-to-back loses 1.5. The margin becomes a win chance using a game-to-game spread of about 12.5 points. Projected totals come from each team's scoring and defense. Player projections use season averages, adjusted for the opponent's defense and rest.</p>
   </div>
 </section>
@@ -517,8 +563,8 @@ try{const t=localStorage.getItem("ge-tab");if(t&&$("p-"+t))show(t)}catch(e){}
 if(TABS.includes(location.hash.slice(1)))show(location.hash.slice(1));
 
 /* --- games & parlays --- */
-const LEAGUES={nfl:{label:"NFL",feed:"nfl",sd:13.5,hfa:1.5},cfb:{label:"College",feed:"ncaafb",sd:16,hfa:2.5},nba:{label:"NBA",feed:"nba",sd:12.5,hfa:2.5}};
-const D={nfl:{},cfb:{},nba:{}};let DF="all";try{DF=localStorage.getItem("ge-df")||"all"}catch(e){}let picks={},LG="all";
+const LEAGUES={nfl:{label:"NFL",feed:"nfl",sd:13.5,hfa:1.5,avg:22.5,tsd:13.5,teamsd:9.5},cfb:{label:"College",feed:"ncaafb",sd:16,hfa:2.5,avg:28,tsd:17,teamsd:12},nba:{label:"NBA",feed:"nba",sd:12.5,hfa:2.5,avg:114,tsd:17,teamsd:11},soc:{label:"Soccer",feed:"soccer",sd:1.6,hfa:0,avg:1.35,tsd:1.6,teamsd:1.1}};
+const D={nfl:{},cfb:{},nba:{},soc:{}};let DF="all";try{DF=localStorage.getItem("ge-df")||"all"}catch(e){}let picks={},LG="all";
 try{LG=localStorage.getItem("ge-lg")||"all"}catch(e){}
 const norm=c=>c==="JAX"?"JAC":c;
 const DONE=["closed","complete","completed","cancelled","canceled","postponed"];
@@ -528,12 +574,14 @@ function rating(lg,c){const t=teamInfo(lg,c);if(t&&t.nr!=null)return t.nr;if(!t|
   if(t.pf!=null)return (t.pf-t.pa)/t.gp*(t.gp/(t.gp+4));
   if(t.wp!=null)return (t.wp-0.5)*28*(t.gp/(t.gp+3));return null}
 function remaining(g){
+  if(g.lg==="soc"){const mm=String(g.clock||"").match(/(\d+)/);let e=mm?+mm[1]:0;if(/HT|half/i.test(g.detail||""))e=45;return Math.max(0.01,(90-Math.min(e,90))/90)}
   const q=+(g.quarter||g.period||0),ck=String(g.clock||""),per=g.lg==="nba"?12:15;let mins=null;
   if(/^\d+:\d+(\.\d+)?$/.test(ck)){const[m,s]=ck.split(":").map(Number);mins=m+s/60}else if(/^\d+(\.\d+)?$/.test(ck))mins=+ck/60;
   if(q&&mins!=null)return Math.max(0,(Math.max(0,4-q)*per+mins)/(4*per));
   const el=(Date.now()-Date.parse(g.start_time))/60000;return Math.min(1,Math.max(0.02,1-el/(g.lg==="cfb"?210:g.lg==="nba"?150:190)));
 }
 function model(g){
+  if(g.lg==="soc"){const P=socModel(g);return P?{m:P.lh-P.la,pH:P.full.H,pA:P.full.A,pD:P.full.D}:null}
   const L=LEAGUES[g.lg],rh=rating(g.lg,g.home),ra=rating(g.lg,g.away);if(rh==null||ra==null)return null;
   let m=rh-ra+(g.neutral?0:L.hfa);if(g.lg==="nba"){if(g.b2bH)m-=NBA_REST;if(g.b2bA)m+=NBA_REST}let pH=Phi(m/L.sd);
   const sc=g.score||{};const sh=sc[g.home]??sc[norm(g.home)],sa=sc[g.away]??sc[norm(g.away)];
@@ -552,10 +600,12 @@ function slate(){
 function rec(g,c){const t=teamInfo(g.lg,c);return (t&&t.rec)||(g.teams&&g.teams[c]&&g.teams[c].rec)||""}
 function renderLg(){document.querySelectorAll(".lgsel button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lg===LG))}
 function renderGames(){
+  const ae=document.activeElement;if(ae&&ae.classList&&(ae.classList.contains("ouIn")||ae.classList.contains("pIn")||ae.classList.contains("socIn"))){pendingRender=true;return}
   renderLg();
   const notes=[];const n=D.nfl.teams,c=D.cfb.teams,b=D.nba.teams,sh=k=>LG==="all"||LG===k;
   if(n&&n.asOf&&sh("nfl"))notes.push(`NFL season stats updated ${n.asOf}.`);
   if(c&&c.asOf&&sh("cfb"))notes.push(`College season stats updated ${c.asOf}. College picks are rougher, since schedules vary so much.`);
+  const so=D.soc.teams;if(so&&so.asOf&&sh("soc"))notes.push(`Soccer ratings from each league table (goals scored and allowed), updated ${so.asOf}. Champions League picks are rougher, since teams come from different leagues.`);
   if(b&&b.asOf&&sh("nba"))notes.push(`NBA ratings updated ${b.asOf}, blending this season with last season while it's early.`);
   $("statsAsOf").textContent=notes.join(" ")+(notes.length?" Source: ESPN.":"");
   const gs=slate();
@@ -577,14 +627,15 @@ function renderGames(){
     const day=new Date(g.start_time).toLocaleDateString([], {weekday:"long",month:"short",day:"numeric"});
     const head=day!==lastDay?`<h3 style="margin-top:6px">${esc(day)}</h3>`:"";lastDay=day;
     const side=(c,p,fav)=>`<div class="tm${fav?" fav":""}"><div class="nm">${esc(tname(g,c))}<small>${esc(rec(g,c))}</small></div><div class="sc">${(live||fin)&&sc[c]!=null?sc[c]:""}</div><div class="pc">${md?pct(p,0):fin?"":"—"}</div></div>`;
-    const favH=md&&md.pH>=.5;const sp=md?Math.round(Math.abs(md.m)*2)/2:0;
+    const favH=md&&md.pH>=md.pA;const sp=md?Math.round(Math.abs(md.m)*2)/2:0;
     return`${head}<div class="gm"><div class="meta"><span>${live?`<span class="live">Live</span> ${esc(g.detail||"")}`:fin?"Final":esc(whenTxt(g))}</span><span>${esc(LEAGUES[g.lg].label)}${g.title?" · "+esc(g.title):""}</span></div>
-      ${side(g.away,md&&md.pA,md&&!favH)}${side(g.home,md&&md.pH,md&&favH)}
-      ${md?`<div class="bar" aria-hidden="true"><i style="width:${(md.pA*100).toFixed(1)}%;opacity:.45"></i></div>`:""}
-      ${g.lg==="nba"&&!fin&&!live?nbaLineHtml(g):""}
-      <div class="row" style="justify-content:space-between"><span class="note">${md?(live?"Live win chance":`Model line: ${esc(short(g,md.m>0?g.home:g.away))} ${sp?"-"+sp:"pick'em"}`):(fin?"Final score":"No stats for one of these teams yet")}</span>
-      <span class="row" style="gap:6px">${g.lg==="nba"?"":`<button class="btn sm ghost dig" data-id="${esc(g.id)}">Dig in</button>`}<button class="btn sm ghost" data-log="${esc(JSON.stringify({key:g.lg+":"+g.id}))}">Log bet</button></span></div></div>`}).join("");
+      ${side(g.away,md&&md.pA,md&&!favH)}${side(g.home,md&&md.pH,md&&favH)}${md&&md.pD!=null?`<div class="tm"><div class="nm drw">Draw</div><div class="sc"></div><div class="pc">${pct(md.pD,0)}</div></div>`:""}
+      ${md&&g.lg!=="soc"?`<div class="bar" aria-hidden="true"><i style="width:${(md.pA*100).toFixed(1)}%;opacity:.45"></i></div>`:""}
+      ${!fin?(g.lg==="soc"?soccerHtml(g):totalsHtml(g)+periodsHtml(g)):""}${liveTdLine(g)}
+      <div class="row" style="justify-content:space-between"><span class="note">${md?(g.lg==="soc"?(live?"Live win and draw chances":"Win and draw chances"):live?"Live win chance":`Model line: ${esc(short(g,md.m>0?g.home:g.away))} ${sp?"-"+sp:"pick'em"}`):(fin?"Final score":"No stats for one of these teams yet")}</span>
+      <span class="row" style="gap:6px">${g.lg==="nba"||g.lg==="soc"?"":`<button class="btn sm ghost dig" data-id="${esc(g.id)}">Dig in</button>`}<button class="btn sm ghost" data-log="${esc(JSON.stringify({key:g.lg+":"+g.id}))}">Log bet</button></span></div></div>`}).join("");
   document.querySelectorAll(".dig").forEach(b=>b.addEventListener("click",()=>digIn(shown.find(g=>g.id===b.dataset.id))));
+  document.querySelectorAll("#gameList .pchk").forEach(pchkCalc);
   renderParlays(gs);
 }
 function digIn(g){
@@ -595,9 +646,9 @@ function digIn(g){
   $("neutral").checked=false;$("notes").value=g.lg==="cfb"?"College game: enter each team's points per game from ESPN to use the Analyze model.":"";$("exTag").hidden=true;analyze();show("analyze");window.scrollTo(0,0);
 }
 const upcoming=g=>!isLive(g)&&Date.parse(g.start_time)>Date.now();
-function legs(gs){return gs.filter(upcoming).map(g=>{const md=model(g);if(!md)return null;const h=md.pH>=.5;return{g,team:h?g.home:g.away,p:h?md.pH:md.pA}}).filter(Boolean)}
+function legs(gs){return gs.filter(upcoming).map(g=>{const md=model(g);if(!md)return null;const h=md.pH>=md.pA;return{g,team:h?g.home:g.away,p:h?md.pH:md.pA}}).filter(Boolean)}
 function fairOdds(p){const a=toAm(1/p);return a==null?"—":sgn(a)}
-const LGN={all:"All sports",nfl:"NFL",cfb:"College football",nba:"NBA"};
+const LGN={all:"All sports",nfl:"NFL",cfb:"College football",nba:"NBA",soc:"Soccer"};
 function filterText(){return `${LGN[LG]||"All sports"} · ${DF==="all"?"All days":DF==="live"?"Live":dayLabel(DF)}`}
 function dateFilter(gs){return DF==="all"||DF==="live"?gs:gs.filter(g=>localDate(g.start_time)===DF)}
 function renderParlays(gs){
@@ -628,6 +679,7 @@ function collectEntries(o,out){if(!o||typeof o!=="object")return;if(Array.isArra
 const cache={get(k){try{return JSON.parse(localStorage.getItem("ge-c-"+k)||"null")}catch(e){return null}},set(k,v){try{localStorage.setItem("ge-c-"+k,JSON.stringify(v))}catch(e){}}};
 async function loadStandings(lg){
   if(lg==="nba")return loadNbaTeams();
+  if(lg==="soc")return loadSoccerTeams();
   const j=await getJSON(`${ESPN}/v2/sports/${PATH[lg]}/standings`+(lg==="cfb"?"?group=80":""));
   const es=[];collectEntries(j,es);const teams={};
   es.forEach(e=>{const t=e.team;const w=stat(e,"wins")||0,l=stat(e,"losses")||0,ti=stat(e,"ties")||0,gp=w+l+ti;if(!gp)return;
@@ -644,14 +696,20 @@ function parseEvents(j,recs){
     [h,a].forEach(x=>{const r=recSum(x).match(/^(\d+)-(\d+)(?:-(\d+))?/);if(r){const w=+r[1],l=+r[2],t=+(r[3]||0),gp=w+l+t;if(gp)recs[x.team.id]={name:x.team.displayName,gp,wp:(w+t/2)/gp,rec:recSum(x)}}});
     const g={id:String(ev.id),start_time:ev.date,home:h.team.id,away:a.team.id,neutral:!!c.neutralSite,
       title:(c.notes&&c.notes[0]&&c.notes[0].headline)||"",
-      teams:{[h.team.id]:{name:h.team.displayName,rec:recSum(h)},[a.team.id]:{name:a.team.displayName,rec:recSum(a)}},
+      teams:{[h.team.id]:{name:h.team.displayName,rec:recSum(h),abbr:h.team.abbreviation||""},[a.team.id]:{name:a.team.displayName,rec:recSum(a),abbr:a.team.abbreviation||""}},
       status:state==="pre"?"scheduled":state==="in"?"inprogress":(st.type.completed?"closed":"postponed"),
       detail:st.type.shortDetail||st.type.detail||"",quarter:st.period,clock:st.displayClock};
     if(state!=="pre")g.score={[h.team.id]:+h.score||0,[a.team.id]:+a.score||0};
+    const lsv=x=>(x.linescores||[]).slice().sort((p,q)=>(p.period||0)-(q.period||0)).map(v=>+v.value||0);if(h.linescores||a.linescores)g.ls={h:lsv(h),a:lsv(a)};
+    const si=c.situation;if(state==="in"&&si&&si.possession){const poss=String(si.possession),pa=poss===String(h.team.id)?h.team.abbreviation:a.team.abbreviation;
+      const mt=String(si.possessionText||si.downDistanceText||"").match(/([A-Z]{2,4})\s+(\d{1,2})\s*$/);let ytg=null;
+      if(mt){const n=+mt[2];ytg=n===50?50:(mt[1]===pa?100-n:n)}else if(String(si.possessionText||"").includes("50"))ytg=50;
+      g.sit={poss,ytg,rz:!!si.isRedZone,dd:si.downDistanceText||si.shortDownDistanceText||si.possessionText||""}}
     return g}).filter(Boolean);
 }
 async function loadScores(lg){
   if(lg==="nba")return loadNbaScores();
+  if(lg==="soc")return loadSoccerScores();
   const j=await getJSON(`${ESPN}/site/v2/sports/${PATH[lg]}/scoreboard`+(lg==="cfb"?"?groups=80&limit=300":""));
   const recs={};const games=parseEvents(j,recs);
   D[lg].recs=recs;D[lg].live={games};D[lg].liveAt=Date.now();cache.set(lg+"-live",{live:D[lg].live,recs,at:D[lg].liveAt});
@@ -663,7 +721,7 @@ async function refresh(force){
     jobs.push(loadScores(lg).catch(()=>{feedErr=true}));
     if(force||!D[lg].teams||Date.now()-(D[lg].teams.at||0)>6*3600e3)jobs.push(loadStandings(lg).catch(()=>{}));
   });
-  feedErr=false;await Promise.all(jobs);setTag();renderGames();if(typeof fillGameSelect==="function"){fillGameSelect();autoSettle()}
+  feedErr=false;await Promise.all(jobs);setTag();renderGames();if(!$("p-props").hidden&&typeof renderLiveTd==="function")renderLiveTd();if(typeof fillGameSelect==="function"){fillGameSelect();autoSettle()}
 }
 function initData(){
   Object.keys(LEAGUES).forEach(lg=>{const t=cache.get(lg+"-teams");if(t)D[lg].teams=t;const l=cache.get(lg+"-live");if(l){D[lg].live=l.live;D[lg].recs=l.recs;D[lg].liveAt=l.at}});
@@ -672,7 +730,7 @@ function initData(){
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh(false)});
 }
 function setTag(){
-  const at=Math.max(D.nfl.liveAt||0,D.cfb.liveAt||0,D.nba.liveAt||0);
+  const at=Math.max(...Object.values(D).map(x=>x.liveAt||0));
   const t=at?new Date(at).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}):"";
   $("liveTag").textContent=feedErr?(at?"Offline · "+t:"Can't reach scores"):(at?"Live · "+t:"Loading…");
   if(feedErr&&!at)$("gameList").innerHTML=`<div class="empty">Couldn't reach the live sports feed. Check your connection, then tap Refresh.</div>`;
@@ -707,11 +765,220 @@ async function loadNbaScores(){
   const seen=new Set(),games=[];[...(y||[]),...t,...(n||[])].forEach(g=>{if(!seen.has(g.id)){seen.add(g.id);games.push(g)}});
   D.nba.recs=recs;D.nba.live={games};D.nba.liveAt=Date.now();cache.set("nba-live",{live:D.nba.live,recs,at:D.nba.liveAt});
 }
-function nbaProj(g){const H=teamInfo("nba",g.home),A=teamInfo("nba",g.away),md=model(g);if(!H||!A||H.off==null||A.off==null||!md)return null;
-  const tot=(H.off+A.def+A.off+H.def)/2-(g.b2bH?1:0)-(g.b2bA?1:0);return{tot,h:tot/2+md.m/2,a:tot/2-md.m/2,m:md.m}}
+function nbaProj(g){return gameProj(g)}
 const NBA_TOT_SD=17;
 function nbaLineHtml(g){const p=nbaProj(g);if(!p)return"";const b2b=[g.b2bA&&short(g,g.away),g.b2bH&&short(g,g.home)].filter(Boolean);
   return`<div class="note">Proj score ${esc(short(g,g.away))} ${Math.round(p.a)} – ${Math.round(p.h)} ${esc(short(g,g.home))} · Total ${(Math.round(p.tot*2)/2).toFixed(1)}</div>${b2b.length?`<div class="note"><span class="chip td">Back-to-back</span> ${esc(b2b.join(" and "))} played yesterday (tired legs, -${NBA_REST} pts).</div>`:""}`}
+/* --- totals, team totals, live projections, next TD --- */
+const lineMem={},openMem=new Set();let pendingRender=false;
+function lgAvgPts(lg){const T=D[lg].teams&&D[lg].teams.teams;const a=T?Object.values(T).filter(t=>t.pf!=null&&t.gp):[];return a.length?a.reduce((s,t)=>s+t.pf/t.gp,0)/a.length:LEAGUES[lg].avg}
+function teamOD(lg,id){const t=teamInfo(lg,id);if(!t)return null;if(t.off!=null&&t.def!=null)return{off:t.off,def:t.def};
+  if(t.pf==null||t.pa==null||!t.gp)return null;const avg=lgAvgPts(lg),w=t.gp/(t.gp+3);return{off:avg+(t.pf/t.gp-avg)*w,def:avg+(t.pa/t.gp-avg)*w}}
+function gameProj(g){const H=teamOD(g.lg,g.home),A=teamOD(g.lg,g.away),md=model(g);if(!H||!A||!md)return null;
+  let tot=(H.off+A.def+A.off+H.def)/2;if(g.lg==="nba")tot-=(g.b2bH?1:0)+(g.b2bA?1:0);
+  const m=md.m,preH=tot/2+m/2,preA=tot/2-m/2;
+  if(isLive(g)&&g.score){const r=remaining(g),sh=+g.score[g.home]||0,sa=+g.score[g.away]||0;
+    return{live:true,r,m,preH,preA,preTot:tot,h:sh+preH*r,a:sa+preA*r,tot:sh+sa+tot*r,curH:sh,curA:sa,sdF:Math.sqrt(Math.max(r,1e-4))}}
+  return{live:false,r:1,m,preH,preA,preTot:tot,h:preH,a:preA,tot,curH:0,curA:0,sdF:1}}
+const half=x=>(Math.round(x*2)/2).toFixed(1);
+function ouTxt(proj,sd,L,min){if(min!=null&&min>L)return`Over <b>already hit</b>`;const p=Phi((proj-(Number.isInteger(L)?L+0.5:L))/Math.max(sd,0.3));return`Over <b>${pct(p,0)}</b> · Under <b>${pct(1-p,0)}</b>`}
+const TD_PER_PT=0.115;
+function driveTdP(ytg,rz){return Math.min(0.85,Math.max(0.08,0.12+0.6*Math.pow(1-ytg/100,2)+(rz?0.08:0)))}
+function nextTD(g){const p=gameProj(g);if(!p)return null;const r=p.live?p.r:1;
+  const lh=Math.max(1e-3,p.preH*TD_PER_PT*r),la=Math.max(1e-3,p.preA*TD_PER_PT*r),none=Math.exp(-(lh+la)),ph=lh/(lh+la);
+  let poss=null,d=0;
+  if(p.live&&g.sit&&g.sit.poss&&g.sit.ytg!=null){poss=g.sit.poss===String(g.home)?"h":g.sit.poss===String(g.away)?"a":null;
+    if(poss)d=driveTdP(g.sit.ytg,g.sit.rz)*Math.min(1,(r*60)/2.5)}
+  const H=(poss==="h"?d:0)+(1-d)*(1-none)*ph,A=(poss==="a"?d:0)+(1-d)*(1-none)*(1-ph);
+  return{h:H,a:A,none:(1-d)*none,d,poss,lh,la}}
+function totalsHtml(g){const p=gameProj(g);if(!p)return"";const L=LEAGUES[g.lg],key=g.lg+":"+g.id,A=short(g,g.away),H=short(g,g.home);
+  const head=p.live?`Live projection: ${esc(A)} ${Math.round(p.a)} – ${Math.round(p.h)} ${esc(H)} · Final total ${half(p.tot)}`:`Proj score ${esc(A)} ${Math.round(p.a)} – ${Math.round(p.h)} ${esc(H)} · Total ${half(p.tot)}`;
+  const b2b=g.lg==="nba"&&!p.live?[g.b2bA&&A,g.b2bH&&H].filter(Boolean):[];
+  const fld=(f,label,proj,sd,min)=>{const v=lineMem[key+f]??"";const o=v!==""&&isFinite(+v)?ouTxt(proj,sd,+v,min):"";
+    return`<div class="row chk ou"><span class="lab tl">${esc(label)} <span class="pv">${half(proj)}</span></span><input type="number" inputmode="decimal" step="0.5" class="ouIn" data-k="${esc(key+f)}" data-proj="${proj.toFixed(2)}" data-sd="${sd.toFixed(2)}"${p.live?` data-min="${min}"`:""} value="${esc(v)}" placeholder="DK line" aria-label="${esc(label)} line"><span class="note ouOut">${o}</span></div>`};
+  return`<div class="note">${head}</div>${b2b.length?`<div class="note"><span class="chip td">Back-to-back</span> ${esc(b2b.join(" and "))} played yesterday (tired legs, -${NBA_REST} pts).</div>`:""}
+  <details class="tot" data-k="${esc(key)}"${openMem.has(key)?" open":""}><summary>Totals and team totals</summary>
+    ${fld("t","Game total",p.tot,L.tsd*p.sdF,p.curH+p.curA)}${fld("a",A+" team total",p.a,L.teamsd*p.sdF,p.curA)}${fld("h",H+" team total",p.h,L.teamsd*p.sdF,p.curH)}
+    <p class="note">Type DraftKings' line to see the over/under chance.${p.live?" Live numbers use the current score and time left.":""}</p></details>`}
+function liveTdLine(g){if(!isLive(g)||(g.lg!=="nfl"&&g.lg!=="cfb"))return"";const n=nextTD(g);if(!n)return"";
+  const A=short(g,g.away),H=short(g,g.home),poss=n.poss==="h"?H:n.poss==="a"?A:"";
+  return`<div class="note">${poss?`<b>${esc(poss)} ball</b>${g.sit&&g.sit.dd?" · "+esc(g.sit.dd):""}<br>`:""}<b>Next TD:</b> ${esc(A)} ${pct(n.a,0)} · ${esc(H)} ${pct(n.h,0)} · No more TDs ${pct(n.none,0)}</div>`}
+document.addEventListener("input",e=>{const t=e.target;if(!t.classList||!t.classList.contains("ouIn"))return;lineMem[t.dataset.k]=t.value;const L=parseFloat(t.value),o=t.parentNode.querySelector(".ouOut");
+  o.innerHTML=isFinite(L)?ouTxt(+t.dataset.proj,+t.dataset.sd,L,t.dataset.min!=null?+t.dataset.min:null):""});
+document.addEventListener("toggle",e=>{const d=e.target;if(d.classList&&d.classList.contains("tot")){d.open?openMem.add(d.dataset.k):openMem.delete(d.dataset.k)}},true);
+document.addEventListener("focusout",e=>{if(e.target.classList&&["ouIn","pIn","socIn"].some(c=>e.target.classList.contains(c))&&pendingRender){pendingRender=false;setTimeout(renderGames,50)}});
+/* NFL player TD data */
+const NFL_SEASON=(()=>{const d=new Date();return d.getMonth()<2?d.getFullYear()-1:d.getFullYear()})();
+let NFLP=null;const NFLLIVE={};
+const NFLBY=(sort,limit)=>`https://site.web.api.espn.com/apis/common/v3/sports/football/nfl/statistics/byathlete?region=us&lang=en&contentorigin=espn&isqualified=false&page=1&limit=${limit}&sort=${sort}&season=${NFL_SEASON}&seasontype=2`;
+async function loadNflPlayers(){if(NFLP)return;const c=cache.get("nfl-pl");if(c&&Date.now()-c.at<6*3600e3){NFLP=c.v;return}
+  const js=await Promise.all([getJSON(NFLBY("rushing.rushingYards:desc",120)),getJSON(NFLBY("receiving.receivingYards:desc",220))]);const out={};
+  js.forEach(j=>{const cats={};(j.categories||[]).forEach(c=>cats[c.name]=c.names||[]);
+    (j.athletes||[]).forEach(x=>{const at=x.athlete||{};if(!at.id)return;const v={};
+      (x.categories||[]).forEach(c=>{const nm=cats[c.name]||c.names||[];(c.values||[]).forEach((y,i)=>{const k=c.name+"."+nm[i];if(v[k]==null)v[k]=+y||0})});
+      out[String(at.id)]={name:at.displayName||"",pos:(at.position&&at.position.abbreviation)||"",team:String(at.teamId||""),gp:v["general.gamesPlayed"]||0,td:(v["rushing.rushingTouchdowns"]||0)+(v["receiving.receivingTouchdowns"]||0),yds:(v["rushing.rushingYards"]||0)+(v["receiving.receivingYards"]||0)}})});
+  if(!Object.keys(out).length)throw new Error("no nfl players");NFLP=out;cache.set("nfl-pl",{at:Date.now(),v:out})}
+async function loadNflLive(g){const c=NFLLIVE[g.id];if(c&&Date.now()-c.at<45e3)return;
+  try{const j=await getJSON(`${ESPN}/site/v2/sports/${PATH.nfl}/summary?event=${g.id}`);const tds={},names={};
+    ((j.boxscore&&j.boxscore.players)||[]).forEach(t=>{const tid=String((t.team&&t.team.id)||"");(t.statistics||[]).forEach(cat=>{const keys=cat.keys||[];const i=keys.indexOf(cat.name==="rushing"?"rushingTouchdowns":cat.name==="receiving"?"receivingTouchdowns":"~");if(i<0)return;
+      (cat.athletes||[]).forEach(a=>{const id=String((a.athlete&&a.athlete.id)||"");if(!id)return;tds[id]=(tds[id]||0)+(+((a.stats||[])[i])||0);names[id]={name:a.athlete.displayName||"",team:tid,pos:(a.athlete.position&&a.athlete.position.abbreviation)||""}})})});
+    NFLLIVE[g.id]={at:Date.now(),tds,names}}catch(e){NFLLIVE[g.id]=NFLLIVE[g.id]||{at:Date.now(),tds:{},names:{}}}}
+function teamTdpg(tid){const t=teamInfo("nfl",tid);return t&&t.pf!=null&&t.gp?Math.max(1,t.pf/t.gp*TD_PER_PT):2.5}
+function tdShare(tid,td,yds,gp){if(!gp)return 0.06;const tdpg=(td+yds/140)/2/gp;return Math.min(0.5,Math.max(0.01,tdpg/teamTdpg(tid)))}
+function tdCandidates(g,tid){const live=NFLLIVE[g.id]||{tds:{},names:{}};const out={};
+  Object.entries(NFLP||{}).forEach(([id,p])=>{if(p.team===String(tid)&&p.gp)out[id]={id,name:p.name,pos:p.pos,share:tdShare(tid,p.td,p.yds,p.gp)}});
+  Object.entries(live.names).forEach(([id,n])=>{if(n.team===String(tid)&&!out[id])out[id]={id,name:n.name,pos:n.pos,share:0.06}});
+  return Object.values(out).map(p=>({...p,so:live.tds[p.id]||0})).sort((a,b)=>b.share-a.share).slice(0,6)}
+async function renderLiveTd(){const box=$("liveTd-nfl");if(!box)return;const todayK=localDate(Date.now());
+  const show=(LG==="all"||LG==="nfl")&&(DF==="all"||DF==="live"||DF===todayK);const gs=show?lgSlate("nfl").filter(isLive):[];
+  if(!gs.length){box.innerHTML=DF==="live"&&(LG==="all"||LG==="nfl")?`<div class="empty">No NFL games are live right now.</div>`:"";return}
+  try{await loadNflPlayers()}catch(e){}
+  await Promise.all(gs.map(loadNflLive));
+  box.innerHTML=`<div class="card"><h2>Live touchdown tracker</h2><p class="note">Updates every minute while the app is open. Next TD chances use the score, time left, who has the ball and field position. “Another TD” is the chance a player scores (again) before the game ends.</p></div>`+
+  gs.map(g=>{const n=nextTD(g);const sc=g.score||{},A=short(g,g.away),H=short(g,g.home);if(!n)return"";
+    const lamRem=tid=>String(tid)===String(g.home)?n.lh:n.la,isPoss=tid=>(n.poss==="h"&&String(tid)===String(g.home))||(n.poss==="a"&&String(tid)===String(g.away));
+    const rows=[g.away,g.home].flatMap(tid=>tdCandidates(g,tid).map(p=>{const tp=String(tid)===String(g.home)?n.h:n.a;
+      return{...p,tid,next:tp*p.share,any:1-(1-(isPoss(tid)?n.d:0)*p.share)*Math.exp(-lamRem(tid)*p.share)}})).sort((a,b)=>b.next-a.next).slice(0,10);
+    return`<div class="gm"><div class="meta"><span><span class="live">Live</span> ${esc(g.detail||"")}</span><span>${esc(A)} ${sc[g.away]??""} – ${sc[g.home]??""} ${esc(H)}</span></div>
+      ${liveTdLine(g)}
+      ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Player</th><th>TDs</th><th>Next TD</th><th>Another TD</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${esc(r.name)}</b><div class="note">${esc(r.pos)} · ${esc(short(g,r.tid))}</div></td><td class="n">${r.so?`<b class="pos">${r.so}</b>`:"0"}</td><td class="n">${pct(r.next,0)}</td><td class="n">${pct(r.any,0)}</td></tr>`).join("")}</tbody></table></div>`:`<p class="note">Player stats aren't available right now, so only team chances are shown.</p>`}
+      <div class="row"><button class="btn sm ghost" data-log="${esc(JSON.stringify({type:"Prop",key:"nfl:"+g.id}))}">Log a TD bet</button></div></div>`}).join("")}
+/* --- halves and quarters --- */
+const PSH={nfl:[0.21,0.29,0.21,0.29],cfb:[0.24,0.28,0.24,0.24],nba:[0.25,0.25,0.25,0.25]},TIEB={nfl:1.75,cfb:1.75,nba:0.5};
+const PER=[["1st half",[0,1]],["2nd half",[2,3]],["1st quarter",[0]],["2nd quarter",[1]],["3rd quarter",[2]],["4th quarter",[3]]];
+function periodLeft(g){const ck=String(g.clock||""),per=g.lg==="nba"?12:15;let mins=null;
+  if(/^\d+:\d+(\.\d+)?$/.test(ck)){const[m,s]=ck.split(":").map(Number);mins=m+s/60}else if(/^\d+(\.\d+)?$/.test(ck))mins=+ck/60;
+  return mins==null?0.5:Math.min(1,Math.max(0,mins/per))}
+function periodDist(g,idx){const p=gameProj(g);if(!p||!PSH[g.lg])return null;const L=LEAGUES[g.lg],sh=PSH[g.lg],fin=DONE.includes(g.status),live=isLive(g),q=+(g.quarter||0);
+  let h=0,a=0,vm=0,vt=0,cur=0,anyLive=false,allDone=true;
+  idx.forEach(i=>{const s=sh[i],ah=g.ls&&g.ls.h[i]!=null?+g.ls.h[i]:null,aa=g.ls&&g.ls.a[i]!=null?+g.ls.a[i]:null;
+    if((fin||(live&&i<q-1))&&ah!=null){h+=ah;a+=aa||0;cur+=ah+(aa||0);return}
+    allDone=false;
+    if(live&&i===q-1){const r=periodLeft(g);anyLive=true;h+=(ah||0)+p.preH*s*r;a+=(aa||0)+p.preA*s*r;cur+=(ah||0)+(aa||0);vm+=s*r;vt+=s*r;return}
+    h+=p.preH*s;a+=p.preA*s;vm+=s;vt+=s});
+  const sdm=L.sd*1.08*Math.sqrt(vm),sdt=L.tsd*1.1*Math.sqrt(vt),mm=h-a,b=TIEB[g.lg];let pH,pA,pT;
+  if(sdm<0.01){pH=mm>0?1:0;pA=mm<0?1:0;pT=mm===0?1:0}else{pH=1-Phi((b-mm)/sdm);pA=Phi((-b-mm)/sdm);pT=Math.max(0,1-pH-pA)}
+  return{h,a,tot:h+a,mm,sdm,sdt,pH,pA,pT,cur,state:allDone?"done":anyLive?"live":"pre"}}
+function periodsHtml(g){if(!PSH[g.lg]||!gameProj(g))return"";const key=g.lg+":"+g.id+":p",A=short(g,g.away),H=short(g,g.home);
+  const ds=PER.map(([nm,ix])=>[nm,periodDist(g,ix)]);
+  const rows=ds.map(([nm,d])=>{if(!d)return"";const sc=`${Math.round(d.a)}–${Math.round(d.h)}`;
+    if(d.state==="done")return`<tr><td>${nm}</td><td class="n">${sc}</td><td colspan="2" class="note">Final · ${d.mm===0?"tie":esc(d.mm>0?H:A)+" won"}</td></tr>`;
+    const fav=d.pH>=d.pA?H:A,sp=Math.round(Math.abs(d.mm)*2)/2;
+    return`<tr><td>${nm}${d.state==="live"?' <span class="live">Live</span>':""}</td><td class="n">${sc}</td><td>${esc(fav)} <b>${pct(Math.max(d.pH,d.pA),0)}</b>${d.pT>=0.03?`<div class="note">Tie ${pct(d.pT,0)}</div>`:""}<div class="note">Line ${esc(d.mm>=0?H:A)} ${sp?"-"+sp:"pk"}</div></td><td class="n">${half(d.tot)}</td></tr>`}).join("");
+  const sel=lineMem[key+"s"]??"0";
+  const opts=ds.map(([nm,d],k)=>!d||d.state==="done"?"":`<option value="${k}" data-tot="${d.tot.toFixed(2)}" data-sdt="${Math.max(d.sdt,0.3).toFixed(2)}" data-m="${d.mm.toFixed(2)}" data-sdm="${Math.max(d.sdm,0.3).toFixed(2)}" data-min="${d.state==="live"?d.cur:""}"${String(k)===String(sel)?" selected":""}>${nm}</option>`).join("");
+  return`<details class="tot" data-k="${esc(key)}"${openMem.has(key)?" open":""}><summary>Halves and quarters</summary>
+    <div class="tablewrap"><table><thead><tr><th>Period</th><th>Proj ${esc(A)}–${esc(H)}</th><th>Winner</th><th>Total</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${opts?`<div class="pchk"><div class="row chk"><span class="lab tl">Check a line for</span><select class="pIn pSel" data-k="${esc(key+"s")}" aria-label="Period">${opts}</select></div>
+    <div class="row chk ou"><span class="lab tl">Total</span><input type="number" inputmode="decimal" step="0.5" class="pIn pTot" data-k="${esc(key+"t")}" value="${esc(lineMem[key+"t"]??"")}" placeholder="DK line" aria-label="Period total line"><span class="note pTotO"></span></div>
+    <div class="row chk ou"><span class="lab tl">${esc(H)} spread</span><input type="number" inputmode="decimal" step="0.5" class="pIn pSpr" data-k="${esc(key+"m")}" value="${esc(lineMem[key+"m"]??"")}" placeholder="e.g. -1.5" aria-label="${esc(H)} period spread"><span class="note pSprO"></span></div></div>`:""}
+    <p class="note">Football quarters often end tied, so the tie chance is shown. A tie usually pushes a 2-way quarter or half moneyline.${isLive(g)?" Live rows use the score so far and time left in the period.":""}</p></details>`}
+function pchkCalc(box){if(!box)return;const sel=box.querySelector(".pSel"),op=sel&&sel.selectedOptions&&sel.selectedOptions[0];if(!op)return;
+  const t=parseFloat(box.querySelector(".pTot").value),m=parseFloat(box.querySelector(".pSpr").value);
+  box.querySelector(".pTotO").innerHTML=isFinite(t)?ouTxt(+op.dataset.tot,+op.dataset.sdt,t,op.dataset.min!==""?+op.dataset.min:null):"";
+  box.querySelector(".pSprO").innerHTML=isFinite(m)?(()=>{const p=Phi((+op.dataset.m+m)/+op.dataset.sdm);return`Covers <b>${pct(p,0)}</b> · Other side <b>${pct(1-p,0)}</b>`})():""}
+["input","change"].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(!t.classList||!t.classList.contains("pIn"))return;lineMem[t.dataset.k]=t.value;pchkCalc(t.closest(".pchk"))}));
+/* --- soccer --- */
+const SOCCER=[["eng.1","Premier League"],["esp.1","LaLiga"],["ita.1","Serie A"],["ger.1","Bundesliga"],["fra.1","Ligue 1"],["uefa.champions","Champions League"],["usa.1","MLS"]];
+const SOCC={};
+async function loadSoccerTeams(){const teams={};
+  const res=await Promise.all(SOCCER.map(([k])=>getJSON(`${ESPN}/v2/sports/soccer/${k}/standings`).then(j=>[k,j]).catch(()=>[k,null])));
+  res.forEach(([k,j])=>{if(!j)return;const es=[];collectEntries(j,es);let gfS=0,gpS=0;const rows=[];
+    es.forEach(e=>{const gp=stat(e,"gamesPlayed")||0;if(!gp)return;const gf=stat(e,"pointsFor")||0,ga=stat(e,"pointsAgainst")||0;gfS+=gf;gpS+=gp;
+      rows.push({id:String(e.team.id),name:e.team.displayName,gp,gf,ga,w:stat(e,"wins")||0,d:stat(e,"ties")||0,l:stat(e,"losses")||0})});
+    const avg=gpS?gfS/gpS:1.35,dom=k!=="uefa.champions";
+    rows.forEach(r=>{if(teams[r.id]&&teams[r.id].dom&&!dom)return;teams[r.id]={name:r.name,gp:r.gp,gf:r.gf,ga:r.ga,lgAvg:avg,dom,rec:`${r.w}-${r.d}-${r.l}`}})});
+  if(!Object.keys(teams).length)throw new Error("no soccer standings");
+  D.soc.teams={asOf:new Date().toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"}),at:Date.now(),teams};cache.set("soc-teams",D.soc.teams)}
+async function loadSoccerScores(){const recs={};
+  const day=async(k,n,d)=>{const key=k+"-"+d,c=SOCC[key];if(c&&Date.now()-c.at<(d===ymd(0)?55e3:30*60e3))return c.v;
+    const j=await getJSON(`${ESPN}/site/v2/sports/soccer/${k}/scoreboard?dates=${d}`);const v=parseEvents(j,recs).map(g=>({...g,title:n}));SOCC[key]={at:Date.now(),v};return v};
+  const days=[0,1,2,3,4,5,6].map(ymd);
+  const res=await Promise.all(SOCCER.flatMap(([k,n])=>days.map(d=>day(k,n,d).catch(()=>null))));
+  if(res.every(x=>x==null))throw new Error("soccer feed");
+  const seen=new Set(),games=[];res.forEach(v=>(v||[]).forEach(g=>{if(!seen.has(g.id)){seen.add(g.id);games.push(g)}}));
+  D.soc.live={games};D.soc.liveAt=Date.now();cache.set("soc-live",{live:D.soc.live,recs:{},at:D.soc.liveAt})}
+const poisP=(l,k)=>{let p=Math.exp(-l);for(let i=1;i<=k;i++)p*=l/i;return p};
+function socProbs(lh,la,ch,ca){const N=10,ph=[],pa=[];for(let i=0;i<=N;i++){ph.push(poisP(lh,i));pa.push(poisP(la,i))}
+  let H=0,Dw=0,A=0,bt=0;const tot=new Array(2*N+1).fill(0),cs=[];
+  for(let i=0;i<=N;i++)for(let j=0;j<=N;j++){const p=ph[i]*pa[j],fh=ch+i,fa=ca+j;if(fh>fa)H+=p;else if(fh===fa)Dw+=p;else A+=p;tot[i+j]+=p;if(fh>0&&fa>0)bt+=p;cs.push([fh,fa,p])}
+  if(lh+la>0.3){const D2=Math.min(0.6,Dw*1.08),k=(1-D2)/((H+A)||1);H*=k;A*=k;Dw=D2}
+  cs.sort((x,y)=>y[2]-x[2]);
+  const over=L=>{const need=Math.floor(L)+1-(ch+ca);if(need<=0)return 1;let s=0;for(let k=need;k<tot.length;k++)s+=tot[k];return s};
+  const tOver=(sd,L)=>{const cur=sd==="h"?ch:ca,arr=sd==="h"?ph:pa,need=Math.floor(L)+1-cur;if(need<=0)return 1;let x=0;for(let k=need;k<arr.length;k++)x+=arr[k];return x};
+  return{H,D:Dw,A,btts:bt,cs:cs.slice(0,4),over,tOver}}
+function socModel(g){const T=D.soc.teams&&D.soc.teams.teams;if(!T)return null;const H=T[g.home],A=T[g.away];if(!H||!A||!H.gp||!A.gp)return null;
+  const att=t=>1+((t.gf/t.gp)/t.lgAvg-1)*t.gp/(t.gp+6),def=t=>1+((t.ga/t.gp)/t.lgAvg-1)*t.gp/(t.gp+6);
+  const base=Math.sqrt(H.lgAvg*A.lgAvg),hf=g.neutral?1:1.12,af=g.neutral?1:0.88;
+  const lh=Math.max(0.15,base*att(H)*def(A)*hf),la=Math.max(0.15,base*att(A)*def(H)*af);
+  const live=isLive(g)&&!!g.score,ch=live?+g.score[g.home]||0:0,ca=live?+g.score[g.away]||0:0,r=live?remaining(g):1,e=90*(1-r);
+  const full=socProbs(lh*r,la*r,ch,ca);let first=null;
+  if(!live)first=socProbs(lh*0.45,la*0.45,0,0);else if(e<45&&!/HT|half/i.test(g.detail||""))first=socProbs(lh*0.45*(45-e)/45,la*0.45*(45-e)/45,ch,ca);
+  return{lh,la,full,first,live,r,ch,ca}}
+function socOu(F,L){const p=F.over(L);return p>=1?`Over <b>already hit</b>`:`Over <b>${pct(p,0)}</b> · Under <b>${pct(1-p,0)}</b>`}
+function soccerHtml(g){const P=socModel(g);if(!P)return"";const A=short(g,g.away),H=short(g,g.home),F=P.full,key="soc:"+g.id,b=x=>`<b>${pct(x,0)}</b>`,row=(k,v)=>`<tr><td>${k}</td><td>${v}</td></tr>`,fh=P.first;
+  const head=P.live?`Live · expected final goals ${esc(A)} ${(P.ca+P.la*P.r).toFixed(1)} – ${(P.ch+P.lh*P.r).toFixed(1)} ${esc(H)}`:`Expected goals ${esc(A)} ${P.la.toFixed(1)} – ${P.lh.toFixed(1)} ${esc(H)}`;
+  const v=lineMem[key+"t"]??"";
+  return`<div class="note">${head}</div><details class="tot" data-k="${esc(key)}"${openMem.has(key)?" open":""}><summary>All soccer markets</summary>
+  <div class="tablewrap"><table class="soc"><tbody>
+  ${row("Result (90 min)",`${esc(H)} ${b(F.H)} · Draw ${b(F.D)} · ${esc(A)} ${b(F.A)}`)}
+  ${row("Double chance",`${esc(H)} or draw ${b(F.H+F.D)} · ${esc(A)} or draw ${b(F.A+F.D)} · Either wins ${b(F.H+F.A)}`)}
+  ${row("Draw no bet",`${esc(H)} ${b(F.H/((F.H+F.A)||1))} · ${esc(A)} ${b(F.A/((F.H+F.A)||1))}`)}
+  ${row("Total goals",[1.5,2.5,3.5].map(L=>`Over ${L} ${b(F.over(L))}`).join(" · "))}
+  ${row("Both teams score",`Yes ${b(F.btts)} · No ${b(1-F.btts)}`)}
+  ${row(esc(H)+" goals",`Over 0.5 ${b(F.tOver("h",0.5))} · Over 1.5 ${b(F.tOver("h",1.5))}`)}
+  ${row(esc(A)+" goals",`Over 0.5 ${b(F.tOver("a",0.5))} · Over 1.5 ${b(F.tOver("a",1.5))}`)}
+  ${row("Likely scores",F.cs.map(([h,a,p])=>`${esc(H)} ${h}–${a} ${b(p)}`).join(" · "))}
+  ${fh?row("1st half result",`${esc(H)} ${b(fh.H)} · Draw ${b(fh.D)} · ${esc(A)} ${b(fh.A)}`)+row("1st half goals",`Over 0.5 ${b(fh.over(0.5))} · Over 1.5 ${b(fh.over(1.5))}`):(P.live?row("1st half","Finished"):"")}
+  </tbody></table></div>
+  <div class="row chk ou"><span class="lab tl">Check a goals line</span><input type="number" inputmode="decimal" step="0.5" class="socIn" data-k="${esc(key+"t")}" data-g="${esc(g.id)}" value="${esc(v)}" placeholder="e.g. 2.5" aria-label="Total goals line"><span class="note socOut">${v!==""&&isFinite(+v)?socOu(F,+v):""}</span></div>
+  <p class="note">A draw loses a regular soccer moneyline bet. Markets cover 90 minutes plus stoppage time.${P.live?" Live numbers use the current score and minute.":""}</p></details>`}
+document.addEventListener("input",e=>{const t=e.target;if(!t.classList||!t.classList.contains("socIn"))return;lineMem[t.dataset.k]=t.value;
+  const g=((D.soc.live&&D.soc.live.games)||[]).find(x=>x.id===t.dataset.g),P=g&&socModel({...g,lg:"soc"}),L=parseFloat(t.value),o=t.parentNode.querySelector(".socOut");o.innerHTML=P&&isFinite(L)?socOu(P.full,L):""});
+/* --- soccer player props --- */
+const SOCP={};
+async function loadSocLeaders(){await Promise.all(SOCCER.map(async([k])=>{if(SOCP[k])return;const c=cache.get("socp-"+k);if(c&&Date.now()-c.at<6*3600e3){SOCP[k]=c.v;return}
+  try{const j=await getJSON(`${ESPN}/site/v2/sports/soccer/${k}/statistics`);const out={};
+    const cat=(j.stats||[]).find(s=>/goal/i.test(s.name||""))||{leaders:[]};
+    (cat.leaders||[]).forEach(L=>{const a=L.athlete||{},id=String(a.id||"");if(!id)return;const st={};(a.statistics||[]).forEach(x=>{if(x&&x.name)st[x.name]=+x.value||0});
+      const dv=String(L.displayValue||""),mm=dv.match(/Matches:\s*(\d+)/i),gg=dv.match(/Goals:\s*(\d+)/i);
+      const tid=String((a.team&&a.team.id)||(a.teams&&a.teams[0]&&a.teams[0].id)||"");
+      out[id]={name:a.displayName||a.shortName||"",team:tid,apps:st.appearances??(mm?+mm[1]:0),goals:st.totalGoals??(gg?+gg[1]:(+L.value||0)),ast:st.goalAssists??0}});
+    SOCP[k]=out;cache.set("socp-"+k,{at:Date.now(),v:out})}catch(e){SOCP[k]=SOCP[k]||{}}}))}
+function socPlayers(tid){const best={};Object.values(SOCP).forEach(m=>Object.entries(m||{}).forEach(([id,p])=>{if(p.team===String(tid)&&p.apps&&(!best[id]||p.apps>best[id].apps))best[id]={id,...p}}));return Object.values(best)}
+function socPlayerOdds(g,tid,p,P){const T=D.soc.teams&&D.soc.teams.teams,t=T&&T[tid];const gpg=t&&t.gp?Math.max(0.6,t.gf/t.gp):1.3;
+  const lt=String(tid)===String(g.home)?P.lh:P.la,f=lt/gpg;
+  const lp=(p.goals+0.3)/(p.apps+2)*f,la=(p.ast+0.25)/(p.apps+2)*f,tot=P.lh+P.la;
+  return{lp,any:1-Math.exp(-lp),two:1-Math.exp(-lp)*(1+lp),first:lp/tot*(1-Math.exp(-tot)),ast:1-Math.exp(-la),ga:1-Math.exp(-(lp+la)),
+    next:lp/tot*(1-Math.exp(-tot*P.r)),rest:1-Math.exp(-lp*P.r)}}
+async function renderSocProps(){
+  $("propIntro-soc").textContent="Goalscorer chances use each player's goals and assists per match this season (from ESPN's league scoring leaders), scaled by how many goals his team is expected to score in this match. They assume he plays most of the game, so check the lineups about an hour before kickoff. No DraftKings odds are used.";
+  const all=lgSlate("soc"),gs=DF==="live"?all.filter(isLive):dateFilter(all).filter(g=>upcoming(g)||isLive(g));
+  if(!gs.length){$("propList-soc").innerHTML=`<div class="empty">${DF==="live"?"No soccer matches are live right now.":"No soccer matches for this filter."}</div>`;$("tdBoard-soc").innerHTML="";return}
+  $("propMsg").textContent="Loading goalscorer stats…";await loadSocLeaders();$("propMsg").textContent="";
+  const board=[],b=x=>pct(x,0);
+  $("propList-soc").innerHTML=gs.slice(0,40).map((g,gi)=>{const P=socModel(g);if(!P)return"";const live=isLive(g),A=short(g,g.away),H=short(g,g.home),sc=g.score||{};
+    const teams=[g.away,g.home].map(tid=>{const ps=socPlayers(tid).map(p=>({...p,o:socPlayerOdds(g,tid,p,P)})).sort((x,y)=>y.o.lp-x.o.lp).slice(0,4);
+      if(!live)ps.forEach(p=>board.push({p,g,tid}));
+      const rows=ps.map(p=>live?`<tr><td><b>${esc(p.name)}</b><div class="note">${p.goals} G in ${p.apps}</div></td><td class="n">${b(p.o.next)}</td><td class="n">${b(p.o.rest)}</td></tr>`
+        :`<tr><td><b>${esc(p.name)}</b><div class="note">${p.goals} G, ${p.ast} A in ${p.apps}</div></td><td class="n">${b(p.o.any)}</td><td class="n">${b(p.o.first)}</td><td class="n">${b(p.o.two)}</td><td class="n">${b(p.o.ast)}</td></tr>`).join("");
+      return`<div class="pteam"><h3>${esc(tname(g,tid))}</h3>${rows?`<div class="tablewrap"><table><thead><tr><th>Player</th>${live?"<th>Next goal</th><th>Scores from now</th>":"<th>Anytime</th><th>First</th><th>2+ goals</th><th>Assist</th>"}</tr></thead><tbody>${rows}</tbody></table></div>`:`<p class="note">No scorer data for this team yet.</p>`}</div>`}).join("");
+    return`<details class="gm"${gi<2?" open":""}><summary class="meta"><span>${live?`<span class="live">Live</span> ${esc(g.detail||"")} · ${esc(A)} ${sc[g.away]??0}–${sc[g.home]??0} ${esc(H)}`:esc(whenTxt(g))}</span><span>${esc(g.title||"")}</span></summary>
+      <div class="note"><b>${esc(A)} @ ${esc(H)}</b> · expected goals ${P.la.toFixed(1)} – ${P.lh.toFixed(1)}${live?" · live columns ignore goals already scored":""}</div>${teams}
+      <div class="row"><button class="btn sm ghost" data-log="${esc(JSON.stringify({type:"Prop",key:"soc:"+g.id}))}">Log a scorer bet</button></div></details>`}).join("")+(gs.length>40?`<p class="note">Showing the first 40 matches. Pick a day on the Games tab to see the rest.</p>`:"");
+  const seen=new Set();const top=board.filter(x=>{if(seen.has(x.p.id))return false;seen.add(x.p.id);return true}).sort((x,y)=>y.p.o.any-x.p.o.any).slice(0,10);
+  $("tdBoard-soc").innerHTML=top.length?`<ol class="tdl">${top.map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · first ${b(t.p.o.first)}</span></span><span class="pv">${b(t.p.o.any)}</span></li>`).join("")}</ol>`:`<p class="note">No goalscorer data yet.</p>`;
+}
+/* --- color themes --- */
+const SKINS={midnight:{name:"Midnight",note:"Navy with amber, like stadium scoreboard lights. Easiest on the eyes at night, and numbers stand out.",c:["#0B1220","#F5A524","#45D1C9"],bar:"#0B1220"},
+  field:{name:"Field",note:"The original turf green and gold.",c:["#0E1512","#4FB585","#F2C531"],bar:"#1E6B45"},
+  hardwood:{name:"Hardwood",note:"Warm wood tones with basketball orange.",c:["#16110D","#FF7A33","#F2C531"],bar:"#16110D"}};
+function setSkin(k){if(!SKINS[k])k="midnight";document.documentElement.dataset.skin=k;try{localStorage.setItem("ge-skin",k)}catch(e){}
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",SKINS[k].bar);renderSkins()}
+function renderSkins(){const box=$("skinPick");if(!box)return;const cur=document.documentElement.dataset.skin||"midnight";
+  box.innerHTML=Object.entries(SKINS).map(([k,s])=>`<button type="button" class="skin" data-skin="${k}" aria-pressed="${k===cur}"><span class="sw">${s.c.map(c=>`<i style="background:${c}"></i>`).join("")}</span><span><b>${s.name}${k==="midnight"?" (recommended)":""}</b><span class="note">${s.note}</span></span></button>`).join("");
+  box.querySelectorAll(".skin").forEach(b=>b.addEventListener("click",()=>setSkin(b.dataset.skin)))}
+setSkin(document.documentElement.dataset.skin||"midnight");
 $("refreshBtn").addEventListener("click",()=>{$("liveTag").textContent="Refreshing…";refresh(true)});
 initData();
 /* --- player props (NFL) --- */
@@ -743,6 +1010,8 @@ const overP=(pr,L)=>Phi((pr.proj-L)/pr.sd);
 function propGames(){return slate().filter(g=>g.lg==="nfl"&&upcoming(g))}
 async function renderNflProps(){
   setPropText("nfl");
+  renderLiveTd();
+  if(DF==="live"){$("propList-nfl").innerHTML=`<div class="empty">Pregame NFL props are hidden while Live is selected. Pick Today or All on the Games tab to see them.</div>`;$("tdBoard-nfl").innerHTML="";return}
   const gs=dateFilter(lgSlate("nfl").filter(upcoming));
   if(!gs.length){$("propList-nfl").innerHTML=`<div class="empty">${DF!=="all"&&DF!=="live"?"No NFL games on "+dayLabel(DF)+".":"No upcoming NFL games right now."}</div>`;$("tdBoard-nfl").innerHTML="";return}
   const missing=gs.filter(g=>!PROPS[g.id]);
@@ -756,7 +1025,7 @@ async function renderNflProps(){
         return`<div class="prop"><div class="ph"><b>${esc(p.name)}</b> <span class="note">${esc(p.pos)} · ${esc(p.line)}</span></div>
           <div class="pr"><span class="lab">${cfg.label}</span><span class="pv">Proj ${Math.round(pr.proj)}</span></div>
           <div class="chips">${cfg.lines.map(L=>`<span class="chip">${L}+ <b>${pct(overP(pr,L),0)}</b></span>`).join("")}
-          ${pr.anyTD!=null?`<span class="chip td">Anytime TD <b>${pct(pr.anyTD,0)}</b></span>`:""}${pr.twoPass!=null?`<span class="chip td">2+ pass TD <b>${pct(pr.twoPass,0)}</b></span>`:""}</div>
+          ${pr.anyTD!=null?`<span class="chip td">Anytime TD <b>${pct(pr.anyTD,0)}</b></span>`:""}${pr.anyTD!=null?(()=>{const nt=nextTD(g),gp=teamGp(tid);if(!nt||!gp)return"";const f=(String(tid)===String(g.home)?nt.h:nt.a)*tdShare(tid,p.td,p.yds,gp);return`<span class="chip td">First TD <b>${pct(f,0)}</b></span>`})():""}${pr.twoPass!=null?`<span class="chip td">2+ pass TD <b>${pct(pr.twoPass,0)}</b></span>`:""}</div>
           <div class="row chk"><input type="number" inputmode="decimal" step="0.5" placeholder="Your line, e.g. ${cfg.lines[1]-0.5}" id="ln-${esc(g.id)}-${esc(tid)}-${i}" data-proj="${pr.proj.toFixed(2)}" data-sd="${pr.sd.toFixed(2)}" class="lineIn" aria-label="Check a ${cfg.label} line for ${esc(p.name)}"><span class="note lineOut"></span><button type="button" class="btn sm ghost logprop" data-key="${esc("nfl:"+g.id)}" data-name="${esc(p.name)}" data-lab="${esc(cfg.label.toLowerCase())}">Log bet</button></div></div>`}).join("");
       return`<div class="pteam"><h3>${esc(tname(g,tid))}</h3>${rows||`<p class="note">Player stats not available yet.</p>`}</div>`}).join("");
     return`<div class="gm"><div class="meta"><span>${esc(whenTxt(g))}</span><span>${esc(short(g,g.away))} @ ${esc(short(g,g.home))}</span></div>${teams}</div>`}).join("");
@@ -770,10 +1039,10 @@ async function renderNflProps(){
 document.querySelector('nav button[data-tab="props"]').addEventListener("click",()=>renderProps());
 if(!$("p-props").hidden)setTimeout(renderProps,500);
 async function renderProps(){
-  const want=LG==="all"?["nba","nfl"]:LG==="nba"||LG==="nfl"?[LG]:[];
-  $("propsNba").hidden=!want.includes("nba");$("propsNfl").hidden=!want.includes("nfl");$("propsNone").hidden=!!want.length;
-  $("propFilterNote").textContent=`Showing: ${filterText()}. Change this on the Games tab.`+(DF==="live"?" Props are for games that haven't started, so every upcoming day is shown.":"");
-  for(const l of want){try{await (l==="nba"?renderNbaProps():renderNflProps())}catch(e){}}
+  const want=LG==="all"?["nba","nfl","soc"]:["nba","nfl","soc"].includes(LG)?[LG]:[];
+  $("propsNba").hidden=!want.includes("nba");$("propsNfl").hidden=!want.includes("nfl");$("propsSoc").hidden=!want.includes("soc");$("propsNone").hidden=!!want.length;
+  $("propFilterNote").textContent=`Showing: ${filterText()}. Change this on the Games tab.`+(DF==="live"?" Live shows the NFL touchdown tracker and soccer next-goal chances. Pregame props show when you pick a day or All.":"");
+  for(const l of want){try{await (l==="nba"?renderNbaProps():l==="soc"?renderSocProps():renderNflProps())}catch(e){}}
 }
 /* --- NBA player props --- */
 function dayLabel(k){const t=localDate(Date.now()),m=localDate(Date.now()+864e5);return k===t?"Today":k===m?"Tomorrow":new Date(k+"T12:00:00").toLocaleDateString([], {weekday:"short",month:"short",day:"numeric"})}
@@ -842,6 +1111,7 @@ const injBad=st=>/out|suspend/i.test(st||""),injQ=st=>/day|question|doubt|probab
 let nbaLoading=false;
 async function renderNbaProps(){
   setPropText("nba");
+  if(DF==="live"){$("propList-nba").innerHTML=`<div class="empty">NBA props are for games that haven't started. Pick Today or All on the Games tab.</div>`;$("tdBoard-nba").innerHTML="";return}
   const gs=dateFilter(lgSlate("nba").filter(upcoming));
   if(!gs.length){$("propList-nba").innerHTML=`<div class="empty">${DF!=="all"&&DF!=="live"?"No NBA games on "+dayLabel(DF)+".":"No upcoming NBA games right now. Check back on game day."}</div>`;$("tdBoard-nba").innerHTML="";return}
   if(nbaLoading)return;
@@ -984,7 +1254,7 @@ function autoSettle(){if(!store)return;bets.filter(b=>b.result==="pending"&&b.ga
   const sc=g.score,tot=(sc[g.home]||0)+(sc[g.away]||0);let d=null;
   if(b.kind==="ml"||b.kind==="spread"){const other=b.side===g.home?g.away:g.home;d=(sc[b.side]||0)-(sc[other]||0)+(b.kind==="spread"?b.line:0)}
   if(b.kind==="total")d=b.ou==="over"?tot-b.line:b.line-tot;
-  if(d!=null)store.update(b.id,{result:d>0?"won":d<0?"lost":"push",auto:true})})}
+  if(d!=null)store.update(b.id,{result:d>0?"won":d<0?"lost":(b.lg==="soc"&&b.kind==="ml"?"lost":"push"),auto:true})})}
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-log]");if(!t)return;
   try{startLog(JSON.parse(t.dataset.log))}catch(err){}});
 fillGameSelect();setTimeout(autoSettle,800);
