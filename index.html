@@ -974,7 +974,10 @@ const SKINS={midnight:{name:"Midnight",note:"Navy with amber, like stadium score
   field:{name:"Field",note:"The original turf green and gold.",c:["#0E1512","#4FB585","#F2C531"],bar:"#1E6B45"},
   hardwood:{name:"Hardwood",note:"Warm wood tones with basketball orange.",c:["#16110D","#FF7A33","#F2C531"],bar:"#16110D"}};
 function setSkin(k){if(!SKINS[k])k="midnight";document.documentElement.dataset.skin=k;try{localStorage.setItem("ge-skin",k)}catch(e){}
-  const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",SKINS[k].bar);renderSkins()}
+  syncBar();renderSkins()}
+function syncBar(){const m=document.querySelector('meta[name="theme-color"]');if(!m)return;let c="";try{c=getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()}catch(e){}
+  m.setAttribute("content",c||SKINS[document.documentElement.dataset.skin||"midnight"].bar)}
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",syncBar)}catch(e){}
 function renderSkins(){const box=$("skinPick");if(!box)return;const cur=document.documentElement.dataset.skin||"midnight";
   box.innerHTML=Object.entries(SKINS).map(([k,s])=>`<button type="button" class="skin" data-skin="${k}" aria-pressed="${k===cur}"><span class="sw">${s.c.map(c=>`<i style="background:${c}"></i>`).join("")}</span><span><b>${s.name}${k==="midnight"?" (recommended)":""}</b><span class="note">${s.note}</span></span></button>`).join("");
   box.querySelectorAll(".skin").forEach(b=>b.addEventListener("click",()=>setSkin(b.dataset.skin)))}
