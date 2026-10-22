@@ -81,6 +81,13 @@ details.gm>summary::-webkit-details-marker{display:none}
 details.gm:not([open])>summary::after{content:"Tap to open";font-size:.75rem}
 .glines{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:8px}
 .chk select{width:auto;flex:0 1 auto;padding:.35rem .5rem}
+.dfsel{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.dfsel::-webkit-scrollbar{display:none}
+.dfsel button{flex:0 0 auto}
+.dfsel button[aria-pressed="true"]{background:var(--turf);color:var(--bg)}
+.ldot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-right:6px;vertical-align:middle}
+@media (prefers-reduced-motion:no-preference){.ldot{animation:blink 1.6s ease-in-out infinite}}
+@keyframes blink{50%{opacity:.35}}
 .pk{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .pk button{font:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:8px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:6px}
 .pk button[aria-pressed="true"],.qs[aria-pressed="true"],.qo[aria-pressed="true"]{border-color:var(--turf);background:var(--turf-soft);color:var(--turf);font-weight:600}
@@ -163,6 +170,7 @@ details p{margin:.5rem 0 0;max-width:62ch}
     <div class="row" style="justify-content:space-between"><h2>This week's games</h2><span class="row" style="gap:6px"><span class="tag" id="liveTag">Loading…</span><button class="btn sm ghost" id="refreshBtn">Refresh</button></span></div>
     <div class="row lgsel" role="group" aria-label="League"><button class="btn sm ghost" data-lg="nfl">NFL</button><button class="btn sm ghost" data-lg="cfb">College</button><button class="btn sm ghost" data-lg="nba">NBA</button><button class="btn sm ghost" data-lg="all">All</button></div>
     <p class="note">Win chances come from each team's season results plus home field. They don't use DraftKings' odds. Injuries aren't included for football, so tap <b>Dig in</b> to add them. NBA picks include back-to-back rest. While the app is open, scores and chances refresh every minute.</p>
+    <div class="row dfsel" id="dayFilter" role="group" aria-label="Filter by date"></div>
     <p class="note" id="statsAsOf"></p>
   </div>
   <div id="gameList" style="display:flex;flex-direction:column;gap:10px"><div class="empty">Loading this week's games…</div></div>
@@ -190,6 +198,8 @@ details p{margin:.5rem 0 0;max-width:62ch}
   <div class="card">
     <h2>Player props</h2>
     <div class="row propsel" role="group" aria-label="Sport"><button class="btn sm ghost" data-pl="nba">NBA</button><button class="btn sm ghost" data-pl="nfl">NFL</button></div>
+    <div class="row dfsel" id="propDay" role="group" aria-label="Filter by date"></div>
+    <p class="note" id="propDfNote"></p>
     <p class="note" id="propIntro"></p>
     <p class="note" id="propMsg"></p>
   </div>
@@ -507,7 +517,7 @@ if(TABS.includes(location.hash.slice(1)))show(location.hash.slice(1));
 
 /* --- games & parlays --- */
 const LEAGUES={nfl:{label:"NFL",feed:"nfl",sd:13.5,hfa:1.5},cfb:{label:"College",feed:"ncaafb",sd:16,hfa:2.5},nba:{label:"NBA",feed:"nba",sd:12.5,hfa:2.5}};
-const D={nfl:{},cfb:{},nba:{}};let picks={},LG="all";
+const D={nfl:{},cfb:{},nba:{}};let DF="all";try{DF=localStorage.getItem("ge-df")||"all"}catch(e){}let picks={},LG="all";
 try{LG=localStorage.getItem("ge-lg")||"all"}catch(e){}
 const norm=c=>c==="JAX"?"JAC":c;
 const DONE=["closed","complete","completed","cancelled","canceled","postponed"];
@@ -549,9 +559,18 @@ function renderGames(){
   $("statsAsOf").textContent=notes.join(" ")+(notes.length?" Source: ESPN.":"");
   const gs=slate();
   const loaded=Object.values(D).some(s=>s.live);
-  if(!gs.length){$("gameList").innerHTML=`<div class="empty">${loaded?"No games in the next week.":"Loading this week's games…"}</div>`;renderParlays([]);return}
+  if(!gs.length){$("dayFilter").innerHTML="";$("gameList").innerHTML=`<div class="empty">${loaded?"No games in the next week.":"Loading this week's games…"}</div>`;renderParlays([]);return}
+  const dayKey=g=>localDate(g.start_time),todayK=localDate(Date.now()),tomK=localDate(Date.now()+864e5);
+  const liveN=gs.filter(isLive).length,days=[...new Set(gs.map(dayKey))];
+  let df=DF;if(df!=="all"&&df!=="live"&&!days.includes(df))df="all";
+  const dLab=k=>k===todayK?"Today":k===tomK?"Tomorrow":new Date(k+"T12:00:00").toLocaleDateString([], {weekday:"short",month:"short",day:"numeric"});
+  $("dayFilter").innerHTML=[["all",`All (${gs.length})`],["live",`<span class="ldot" aria-hidden="true"></span>Live (${liveN})`],...days.map(k=>[k,`${dLab(k)} (${gs.filter(g=>dayKey(g)===k).length})`])]
+    .map(([k,t])=>`<button class="btn sm ghost" data-df="${k}" aria-pressed="${df===k}">${t}</button>`).join("");
+  $("dayFilter").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{DF=b.dataset.df;try{localStorage.setItem("ge-df",DF)}catch(e){}renderGames()}));
+  const shown=df==="all"?gs:df==="live"?gs.filter(isLive):gs.filter(g=>dayKey(g)===df);
+  if(!shown.length){$("gameList").innerHTML=`<div class="empty">${df==="live"?"No games are live right now. Tap Today to see what's coming up.":"No games on this day."}</div>`;renderParlays(gs);return}
   let lastDay="";
-  $("gameList").innerHTML=gs.map(g=>{
+  $("gameList").innerHTML=shown.map(g=>{
     const fin=DONE.includes(g.status),md=fin?null:model(g),sc=g.score||{},live=isLive(g);
     const day=new Date(g.start_time).toLocaleDateString([], {weekday:"long",month:"short",day:"numeric"});
     const head=day!==lastDay?`<h3 style="margin-top:6px">${esc(day)}</h3>`:"";lastDay=day;
@@ -563,7 +582,7 @@ function renderGames(){
       ${g.lg==="nba"&&!fin&&!live?nbaLineHtml(g):""}
       <div class="row" style="justify-content:space-between"><span class="note">${md?(live?"Live win chance":`Model line: ${esc(short(g,md.m>0?g.home:g.away))} ${sp?"-"+sp:"pick'em"}`):(fin?"Final score":"No stats for one of these teams yet")}</span>
       <span class="row" style="gap:6px">${g.lg==="nba"?"":`<button class="btn sm ghost dig" data-id="${esc(g.id)}">Dig in</button>`}<button class="btn sm ghost" data-log="${esc(JSON.stringify({key:g.lg+":"+g.id}))}">Log bet</button></span></div></div>`}).join("");
-  document.querySelectorAll(".dig").forEach(b=>b.addEventListener("click",()=>digIn(gs.find(g=>g.id===b.dataset.id))));
+  document.querySelectorAll(".dig").forEach(b=>b.addEventListener("click",()=>digIn(shown.find(g=>g.id===b.dataset.id))));
   renderParlays(gs);
 }
 function digIn(g){
@@ -720,7 +739,7 @@ async function renderProps(){
   renderPropSel();
   if(PL==="nba")return renderNbaProps();
   setPropText("nfl");
-  const gs=lgSlate("nfl").filter(upcoming);
+  const gs=propDayFilter(lgSlate("nfl").filter(upcoming),"NFL");
   if(!gs.length){$("propList").innerHTML=`<div class="empty">No upcoming NFL games right now.</div>`;$("tdBoard").innerHTML="";return}
   const missing=gs.filter(g=>!PROPS[g.id]);
   if(missing.length&&!propsLoading){propsLoading=true;$("propMsg").textContent="Loading player stats…";
@@ -747,6 +766,15 @@ async function renderProps(){
 document.querySelector('nav button[data-tab="props"]').addEventListener("click",()=>renderProps());
 if(!$("p-props").hidden)setTimeout(renderProps,500);
 /* --- NBA player props --- */
+function dayLabel(k){const t=localDate(Date.now()),m=localDate(Date.now()+864e5);return k===t?"Today":k===m?"Tomorrow":new Date(k+"T12:00:00").toLocaleDateString([], {weekday:"short",month:"short",day:"numeric"})}
+function propDayFilter(gs,lgName){const dk=g=>localDate(g.start_time),days=[...new Set(gs.map(dk))];let df=DF,note="";
+  if(df==="live"){df="all";note="Props are for games that haven't started, so every upcoming day is shown."}
+  else if(df!=="all"&&!days.includes(df)){note=`No ${lgName} games on ${dayLabel(df)}, so every upcoming day is shown.`;df="all"}
+  $("propDay").innerHTML=gs.length?[["all",`All (${gs.length})`],...days.map(k=>[k,`${dayLabel(k)} (${gs.filter(g=>dk(g)===k).length})`])].map(([k,t])=>`<button class="btn sm ghost" data-df="${k}" aria-pressed="${df===k}">${t}</button>`).join(""):"";
+  $("propDay").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{DF=b.dataset.df;try{localStorage.setItem("ge-df",DF)}catch(e){}renderProps()}));
+  $("propDfNote").textContent=note;
+  return df==="all"?gs:gs.filter(g=>dk(g)===df)}
+
 let PL=null;try{PL=localStorage.getItem("ge-pl")}catch(e){}
 let PLset=!!PL;
 function lgSlate(lg){const k=LG;LG=lg;const s=slate();LG=k;return s}
@@ -804,7 +832,7 @@ const injBad=st=>/out|suspend/i.test(st||""),injQ=st=>/day|question|doubt|probab
 let nbaLoading=false;
 async function renderNbaProps(){
   setPropText("nba");
-  const gs=lgSlate("nba").filter(upcoming);
+  const gs=propDayFilter(lgSlate("nba").filter(upcoming),"NBA");
   if(!gs.length){$("propList").innerHTML=`<div class="empty">No upcoming NBA games right now. Check back on game day.</div>`;$("tdBoard").innerHTML="";return}
   if(nbaLoading)return;
   nbaLoading=true;$("propMsg").textContent="Loading NBA player stats…";
