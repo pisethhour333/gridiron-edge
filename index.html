@@ -88,6 +88,7 @@ details.gm:not([open])>summary::after{content:"Tap to open";font-size:.75rem}
 .ldot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-right:6px;vertical-align:middle}
 @media (prefers-reduced-motion:no-preference){.ldot{animation:blink 1.6s ease-in-out infinite}}
 @keyframes blink{50%{opacity:.35}}
+.fnote{margin:0;font-size:.85rem;font-weight:600;color:var(--turf)}
 .pk{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .pk button{font:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:8px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:6px}
 .pk button[aria-pressed="true"],.qs[aria-pressed="true"],.qo[aria-pressed="true"]{border-color:var(--turf);background:var(--turf-soft);color:var(--turf);font-weight:600}
@@ -180,7 +181,7 @@ details p{margin:.5rem 0 0;max-width:62ch}
 <section class="panel" id="p-parlay" hidden>
   <div class="card">
     <h2>Best parlays by win chance</h2>
-    <div class="row lgsel" role="group" aria-label="League"><button class="btn sm ghost" data-lg="nfl">NFL</button><button class="btn sm ghost" data-lg="cfb">College</button><button class="btn sm ghost" data-lg="nba">NBA</button><button class="btn sm ghost" data-lg="all">All</button></div>
+    <p class="fnote" id="parlayFilterNote"></p>
     <p class="note">Each parlay takes the model's biggest favorites from games that haven't started, one team per game. Every added leg lowers the chance of winning, so the 2-team parlay always has the best odds of hitting.</p>
     <div id="bestParlays" style="display:flex;flex-direction:column;gap:12px"></div>
   </div>
@@ -197,18 +198,18 @@ details p{margin:.5rem 0 0;max-width:62ch}
 <section class="panel" id="p-props" hidden>
   <div class="card">
     <h2>Player props</h2>
-    <div class="row propsel" role="group" aria-label="Sport"><button class="btn sm ghost" data-pl="nba">NBA</button><button class="btn sm ghost" data-pl="nfl">NFL</button></div>
-    <div class="row dfsel" id="propDay" role="group" aria-label="Filter by date"></div>
-    <p class="note" id="propDfNote"></p>
-    <p class="note" id="propIntro"></p>
+    <p class="fnote" id="propFilterNote"></p>
     <p class="note" id="propMsg"></p>
   </div>
-  <div class="card">
-    <h3 id="boardH">Top picks</h3>
-    <p class="note" id="boardNote"></p>
-    <div id="tdBoard"><p class="note">Loading…</p></div>
+  <div id="propsNba" style="display:flex;flex-direction:column;gap:10px">
+    <div class="card"><h2>NBA props</h2><p class="note" id="propIntro-nba"></p><h3 id="boardH-nba">Top projected scorers</h3><p class="note" id="boardNote-nba"></p><div id="tdBoard-nba"></div></div>
+    <div id="propList-nba" style="display:flex;flex-direction:column;gap:10px"></div>
   </div>
-  <div id="propList" style="display:flex;flex-direction:column;gap:10px"><div class="empty">Loading player stats…</div></div>
+  <div id="propsNfl" style="display:flex;flex-direction:column;gap:10px">
+    <div class="card"><h2>NFL props</h2><p class="note" id="propIntro-nfl"></p><h3 id="boardH-nfl">Most likely touchdown scorers</h3><p class="note" id="boardNote-nfl"></p><div id="tdBoard-nfl"></div></div>
+    <div id="propList-nfl" style="display:flex;flex-direction:column;gap:10px"></div>
+  </div>
+  <div class="empty" id="propsNone" hidden>Player props cover the NFL and NBA. Choose NFL, NBA or All on the Games tab.</div>
 </section>
 
 <!-- ANALYZE -->
@@ -562,13 +563,14 @@ function renderGames(){
   if(!gs.length){$("dayFilter").innerHTML="";$("gameList").innerHTML=`<div class="empty">${loaded?"No games in the next week.":"Loading this week's games…"}</div>`;renderParlays([]);return}
   const dayKey=g=>localDate(g.start_time),todayK=localDate(Date.now()),tomK=localDate(Date.now()+864e5);
   const liveN=gs.filter(isLive).length,days=[...new Set(gs.map(dayKey))];
-  let df=DF;if(df!=="all"&&df!=="live"&&!days.includes(df))df="all";
+  if(DF!=="all"&&DF!=="live"&&DF<todayK){DF="all";try{localStorage.setItem("ge-df",DF)}catch(e){}}
+  const df=DF;if(df!=="all"&&df!=="live"&&!days.includes(df)){days.push(df);days.sort()}
   const dLab=k=>k===todayK?"Today":k===tomK?"Tomorrow":new Date(k+"T12:00:00").toLocaleDateString([], {weekday:"short",month:"short",day:"numeric"});
   $("dayFilter").innerHTML=[["all",`All (${gs.length})`],["live",`<span class="ldot" aria-hidden="true"></span>Live (${liveN})`],...days.map(k=>[k,`${dLab(k)} (${gs.filter(g=>dayKey(g)===k).length})`])]
     .map(([k,t])=>`<button class="btn sm ghost" data-df="${k}" aria-pressed="${df===k}">${t}</button>`).join("");
   $("dayFilter").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{DF=b.dataset.df;try{localStorage.setItem("ge-df",DF)}catch(e){}renderGames()}));
   const shown=df==="all"?gs:df==="live"?gs.filter(isLive):gs.filter(g=>dayKey(g)===df);
-  if(!shown.length){$("gameList").innerHTML=`<div class="empty">${df==="live"?"No games are live right now. Tap Today to see what's coming up.":"No games on this day."}</div>`;renderParlays(gs);return}
+  if(!shown.length){$("gameList").innerHTML=`<div class="empty">${df==="live"?"No games are live right now. Tap Today to see what's coming up.":`No ${LGN[LG]==="All sports"?"":LGN[LG]+" "}games on ${dLab(df)}. Pick another day above.`}</div>`;renderParlays(gs);return}
   let lastDay="";
   $("gameList").innerHTML=shown.map(g=>{
     const fin=DONE.includes(g.status),md=fin?null:model(g),sc=g.score||{},live=isLive(g);
@@ -595,7 +597,12 @@ function digIn(g){
 const upcoming=g=>!isLive(g)&&Date.parse(g.start_time)>Date.now();
 function legs(gs){return gs.filter(upcoming).map(g=>{const md=model(g);if(!md)return null;const h=md.pH>=.5;return{g,team:h?g.home:g.away,p:h?md.pH:md.pA}}).filter(Boolean)}
 function fairOdds(p){const a=toAm(1/p);return a==null?"—":sgn(a)}
+const LGN={all:"All sports",nfl:"NFL",cfb:"College football",nba:"NBA"};
+function filterText(){return `${LGN[LG]||"All sports"} · ${DF==="all"?"All days":DF==="live"?"Live":dayLabel(DF)}`}
+function dateFilter(gs){return DF==="all"||DF==="live"?gs:gs.filter(g=>localDate(g.start_time)===DF)}
 function renderParlays(gs){
+  gs=dateFilter(slate());
+  $("parlayFilterNote").textContent=`Showing: ${filterText()}. Change this on the Games tab.`+(DF==="live"?" Parlays use games that haven't started, so every upcoming day is included.":"");
   const L=legs(gs).sort((a,b)=>b.p-a.p);const out=[];
   [2,3,4].forEach(n=>{if(L.length<n)return;const set=L.slice(0,n);const p=set.reduce((s,l)=>s*l.p,1);
     out.push(`<div class="pl"><div class="hd"><h3>${n}-team parlay</h3><span class="chance">${pct(p,0)} to hit</span></div>
@@ -734,18 +741,15 @@ function projFor(g,tid,p){
 }
 const overP=(pr,L)=>Phi((pr.proj-L)/pr.sd);
 function propGames(){return slate().filter(g=>g.lg==="nfl"&&upcoming(g))}
-async function renderProps(){
-  if(!PLset)PL=lgSlate("nba").some(upcoming)?"nba":"nfl";
-  renderPropSel();
-  if(PL==="nba")return renderNbaProps();
+async function renderNflProps(){
   setPropText("nfl");
-  const gs=propDayFilter(lgSlate("nfl").filter(upcoming),"NFL");
-  if(!gs.length){$("propList").innerHTML=`<div class="empty">No upcoming NFL games right now.</div>`;$("tdBoard").innerHTML="";return}
+  const gs=dateFilter(lgSlate("nfl").filter(upcoming));
+  if(!gs.length){$("propList-nfl").innerHTML=`<div class="empty">${DF!=="all"&&DF!=="live"?"No NFL games on "+dayLabel(DF)+".":"No upcoming NFL games right now."}</div>`;$("tdBoard-nfl").innerHTML="";return}
   const missing=gs.filter(g=>!PROPS[g.id]);
   if(missing.length&&!propsLoading){propsLoading=true;$("propMsg").textContent="Loading player stats…";
     await Promise.all(missing.map(g=>loadProps(g).catch(()=>{PROPS[g.id]={}})));propsLoading=false;$("propMsg").textContent="";}
   const tds=[];
-  $("propList").innerHTML=gs.map(g=>{const pg=PROPS[g.id]||{};
+  $("propList-nfl").innerHTML=gs.map(g=>{const pg=PROPS[g.id]||{};
     const teams=[g.away,g.home].map(tid=>{const ps=(pg[tid]||[]);
       const rows=ps.map((p,i)=>{const pr=projFor(g,tid,p);if(!pr)return"";const cfg=PROPCFG[p.kind];
         if(pr.anyTD!=null&&p.td>0)tds.push({p,g,tid,ch:pr.anyTD});
@@ -761,10 +765,16 @@ async function renderProps(){
   document.querySelectorAll(".logprop").forEach(b=>b.addEventListener("click",()=>{const L=b.parentNode.querySelector(".lineIn").value;const g=findGame(b.dataset.key);
     startLog({type:"Prop",key:b.dataset.key,pick:`${b.dataset.name} ${L?"Over "+L+" ":""}${b.dataset.lab}`})}));
   tds.sort((a,b)=>b.ch-a.ch);
-  $("tdBoard").innerHTML=tds.length?`<ol class="tdl">${tds.slice(0,10).map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(t.p.pos)}, ${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))}</span></span><span class="pv">${pct(t.ch,0)}</span></li>`).join("")}</ol>`:`<p class="note">No touchdown data yet.</p>`;
+  $("tdBoard-nfl").innerHTML=tds.length?`<ol class="tdl">${tds.slice(0,10).map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(t.p.pos)}, ${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))}</span></span><span class="pv">${pct(t.ch,0)}</span></li>`).join("")}</ol>`:`<p class="note">No touchdown data yet.</p>`;
 }
 document.querySelector('nav button[data-tab="props"]').addEventListener("click",()=>renderProps());
 if(!$("p-props").hidden)setTimeout(renderProps,500);
+async function renderProps(){
+  const want=LG==="all"?["nba","nfl"]:LG==="nba"||LG==="nfl"?[LG]:[];
+  $("propsNba").hidden=!want.includes("nba");$("propsNfl").hidden=!want.includes("nfl");$("propsNone").hidden=!!want.length;
+  $("propFilterNote").textContent=`Showing: ${filterText()}. Change this on the Games tab.`+(DF==="live"?" Props are for games that haven't started, so every upcoming day is shown.":"");
+  for(const l of want){try{await (l==="nba"?renderNbaProps():renderNflProps())}catch(e){}}
+}
 /* --- NBA player props --- */
 function dayLabel(k){const t=localDate(Date.now()),m=localDate(Date.now()+864e5);return k===t?"Today":k===m?"Tomorrow":new Date(k+"T12:00:00").toLocaleDateString([], {weekday:"short",month:"short",day:"numeric"})}
 function propDayFilter(gs,lgName){const dk=g=>localDate(g.start_time),days=[...new Set(gs.map(dk))];let df=DF,note="";
@@ -783,7 +793,7 @@ document.querySelectorAll(".propsel button").forEach(b=>b.addEventListener("clic
 const PTXT={
   nfl:{intro:"Projections use each team's top passer, rusher and receiver from ESPN season stats, scaled by how many points the opponent allows. Type any line to see the chance of going over or under. These don't use DraftKings' odds, and they don't know about injuries, so check that a player is active before you bet.",bh:"Most likely touchdown scorers",bn:"Anytime TD chance from season TDs per game. Running backs count rushing TDs only, so their real chance is a bit higher."},
   nba:{intro:"Each team's top players with projected points, rebounds, assists, 3-pointers and PRA. Projections blend this season with last season (it's early), adjust for the opponent's defense and back-to-backs, and skip players listed out. Percentages are milestone chances, like DraftKings' “25+ points”. Tap a player to see them, or pick a stat and type any line. No DraftKings odds are used. Lineups change right up to tip-off, so check injury news before you bet.",bh:"Top projected scorers",bn:"Projected points tonight, with the chance of 25 or more."}};
-function setPropText(lg){$("propIntro").textContent=PTXT[lg].intro;$("boardH").textContent=PTXT[lg].bh;$("boardNote").textContent=PTXT[lg].bn}
+function setPropText(lg){$("propIntro-"+lg).textContent=PTXT[lg].intro;$("boardH-"+lg).textContent=PTXT[lg].bh;$("boardNote-"+lg).textContent=PTXT[lg].bn}
 const NBAP={last:null,cur:null,roster:{},inj:{}};
 const BYATH=y=>`https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/statistics/byathlete?region=us&lang=en&contentorigin=espn&isqualified=false&page=1&limit=300&sort=offensive.avgPoints:desc&season=${y}&seasontype=2`;
 function parseByAthlete(j){const cats={};(j.categories||[]).forEach(c=>cats[c.name]=c.names||[]);const out={};
@@ -832,15 +842,15 @@ const injBad=st=>/out|suspend/i.test(st||""),injQ=st=>/day|question|doubt|probab
 let nbaLoading=false;
 async function renderNbaProps(){
   setPropText("nba");
-  const gs=propDayFilter(lgSlate("nba").filter(upcoming),"NBA");
-  if(!gs.length){$("propList").innerHTML=`<div class="empty">No upcoming NBA games right now. Check back on game day.</div>`;$("tdBoard").innerHTML="";return}
+  const gs=dateFilter(lgSlate("nba").filter(upcoming));
+  if(!gs.length){$("propList-nba").innerHTML=`<div class="empty">${DF!=="all"&&DF!=="live"?"No NBA games on "+dayLabel(DF)+".":"No upcoming NBA games right now. Check back on game day."}</div>`;$("tdBoard-nba").innerHTML="";return}
   if(nbaLoading)return;
   nbaLoading=true;$("propMsg").textContent="Loading NBA player stats…";
   try{await loadNbaPlayers();await Promise.all(gs.flatMap(g=>[loadRoster(g.home),loadRoster(g.away),loadInj(g)]))}
-  catch(e){nbaLoading=false;$("propMsg").textContent="Couldn't load NBA player stats. Check your connection, then tap NBA above to try again.";$("propList").innerHTML="";$("tdBoard").innerHTML="";return}
+  catch(e){nbaLoading=false;$("propMsg").textContent="Couldn't load NBA player stats. Check your connection, then open this tab again to retry.";$("propList-nba").innerHTML="";$("tdBoard-nba").innerHTML="";return}
   nbaLoading=false;$("propMsg").textContent="";
   const board=[];
-  $("propList").innerHTML=gs.map((g,gi)=>{const inj=NBAP.inj[g.id]||{};const P=nbaProj(g);
+  $("propList-nba").innerHTML=gs.map((g,gi)=>{const inj=NBAP.inj[g.id]||{};const P=nbaProj(g);
     const teams=[g.away,g.home].map(tid=>{const all=teamPlayers(tid);const out=[],q=[];const act=[];
       all.forEach(p=>{const st=(inj[p.id]||{}).status;if(injBad(st))out.push(p.name);else{if(injQ(st))q.push(p.name);act.push({...p,st})}});
       const top=act.slice(0,3);
@@ -859,15 +869,15 @@ async function renderNbaProps(){
       <div class="row chk"><input type="number" inputmode="decimal" step="0.5" class="sprIn" data-m="${P.m.toFixed(2)}" placeholder="${esc(short(g,g.home))} spread, e.g. -4.5" aria-label="Spread for ${esc(short(g,g.home))}"><span class="note sout"></span></div></div>`:"";
     return`<details class="gm" ${gi<2?"open":""}><summary class="meta"><span>${esc(whenTxt(g))}</span><span>${esc(short(g,g.away))} @ ${esc(short(g,g.home))}</span></summary>${lines}${teams}
       <div class="row"><button class="btn sm ghost" data-log="${esc(JSON.stringify({key:"nba:"+g.id}))}">Log a game bet</button></div></details>`}).join("");
-  $("propList").querySelectorAll(".prop").forEach(el=>{const sel=el.querySelector(".nsel"),inp=el.querySelector(".nline"),o=el.querySelector(".nout");
+  $("propList-nba").querySelectorAll(".prop").forEach(el=>{const sel=el.querySelector(".nsel"),inp=el.querySelector(".nline"),o=el.querySelector(".nout");
     const upd=()=>{const L=parseFloat(inp.value);if(!isFinite(L)){o.textContent="";return}const op=sel.selectedOptions[0];const s={proj:+op.dataset.proj,sd:+op.dataset.sd,pois:!!op.dataset.pois};const p=overLine(s,L);o.innerHTML=`Over <b>${pct(p,0)}</b> · Under <b>${pct(1-p,0)}</b>`};
     sel.addEventListener("change",upd);inp.addEventListener("input",upd);
     el.querySelector(".lognba").addEventListener("click",()=>{const L=inp.value;startLog({type:"Prop",key:el.querySelector(".lognba").dataset.key,pick:`${el.querySelector(".lognba").dataset.name} ${L?"Over "+L+" ":""}${STL[sel.value].toLowerCase()}`})})});
-  $("propList").querySelectorAll(".totIn").forEach(inp=>inp.addEventListener("input",()=>{const L=parseFloat(inp.value),o=inp.parentNode.querySelector(".tout");if(!isFinite(L)){o.textContent="";return}const p=Phi((+inp.dataset.tot-L)/NBA_TOT_SD);o.innerHTML=`Over <b>${pct(p,0)}</b> · Under <b>${pct(1-p,0)}</b>`}));
-  $("propList").querySelectorAll(".sprIn").forEach(inp=>inp.addEventListener("input",()=>{const L=parseFloat(inp.value),o=inp.parentNode.querySelector(".sout");if(!isFinite(L)){o.textContent="";return}const p=Phi((+inp.dataset.m+L)/LEAGUES.nba.sd);o.innerHTML=`Covers <b>${pct(p,0)}</b> · Other side <b>${pct(1-p,0)}</b>`}));
+  $("propList-nba").querySelectorAll(".totIn").forEach(inp=>inp.addEventListener("input",()=>{const L=parseFloat(inp.value),o=inp.parentNode.querySelector(".tout");if(!isFinite(L)){o.textContent="";return}const p=Phi((+inp.dataset.tot-L)/NBA_TOT_SD);o.innerHTML=`Over <b>${pct(p,0)}</b> · Under <b>${pct(1-p,0)}</b>`}));
+  $("propList-nba").querySelectorAll(".sprIn").forEach(inp=>inp.addEventListener("input",()=>{const L=parseFloat(inp.value),o=inp.parentNode.querySelector(".sout");if(!isFinite(L)){o.textContent="";return}const p=Phi((+inp.dataset.m+L)/LEAGUES.nba.sd);o.innerHTML=`Covers <b>${pct(p,0)}</b> · Other side <b>${pct(1-p,0)}</b>`}));
   const seenB=new Set();board.splice(0,board.length,...board.filter(t=>{if(seenB.has(t.p.id))return false;seenB.add(t.p.id);return true}));
   board.sort((a,b)=>b.s.pts.proj-a.s.pts.proj);
-  $("tdBoard").innerHTML=board.length?`<ol class="tdl">${board.slice(0,10).map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · 25+ ${pct(geP(t.s.pts,25),0)}</span></span><span class="pv">${one(t.s.pts.proj)}</span></li>`).join("")}</ol>`:`<p class="note">No player data yet.</p>`;
+  $("tdBoard-nba").innerHTML=board.length?`<ol class="tdl">${board.slice(0,10).map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · 25+ ${pct(geP(t.s.pts,25),0)}</span></span><span class="pv">${one(t.s.pts.proj)}</span></li>`).join("")}</ol>`:`<p class="note">No player data yet.</p>`;
 }
 
 setInterval(()=>{if(!document.hidden)renderGames()},60000);
