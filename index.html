@@ -237,19 +237,23 @@ nav button[aria-selected="true"]{color:var(--turf)!important;background:color-mi
 .lsg .lead{color:var(--turf)}
 .lstab{overflow-x:auto}.lstab table{border-collapse:collapse;font:.78rem var(--mono);width:100%}.lstab th,.lstab td{padding:3px 5px;text-align:center;border-bottom:1px solid var(--line)}.lstab th:first-child,.lstab td:first-child{text-align:left;font-family:var(--body);font-weight:600}.lstab td.tot{font-weight:700}
 .tgrp{grid-column:1/-1;display:flex;align-items:center;gap:6px;margin:6px 0 -2px;font:700 .82rem var(--body);color:var(--ink);border-bottom:1px solid var(--line);padding-bottom:4px}.tgrp svg{width:15px;height:15px;color:var(--turf)}.tgrp span{font-weight:600;color:var(--muted);font-size:.75rem}
+.sportbar .dfsel{display:flex;flex-wrap:nowrap!important;overflow-x:auto;gap:6px;padding-bottom:0;-webkit-mask-image:linear-gradient(90deg,#000 90%,transparent);mask-image:linear-gradient(90deg,#000 90%,transparent);padding-right:24px}
+.sportbar .dfsel button{flex:0 0 auto;font-size:.7rem!important;padding:5px 10px!important}
+.sportbar .dfsel:empty{display:none}
+.hdrow{flex-wrap:nowrap!important;gap:8px}.hdrow h1{white-space:nowrap}.hdrow .tag{font-size:.62rem;white-space:nowrap}.hdrow .btn{font-size:.72rem!important;padding:5px 10px!important}
 </style>
 
 </head>
 <body>
 <div class="wrap">
 <header>
-  <h1>Line<span>check</span></h1>
+  <div class="row hdrow" style="justify-content:space-between;align-items:center"><h1>Line<span>check</span></h1><span class="row" style="gap:6px"><span class="tag" id="liveTag">Loading…</span><button class="btn sm ghost" id="refreshBtn" aria-label="Refresh" title="Refresh"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button></span></div>
   <p>Research and math for football, basketball, baseball, hockey, soccer, tennis, UFC, golf and racing. Built for betting on DraftKings. Your own win estimate, compared with the line. You place every bet yourself.</p>
 </header>
 
 <div class="card sportbar">
-  <div class="row" style="justify-content:space-between"><h2>Sport</h2><span class="row" style="gap:6px"><span class="tag" id="liveTag">Loading…</span><button class="btn sm ghost" id="refreshBtn">Refresh</button></span></div>
   <div class="row lgsel" role="group" aria-label="Sport"></div>
+  <div class="row dfsel" id="dayFilter" role="group" aria-label="Filter by date"></div>
 </div>
 
 <nav role="tablist">
@@ -267,9 +271,8 @@ nav button[aria-selected="true"]{color:var(--turf)!important;background:color-mi
 <section class="panel" id="p-games">
   <div class="card">
     <h2>This week's games</h2>
-    <p class="note">Win chances come from each team's season results plus home field. They don't use DraftKings' odds. Injuries aren't included for football, so tap <b>Dig in</b> to add them. NBA picks include back-to-back rest. While the app is open, scores and chances refresh every minute.</p>
-    <div class="row dfsel" id="dayFilter" role="group" aria-label="Filter by date"></div>
-    <p class="note" id="statsAsOf"></p>
+    <details class="lwhelp"><summary>How these chances work</summary><p class="note">Win chances come from each team's season results plus home field. They don't use DraftKings' odds. Injuries aren't included for football, so tap <b>Dig in</b> to add them. NBA picks include back-to-back rest. While the app is open, scores and chances refresh every minute.</p>
+    <p class="note" id="statsAsOf"></p></details>
   </div>
   <div id="gameList" style="display:flex;flex-direction:column;gap:10px"><div class="empty">Loading this week's games…</div></div>
 </section>
@@ -801,7 +804,7 @@ function filterText(){return `${LGN[LG]||"All sports"} · ${DF==="all"?"All days
 function dateFilter(gs){return DF==="all"||DF==="live"?gs:gs.filter(g=>localDate(effT(g))===DF)}
 function renderParlays(gs){
   gs=dateFilter(slate());
-  $("parlayFilterNote").textContent=`Showing: ${filterText()}. Pick the sport above; change the day on the Games tab.`+(DF==="live"?" Parlays use games that haven't started, so every upcoming day is included.":"");
+  $("parlayFilterNote").textContent=`Showing: ${filterText()}. Change the sport and day at the top.`+(DF==="live"?" Parlays use games that haven't started, so every upcoming day is included.":"");
   const L=legs(gs).sort((a,b)=>b.p-a.p);const out=[];
   [2,3,4].forEach(n=>{if(L.length<n)return;const set=L.slice(0,n);const p=set.reduce((s,l)=>s*l.p,1);
     out.push(`<div class="pl"><div class="hd"><h3>${n}-team parlay</h3><span class="chance">${pct(p,0)} to hit</span></div>
@@ -1342,7 +1345,7 @@ function xChecker(opts,key){return`<div class="xchk row chk"><select class="xSel
   if(!op||!isFinite(L)){o.textContent="";return}const m=+op.dataset.m,p=op.dataset.mode==="pois"?poisGE(m,Math.floor(L)+1):Phi((m-(Number.isInteger(L)?L+0.5:L))/+op.dataset.sd);o.innerHTML=`Over <b>${pct(p,0)}</b> · Under <b>${pct(1-p,0)}</b>`}));
 function propGamesFor(lg){if(DF==="live")return null;return dateFilter(lgSlate(lg)).filter(upcoming)}
 async function renderMlbProps(){const box=$("propList-mlb"),bd=$("tdBoard-mlb");const gs=propGamesFor("mlb");
-  if(!gs){box.innerHTML=`<div class="empty">MLB props are for games that haven't started. Pick Today or All on the Games tab.</div>`;bd.innerHTML="";return}
+  if(!gs){box.innerHTML=`<div class="empty">MLB props are for games that haven't started. Pick Today or All at the top.</div>`;bd.innerHTML="";return}
   if(!gs.length){box.innerHTML=`<div class="empty">No upcoming MLB games for this filter.</div>`;bd.innerHTML="";return}
   $("propMsg").textContent="Loading MLB player stats…";try{await loadMlbStats()}catch(e){$("propMsg").textContent="Couldn't load MLB player stats. Check your connection, then open this tab again.";return}
   const inj={};await Promise.all(gs.map(async g=>{inj[g.id]=await loadInjX("baseball/mlb",g)}));$("propMsg").textContent="";
@@ -1367,7 +1370,7 @@ async function renderMlbProps(){const box=$("propList-mlb"),bd=$("tdBoard-mlb");
   const seen=new Set(),top=board.filter(x=>!seen.has(x.p.id)&&seen.add(x.p.id)).sort((a,b)=>b.p.hr-a.p.hr).slice(0,10);
   bd.innerHTML=top.length?`<ol class="tdl">${top.map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · 1+ hit ${pct(pge(t.p.h,1),0)}</span></span><span class="pv">${pct(pge(t.p.hr,1),0)}</span></li>`).join("")}</ol>`:`<p class="note">No batter data yet.</p>`}
 async function renderNhlProps(){const box=$("propList-nhl"),bd=$("tdBoard-nhl");const gs=propGamesFor("nhl");
-  if(!gs){box.innerHTML=`<div class="empty">NHL props are for games that haven't started. Pick Today or All on the Games tab.</div>`;bd.innerHTML="";return}
+  if(!gs){box.innerHTML=`<div class="empty">NHL props are for games that haven't started. Pick Today or All at the top.</div>`;bd.innerHTML="";return}
   if(!gs.length){box.innerHTML=`<div class="empty">No upcoming NHL games for this filter.</div>`;bd.innerHTML="";return}
   $("propMsg").textContent="Loading NHL player stats…";try{await loadNhlStats()}catch(e){$("propMsg").textContent="Couldn't load NHL player stats. Check your connection, then open this tab again.";return}
   const ros={},inj={};await Promise.all(gs.flatMap(g=>[...[g.home,g.away].map(async t=>{ros[t]=await loadRosterX("hockey/nhl",t)}),(async()=>{inj[g.id]=await loadInjX("hockey/nhl",g)})()]));$("propMsg").textContent="";
@@ -1417,7 +1420,7 @@ async function renderSocProps(){
       return`<div class="pteam"><h3>${esc(tname(g,tid))}</h3>${rows?`<div class="tablewrap"><table><thead><tr><th>Player</th>${live?"<th>Next goal</th><th>Scores from now</th>":"<th>Anytime</th><th>First</th><th>2+ goals</th><th>Assist</th>"}</tr></thead><tbody>${rows}</tbody></table></div>`:`<p class="note">No scorer data for this team yet.</p>`}</div>`}).join("");
     return`<details class="gm"${gi<2?" open":""}><summary class="meta"><span>${live?`<span class="live">Live</span> ${esc(g.detail||"")} · ${esc(A)} ${sc[g.away]??0}–${sc[g.home]??0} ${esc(H)}`:esc(whenTxt(g))}</span><span>${esc(g.title||"")}</span></summary>
       <div class="note"><b>${esc(A)} @ ${esc(H)}</b> · expected goals ${P.la.toFixed(1)} – ${P.lh.toFixed(1)}${live?" · live columns ignore goals already scored":""}</div>${teams}
-      <div class="row"><button class="btn sm ghost" data-log="${esc(JSON.stringify({type:"Prop",key:"soc:"+g.id}))}">Log a scorer bet</button></div></details>`}).join("")+(gs.length>40?`<p class="note">Showing the first 40 matches. Pick a day on the Games tab to see the rest.</p>`:"");
+      <div class="row"><button class="btn sm ghost" data-log="${esc(JSON.stringify({type:"Prop",key:"soc:"+g.id}))}">Log a scorer bet</button></div></details>`}).join("")+(gs.length>40?`<p class="note">Showing the first 40 matches. Pick a day at the top to see the rest.</p>`:"");
   const seen=new Set();const top=board.filter(x=>{if(seen.has(x.p.id))return false;seen.add(x.p.id);return true}).sort((x,y)=>y.p.o.any-x.p.o.any).slice(0,10);
   $("tdBoard-soc").innerHTML=top.length?`<ol class="tdl">${top.map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · first ${b(t.p.o.first)}</span></span><span class="pv">${b(t.p.o.any)}</span></li>`).join("")}</ol>`:`<p class="note">No goalscorer data yet.</p>`;
 }
@@ -1521,7 +1524,7 @@ function propGames(){return slate().filter(g=>g.lg==="nfl"&&upcoming(g))}
 async function renderNflProps(){
   setPropText("nfl");
   renderLiveTd();
-  if(DF==="live"){$("propList-nfl").innerHTML=`<div class="empty">Pregame NFL props are hidden while Live is selected. Pick Today or All on the Games tab to see them.</div>`;$("tdBoard-nfl").innerHTML="";return}
+  if(DF==="live"){$("propList-nfl").innerHTML=`<div class="empty">Pregame NFL props are hidden while Live is selected. Pick Today or All at the top to see them.</div>`;$("tdBoard-nfl").innerHTML="";return}
   const gs=dateFilter(lgSlate("nfl").filter(upcoming));
   if(!gs.length){$("propList-nfl").innerHTML=`<div class="empty">${DF!=="all"&&DF!=="live"?"No NFL games on "+dayLabel(DF)+".":"No upcoming NFL games right now."}</div>`;$("tdBoard-nfl").innerHTML="";return}
   const missing=gs.filter(g=>!PROPS[g.id]);
@@ -1551,7 +1554,7 @@ if(!$("p-props").hidden)setTimeout(renderProps,500);
 async function renderProps(){
   const PLGS=["nba","nfl","mlb","nhl","soc"];const want=LG==="all"?PLGS:PLGS.includes(LG)?[LG]:[];
   $("propsNba").hidden=!want.includes("nba");$("propsNfl").hidden=!want.includes("nfl");$("propsSoc").hidden=!want.includes("soc");$("propsMlb").hidden=!want.includes("mlb");$("propsNhl").hidden=!want.includes("nhl");$("propsNone").hidden=!!want.length;
-  $("propFilterNote").textContent=`Showing: ${filterText()}. Pick the sport above; change the day on the Games tab.`+(DF==="live"?" Live shows the NFL touchdown tracker and soccer next-goal chances. Pregame props show when you pick a day or All.":"");
+  $("propFilterNote").textContent=`Showing: ${filterText()}. Change the sport and day at the top.`+(DF==="live"?" Live shows the NFL touchdown tracker and soccer next-goal chances. Pregame props show when you pick a day or All.":"");
   for(const l of want){try{await (l==="nba"?renderNbaProps():l==="soc"?renderSocProps():l==="mlb"?renderMlbProps():l==="nhl"?renderNhlProps():renderNflProps())}catch(e){}}
 }
 /* --- NBA player props --- */
@@ -1621,7 +1624,7 @@ const injBad=st=>/out|suspend/i.test(st||""),injQ=st=>/day|question|doubt|probab
 let nbaLoading=false;
 async function renderNbaProps(){
   setPropText("nba");
-  if(DF==="live"){$("propList-nba").innerHTML=`<div class="empty">NBA props are for games that haven't started. Pick Today or All on the Games tab.</div>`;$("tdBoard-nba").innerHTML="";return}
+  if(DF==="live"){$("propList-nba").innerHTML=`<div class="empty">NBA props are for games that haven't started. Pick Today or All at the top.</div>`;$("tdBoard-nba").innerHTML="";return}
   const gs=dateFilter(lgSlate("nba").filter(upcoming));
   if(!gs.length){$("propList-nba").innerHTML=`<div class="empty">${DF!=="all"&&DF!=="live"?"No NBA games on "+dayLabel(DF)+".":"No upcoming NBA games right now. Check back on game day."}</div>`;$("tdBoard-nba").innerHTML="";return}
   if(nbaLoading)return;
@@ -1828,7 +1831,7 @@ function lwSub(s){LW.sub=s;try{localStorage.setItem("ge-lwsub",s)}catch(e){}docu
 document.querySelectorAll(".subtab").forEach(b=>b.addEventListener("click",()=>lwSub(b.dataset.sub)));
 try{lwSub(localStorage.getItem("ge-lwsub")||"scores")}catch(e){lwSub("scores")}
 async function renderLive(){if($("p-live").hidden)return;
-  $("lwFilterNote").textContent=`Showing: ${filterText()}. Pick the sport above; change the day on the Games tab.`;
+  $("lwFilterNote").textContent=`Showing: ${filterText()}. Change the sport and day at the top.`;
   const all=lwGames(),now=Date.now();
   const live=all.filter(g=>isLive(g)&&g.status!=="postponed");
   const soon=all.filter(g=>!isLive(g)&&!DONE.includes(g.status)&&!g.field&&Date.parse(g.start_time)>now-30*60e3&&Date.parse(g.start_time)<now+3*3600e3).sort((a,b)=>Date.parse(a.start_time)-Date.parse(b.start_time));
