@@ -123,6 +123,9 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
 label.f .stp{width:100%}label.f .stp input{flex:1;width:auto!important}
 .stb{flex:0 0 auto;width:36px;height:36px;padding:0;border:1px solid var(--line);background:var(--surface);color:var(--turf);border-radius:7px;font:700 1.15rem/1 var(--mono);cursor:pointer;touch-action:manipulation}
 .stb:active{background:var(--turf-soft)}
+table.ptab{font-size:.88rem}table.ptab td,table.ptab th{white-space:normal;padding:7px 5px;vertical-align:top}
+table.ptab td:first-child{white-space:nowrap}
+.dkc{color:var(--flag-ink)}
 .pk{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .pk button{font:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:8px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:6px}
 .pk button[aria-pressed="true"],.qs[aria-pressed="true"],.qo[aria-pressed="true"]{border-color:var(--turf);background:var(--turf-soft);color:var(--turf);font-weight:600}
@@ -457,6 +460,13 @@ details p{margin:.5rem 0 0;max-width:62ch}
     <details><summary>Spread (Asian handicap)</summary><p>Soccer's version of a spread, like -0.5 or +1.5 goals. A -0.5 is the same as picking that team to win outright.</p></details>
   </div>
   <div class="card">
+    <h2>Tennis and UFC bets</h2>
+    <details open><summary>Tennis: match winner and set betting</summary><p>Match winner is a moneyline on the match. Set betting picks the exact score in sets, like 2-0 or 2-1. Total sets over 2.5 wins if a best-of-3 match goes to a third set. Grand Slam men's matches are best of 5.</p></details>
+    <details><summary>Tennis: how the app rates players</summary><p>It uses official ranking points, which reward results over the past year. It doesn't know about surface, recent form or injuries, so a player returning from injury can look weaker than they are.</p></details>
+    <details><summary>UFC: winner, distance and rounds</summary><p>“Goes the distance” means the fight reaches the judges' scorecards. Total rounds over 1.5 means it lasts past the halfway point of round 2. Method bets combine who wins with how, by finish (KO or submission) or decision.</p></details>
+    <details><summary>UFC: how the app rates fighters</summary><p>It uses each fighter's win-loss record and how often fights in that weight class end early. Records don't show who a fighter beat, so these numbers are rougher than the other sports.</p></details>
+  </div>
+  <div class="card">
     <h2>Baseball and hockey bets</h2>
     <details open><summary>Run line and puck line</summary><p>Baseball and hockey's version of a spread, almost always 1.5. The favorite at -1.5 must win by 2 or more. Game cards show the model's chance for the favorite to cover -1.5.</p></details>
     <details><summary>Totals</summary><p>Runs or goals for both teams, often 8.5 in baseball and 5.5 or 6.5 in hockey. Open “Totals and team totals” on any game to check DraftKings' number.</p></details>
@@ -595,8 +605,8 @@ if(TABS.includes(location.hash.slice(1)))show(location.hash.slice(1));
 /* --- games & parlays --- */
 const LEAGUES={nfl:{label:"NFL",feed:"nfl",sd:13.5,hfa:1.5,avg:22.5,tsd:13.5,teamsd:9.5},cfb:{label:"College",feed:"ncaafb",sd:16,hfa:2.5,avg:28,tsd:17,teamsd:12},nba:{label:"NBA",feed:"nba",sd:12.5,hfa:2.5,avg:114,tsd:17,teamsd:11},soc:{label:"Soccer",feed:"soccer",sd:1.6,hfa:0,avg:1.35,tsd:1.6,teamsd:1.1},
   mlb:{label:"MLB",sd:4.4,hfa:0.35,avg:4.4,tsd:4.4,teamsd:3.1},nhl:{label:"NHL",sd:2.4,hfa:0.25,avg:3.1,tsd:2.3,teamsd:1.6},wnba:{label:"WNBA",sd:11.5,hfa:2.5,avg:82,tsd:15,teamsd:10},
-  ncaab:{label:"NCAAB",sd:11,hfa:3.2,avg:72,tsd:15,teamsd:10},ncaaw:{label:"NCAAW",sd:12,hfa:3,avg:67,tsd:15,teamsd:10}};
-const D={nfl:{},cfb:{},nba:{},soc:{},mlb:{},nhl:{},wnba:{},ncaab:{},ncaaw:{}};let DF="all";try{DF=localStorage.getItem("ge-df")||"all"}catch(e){}let picks={},LG="all";
+  ncaab:{label:"NCAAB",sd:11,hfa:3.2,avg:72,tsd:15,teamsd:10},ncaaw:{label:"NCAAW",sd:12,hfa:3,avg:67,tsd:15,teamsd:10},ten:{label:"Tennis",sd:1,hfa:0,avg:0,tsd:1,teamsd:1},mma:{label:"UFC",sd:1,hfa:0,avg:0,tsd:1,teamsd:1}};
+const D={nfl:{},cfb:{},nba:{},soc:{},mlb:{},nhl:{},wnba:{},ncaab:{},ncaaw:{},ten:{},mma:{}};let DF="all";try{DF=localStorage.getItem("ge-df")||"all"}catch(e){}let picks={},LG="all";
 try{LG=localStorage.getItem("ge-lg")||"all"}catch(e){}
 const norm=c=>c==="JAX"?"JAC":c;
 const DONE=["closed","complete","completed","cancelled","canceled","postponed"];
@@ -614,6 +624,8 @@ function remaining(g){
   const el=(Date.now()-Date.parse(g.start_time))/60000;return Math.min(1,Math.max(0.02,1-el/(g.lg==="cfb"?210:g.lg==="nhl"?150:["nba","wnba","ncaab","ncaaw"].includes(g.lg)?135:190)));
 }
 function model(g){
+  if(g.lg==="ten")return tennisModel(g);
+  if(g.lg==="mma")return mmaModel(g);
   if(g.lg==="soc"){const P=socModel(g);return P?{m:P.lh-P.la,pH:P.full.H,pA:P.full.A,pD:P.full.D}:null}
   const L=LEAGUES[g.lg],rh=rating(g.lg,g.home),ra=rating(g.lg,g.away);if(rh==null||ra==null)return null;
   let m=rh-ra+(g.neutral?0:L.hfa);{const rs=g.lg==="nba"?NBA_REST:(TEAMLG[g.lg]&&TEAMLG[g.lg].b2b)||0;if(rs){if(g.b2bH)m-=rs;if(g.b2bA)m+=rs}}let pH=Phi(m/L.sd);
@@ -630,7 +642,7 @@ function slate(){
     src.forEach(g0=>{const g={...g0,lg};if(g.status!=="postponed"&&(isLive(g)||(Date.parse(g.start_time)>now-(DONE.includes(g.status)?14:4)*3600e3&&Date.parse(g.start_time)<now+8*864e5)))out.push(g)})});
   return out.sort((a,b)=>Date.parse(a.start_time)-Date.parse(b.start_time));
 }
-function rec(g,c){const t=teamInfo(g.lg,c);return (t&&t.rec)||(g.teams&&g.teams[c]&&g.teams[c].rec)||""}
+function rec(g,c){if(g.lg==="ten"){const r=tenRank(c,tname(g,c),g.tour);return r?"#"+r.rank:""}const t=teamInfo(g.lg,c);return (t&&t.rec)||(g.teams&&g.teams[c]&&g.teams[c].rec)||""}
 function renderLg(){document.querySelectorAll(".lgsel button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lg===LG))}
 function renderGames(){
   const ae=document.activeElement;if(ae&&ae.classList&&(ae.classList.contains("ouIn")||ae.classList.contains("pIn")||ae.classList.contains("socIn")||ae.classList.contains("spIn"))){pendingRender=true;return}
@@ -639,6 +651,7 @@ function renderGames(){
   if(n&&n.asOf&&sh("nfl"))notes.push(`NFL season stats updated ${n.asOf}.`);
   if(c&&c.asOf&&sh("cfb"))notes.push(`College season stats updated ${c.asOf}. College picks are rougher, since schedules vary so much.`);
   Object.keys(TEAMLG).forEach(k=>{const t=D[k].teams;if(t&&t.asOf&&sh(k))notes.push(`${LEAGUES[k].label} ratings updated ${t.asOf}${k==="ncaab"||k==="ncaaw"?", blended with last season early on. College picks are rougher because schedules vary so much":", blended with last season early on"}.`)});
+  if(D.ten.teams&&sh("ten"))notes.push("Tennis chances use official ATP and WTA ranking points.");if(sh("mma")&&D.mma.live)notes.push("UFC chances use each fighter's pro record and are rough.");
   const so=D.soc.teams;if(so&&so.asOf&&sh("soc"))notes.push(`Soccer ratings from each league table (goals scored and allowed), updated ${so.asOf}. Champions League picks are rougher, since teams come from different leagues.`);
   if(b&&b.asOf&&sh("nba"))notes.push(`NBA ratings updated ${b.asOf}, blending this season with last season while it's early.`);
   $("statsAsOf").textContent=notes.join(" ")+(notes.length?" Source: ESPN.":"");
@@ -665,8 +678,8 @@ function renderGames(){
     return`${head}<div class="gm"><div class="meta"><span>${live?`<span class="live">Live</span> ${esc(g.detail||"")}`:fin?"Final":esc(whenTxt(g))}</span><span class="lgtag">${icon(g.lg)}${esc(LEAGUES[g.lg].label)}${g.title?" · "+esc(g.title):""}</span></div>
       ${side(g.away,md&&md.pA,md&&!favH)}${side(g.home,md&&md.pH,md&&favH)}${md&&md.pD!=null?`<div class="tm"><div class="nm drw">Draw</div><div class="sc"></div><div class="pc">${pct(md.pD,0)}</div></div>`:""}
       ${md&&g.lg!=="soc"?`<div class="bar" aria-hidden="true"><i style="width:${(md.pA*100).toFixed(1)}%;opacity:.45"></i></div>`:""}
-      ${!fin?(g.lg==="soc"?soccerHtml(g):totalsHtml(g)+periodsHtml(g)):""}${liveTdLine(g)}
-      <div class="row" style="justify-content:space-between"><span class="note">${md?(g.lg==="soc"?(live?"Live win and draw chances":"Win and draw chances"):live?"Live win chance":(g.lg==="mlb"||g.lg==="nhl")?altLine(g,md):`Model line: ${esc(short(g,md.m>0?g.home:g.away))} ${sp?"-"+sp:"pick'em"}`):(fin?"Final score":"No stats for one of these teams yet")}</span>
+      ${!fin?(g.lg==="soc"?soccerHtml(g):g.lg==="ten"?tennisHtml(g):g.lg==="mma"?mmaHtml(g):totalsHtml(g)+periodsHtml(g)):(g.lg==="ten"&&g.sets?`<div class="note">Sets: ${g.sets.h.map((v,i)=>`${v}-${g.sets.a[i]??0}`).join(", ")}</div>`:"")}${liveTdLine(g)}
+      <div class="row" style="justify-content:space-between"><span class="note">${md?(g.lg==="ten"?(live?"Live match chance":"Match winner chance"):g.lg==="mma"?"Fight winner chance":g.lg==="soc"?(live?"Live win and draw chances":"Win and draw chances"):live?"Live win chance":(g.lg==="mlb"||g.lg==="nhl")?altLine(g,md):`Model line: ${esc(short(g,md.m>0?g.home:g.away))} ${sp?"-"+sp:"pick'em"}`):(fin?"Final score":"No stats for one of these teams yet")}</span>
       <span class="row" style="gap:6px">${g.lg!=="nfl"&&g.lg!=="cfb"?"":`<button class="btn sm ghost dig" data-id="${esc(g.id)}">Dig in</button>`}<button class="btn sm ghost" data-log="${esc(JSON.stringify({key:g.lg+":"+g.id}))}">Log bet</button></span></div></div>`}).join("");
   document.querySelectorAll(".dig").forEach(b=>b.addEventListener("click",()=>digIn(shown.find(g=>g.id===b.dataset.id))));
   document.querySelectorAll("#gameList .pchk").forEach(pchkCalc);
@@ -682,7 +695,7 @@ function digIn(g){
 const upcoming=g=>!isLive(g)&&Date.parse(g.start_time)>Date.now();
 function legs(gs){return gs.filter(upcoming).map(g=>{const md=model(g);if(!md)return null;const h=md.pH>=md.pA;return{g,team:h?g.home:g.away,p:h?md.pH:md.pA}}).filter(Boolean)}
 function fairOdds(p){const a=toAm(1/p);return a==null?"—":sgn(a)}
-const LGN={all:"All sports",nfl:"NFL",cfb:"College football",nba:"NBA",soc:"Soccer",mlb:"MLB",nhl:"NHL",wnba:"WNBA",ncaab:"Men's college basketball",ncaaw:"Women's college basketball"};
+const LGN={all:"All sports",nfl:"NFL",cfb:"College football",nba:"NBA",soc:"Soccer",mlb:"MLB",nhl:"NHL",wnba:"WNBA",ncaab:"Men's college basketball",ncaaw:"Women's college basketball",ten:"Tennis",mma:"UFC"};
 function filterText(){return `${LGN[LG]||"All sports"} · ${DF==="all"?"All days":DF==="live"?"Live":dayLabel(DF)}`}
 function dateFilter(gs){return DF==="all"||DF==="live"?gs:gs.filter(g=>localDate(g.start_time)===DF)}
 function renderParlays(gs){
@@ -711,6 +724,8 @@ function stat(e,n){const s=(e.stats||[]).find(x=>x.name===n);return s&&s.value!=
 function collectEntries(o,out){if(!o||typeof o!=="object")return;if(Array.isArray(o.entries))o.entries.forEach(e=>{if(e&&e.team)out.push(e)});if(o.standings)collectEntries(o.standings,out);(o.children||[]).forEach(c=>collectEntries(c,out))}
 const cache={get(k){try{return JSON.parse(localStorage.getItem("ge-c-"+k)||"null")}catch(e){return null}},set(k,v){try{localStorage.setItem("ge-c-"+k,JSON.stringify(v))}catch(e){}}};
 async function loadStandings(lg){
+  if(lg==="ten")return loadTennisRanks();
+  if(lg==="mma"){D.mma.teams=D.mma.teams||{asOf:"",at:Date.now(),teams:{}};return}
   if(TEAMLG[lg])return loadBlendTeams(lg);
   if(lg==="nba")return loadNbaTeams();
   if(lg==="soc")return loadSoccerTeams();
@@ -743,6 +758,8 @@ function parseEvents(j,recs){
     return g}).filter(Boolean);
 }
 async function loadScores(lg){
+  if(lg==="ten")return loadTennisScores();
+  if(lg==="mma")return loadMmaScores();
   if(TEAMLG[lg])return loadDayScores(lg);
   if(lg==="nba")return loadNbaScores();
   if(lg==="soc")return loadSoccerScores();
@@ -817,12 +834,85 @@ const ICO={
   baseball:'<circle cx="12" cy="12" r="9.4"/><path d="M7.4 4c2 2.2 2.8 5 2.8 8s-.8 5.8-2.8 8M16.6 4c-2 2.2-2.8 5-2.8 8s.8 5.8 2.8 8"/><path d="M8.6 7.2l1.6-.5M9.6 10.2l1.6-.2M9.6 13.8l1.6.2M8.6 16.8l1.6.5M15.4 7.2l-1.6-.5M14.4 10.2l-1.6-.2M14.4 13.8l-1.6.2M15.4 16.8l-1.6.5" stroke-width="1.3"/>',
   hockey:'<path d="M15.5 2.5L10 16.5h-4.5"/><path d="M5.5 16.5c-1.4 0-2 .8-2 1.6"/><ellipse cx="16.5" cy="17.6" rx="4.2" ry="1.7"/><path d="M12.3 17.6v1.3c0 .9 1.9 1.7 4.2 1.7s4.2-.8 4.2-1.7v-1.3"/>',
   soccer:'<circle cx="12" cy="12" r="9.4"/><path d="M12 8.3l3.3 2.4-1.3 3.9h-4l-1.3-3.9z"/><path d="M12 8.3V2.7M15.3 10.7l5-1.7M14 14.6l3 4.3M10 14.6l-3 4.3M8.7 10.7l-5-1.7"/>',
+  tennis:'<circle cx="12" cy="12" r="9.4"/><path d="M4.4 6.4c3.4 2.4 3.4 8.8 0 11.2M19.6 6.4c-3.4 2.4-3.4 8.8 0 11.2"/>',
+  octagon:'<path d="M8.3 2.8h7.4l5.5 5.5v7.4l-5.5 5.5H8.3l-5.5-5.5V8.3z"/><path d="M9.7 6.4h4.6l3.3 3.3v4.6l-3.3 3.3H9.7l-3.3-3.3V9.7z" stroke-width="1.2"/>',
   all:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/>'};
-const LGICON={nfl:"football",cfb:"football",nba:"basketball",wnba:"basketball",ncaab:"basketball",ncaaw:"basketball",mlb:"baseball",nhl:"hockey",soc:"soccer",all:"all"};
+const LGICON={nfl:"football",cfb:"football",nba:"basketball",wnba:"basketball",ncaab:"basketball",ncaaw:"basketball",mlb:"baseball",nhl:"hockey",soc:"soccer",ten:"tennis",mma:"octagon",all:"all"};
 const icon=(lg,cls="sico")=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[LGICON[lg]]||""}</svg>`;
-const LGBTN=[["all","All"],["nfl","NFL"],["cfb","NCAAF"],["nba","NBA"],["ncaab","NCAAB"],["ncaaw","NCAAW"],["wnba","WNBA"],["mlb","MLB"],["nhl","NHL"],["soc","Soccer"]];
+const LGBTN=[["all","All"],["nfl","NFL"],["cfb","NCAAF"],["nba","NBA"],["ncaab","NCAAB"],["ncaaw","NCAAW"],["wnba","WNBA"],["mlb","MLB"],["nhl","NHL"],["soc","Soccer"],["ten","Tennis"],["mma","UFC"]];
 document.querySelectorAll(".lgsel").forEach(box=>{box.innerHTML=LGBTN.map(([k,t])=>`<button class="btn sm ghost" data-lg="${k}">${icon(k)}${t}</button>`).join("");
   box.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{LG=b.dataset.lg;try{localStorage.setItem("ge-lg",LG)}catch(e){}renderGames()}))});
+/* --- tennis and UFC --- */
+function setP(p,bo){let lo=0,hi=1;for(let i=0;i<40;i++){const s=(lo+hi)/2,f=bo===5?s*s*s*(10-15*s+6*s*s):s*s*(3-2*s);if(f<p)lo=s;else hi=s}return(lo+hi)/2}
+function tenRank(id,name,tour){const R=(D.ten.rank||{})[tour]||{};return(R.byId&&R.byId[String(id)])||(R.byName&&R.byName[String(name||"").toLowerCase()])||null}
+function tennisModel(g){const H=tenRank(g.home,tname(g,g.home),g.tour),A=tenRank(g.away,tname(g,g.away),g.tour);if(!H&&!A)return null;
+  const ph=Math.max(10,H?H.pts:120),pa=Math.max(10,A?A.pts:120);let p=Math.pow(ph,0.95)/(Math.pow(ph,0.95)+Math.pow(pa,0.95));p=0.5+(p-0.5)*0.92;
+  const bo=g.tour==="atp"&&g.major?5:3,n=(bo+1)/2,s=setP(p,bo),live=isLive(g),sh=live&&g.score?+g.score[g.home]||0:0,sa=live&&g.score?+g.score[g.away]||0:0,dist={};
+  (function rec(x,y,pr){if(x>=n||y>=n){const k=x+"-"+y;dist[k]=(dist[k]||0)+pr;return}rec(x+1,y,pr*s);rec(x,y+1,pr*(1-s))})(sh,sa,1);
+  const pH=Object.entries(dist).filter(([k])=>+k.split("-")[0]>=n).reduce((t,[,v])=>t+v,0);
+  return{m:0,pH,pA:1-pH,dist,bo,n,s,sh,sa}}
+const MMAFR={3:[.45,.33,.22],5:[.35,.25,.18,.12,.10]};
+function recParse(x){const m=String(x||"").match(/(\d+)-(\d+)(?:-(\d+))?/);return m?{w:+m[1],l:+m[2],d:+(m[3]||0)}:null}
+function mmaModel(g){const r=c=>{const q=recParse(g.teams&&g.teams[c]&&g.teams[c].rec);return q?(q.w+3)/(q.w+q.l+q.d+6):null};const a=r(g.home),b=r(g.away);if(a==null&&b==null)return null;
+  const x=a??0.5,y=b??0.5;let p=x*(1-y)/(x*(1-y)+y*(1-x));p=0.5+(p-0.5)*0.6;
+  const wc=String(g.wc||"").toLowerCase();let dist=/light heavy/.test(wc)?0.38:/heavy/.test(wc)?0.32:/middle/.test(wc)?0.43:/welter/.test(wc)?0.47:/light/.test(wc)?0.5:/feather/.test(wc)?0.52:/bantam/.test(wc)?0.55:0.6;
+  const R=g.rounds>=5?5:3;if(R===5)dist*=0.8;dist*=1-0.4*Math.abs(2*p-1);const fin=1-dist,fr=MMAFR[R];
+  const over=k=>{let c=0;for(let i=0;i<k;i++)c+=fr[i];c+=(fr[k]||0)/2;return 1-fin*c};
+  return{m:0,pH:p,pA:1-p,dist,fin,over,R}}
+function tennisHtml(g){const P=tennisModel(g);if(!P)return"";const H=short(g,g.home),A=short(g,g.away),b=x=>`<b>${pct(x,0)}</b>`,row=(k,v)=>`<tr><td>${k}</td><td>${v}</td></tr>`,key="ten:"+g.id;
+  const sb=Object.entries(P.dist).sort((x,y)=>y[1]-x[1]).map(([k,v])=>{const[x,y]=k.split("-").map(Number);return x>=P.n?`${esc(H)} ${x}-${y} ${b(v)}`:`${esc(A)} ${y}-${x} ${b(v)}`}).join(" · ");
+  const tot=k=>Object.entries(P.dist).filter(([q])=>q.split("-").reduce((s,z)=>s+ +z,0)>k).reduce((s,[,v])=>s+v,0);
+  const winSet=side=>Object.entries(P.dist).filter(([q])=>+q.split("-")[side==="h"?0:1]>=1).reduce((s,[,v])=>s+v,0);
+  const sets=g.sets&&g.sets.h.length?`<div class="note">Sets: ${g.sets.h.map((v,i)=>`${v}-${g.sets.a[i]??0}`).join(", ")}</div>`:"";
+  return`${sets}<div class="note">Best of ${P.bo} sets${isLive(g)?` · leads tracked live by sets won`:""}</div><details class="tot" data-k="${esc(key)}"${openMem.has(key)?" open":""}><summary>All tennis markets</summary>
+  <div class="tablewrap"><table class="soc"><tbody>
+  ${row("Match winner",`${esc(H)} ${b(P.pH)} · ${esc(A)} ${b(P.pA)}`)}
+  ${isLive(g)?"":row("1st set winner",`${esc(H)} ${b(P.s)} · ${esc(A)} ${b(1-P.s)}`)}
+  ${row("Set betting",sb)}
+  ${row("Total sets",P.bo===5?`Over 3.5 ${b(tot(3))} · Over 4.5 ${b(tot(4))}`:`Over 2.5 ${b(tot(2))} · Under 2.5 ${b(1-tot(2))}`)}
+  ${row("To win a set",`${esc(H)} ${b(winSet("h"))} · ${esc(A)} ${b(winSet("a"))}`)}
+  </tbody></table></div><p class="note">Based on official ranking points, so recent form, surface and injuries aren't included. ${isLive(g)?"Live chances use sets won, not the score inside the current set.":""}</p></details>`}
+function mmaHtml(g){const P=mmaModel(g);if(!P)return"";const H=short(g,g.home),A=short(g,g.away),b=x=>`<b>${pct(x,0)}</b>`,row=(k,v)=>`<tr><td>${k}</td><td>${v}</td></tr>`,key="mma:"+g.id;
+  const ou=P.R===5?[2.5,3.5,4.5]:[1.5,2.5];
+  return`<div class="note">${esc(g.wc||"Fight")} · ${P.R} rounds</div><details class="tot" data-k="${esc(key)}"${openMem.has(key)?" open":""}><summary>All fight markets</summary>
+  <div class="tablewrap"><table class="soc"><tbody>
+  ${row("Winner",`${esc(H)} ${b(P.pH)} · ${esc(A)} ${b(P.pA)}`)}
+  ${row("Goes the distance",`Yes ${b(P.dist)} · No ${b(P.fin)}`)}
+  ${row("Total rounds",ou.map(k=>`Over ${k} ${b(P.over(Math.floor(k)))}`).join(" · "))}
+  ${row("Method",`${esc(H)} by finish ${b(P.pH*P.fin)} · by decision ${b(P.pH*P.dist)}<br>${esc(A)} by finish ${b(P.pA*P.fin)} · by decision ${b(P.pA*P.dist)}`)}
+  </tbody></table></div><p class="note">Based on each fighter's pro record and typical finish rates for the weight class. Records don't show who they beat, so treat these as rough. ${isLive(g)?"These are pre-fight numbers.":""}</p></details>`}
+function parseTennis(j,tour){const out=[];(j.events||[]).forEach(ev=>(ev.groupings||[]).forEach(gr=>{const gn=(gr.grouping&&(gr.grouping.slug||gr.grouping.displayName))||"";if(!/singles/i.test(gn))return;
+  (gr.competitions||[]).forEach(c=>{const cs=c.competitors||[];if(cs.length!==2)return;const h=cs.find(x=>x.order===1)||cs[0],a=cs.find(x=>x!==h);
+    const id=x=>String(x.id||(x.athlete&&x.athlete.id)||""),nm=x=>(x.athlete&&(x.athlete.displayName||x.athlete.fullName))||"TBD";if(nm(h)==="TBD"||nm(a)==="TBD")return;
+    const st=c.status||{type:{}},state=st.type.state,sets=x=>(x.linescores||[]).map(l=>+l.value||0),won=x=>(x.linescores||[]).filter(l=>l.winner).length;
+    const g={id:"t"+c.id,start_time:c.date||c.startDate||ev.date,home:id(h),away:id(a),neutral:true,tour,major:!!ev.major,
+      title:`${ev.shortName||ev.name||""}${c.round&&c.round.displayName?" · "+c.round.displayName:""}`,
+      teams:{[id(h)]:{name:nm(h)},[id(a)]:{name:nm(a)}},status:state==="pre"?"scheduled":state==="in"?"inprogress":(st.type.completed?"closed":"postponed"),detail:st.type.shortDetail||""};
+    if(state!=="pre"){g.score={[g.home]:won(h),[g.away]:won(a)};g.sets={h:sets(h),a:sets(a)}}
+    if(state==="post"&&(h.winner||a.winner)&&!((h.winner&&g.score[g.home]>g.score[g.away])||(a.winner&&g.score[g.away]>g.score[g.home])))g.score={[g.home]:h.winner?1:0,[g.away]:h.winner?0:1};
+    out.push(g)})}));return out}
+async function loadTennisRanks(){const R={};await Promise.all(["atp","wta"].map(async t=>{const c=cache.get("ten-rank-"+t);let v=c&&Date.now()-c.at<12*3600e3?c.v:null;
+  if(!v){try{const j=await getJSON(`${ESPN}/site/v2/sports/tennis/${t}/rankings`);const byId={},byName={};(((j.rankings||[])[0]||{}).ranks||[]).forEach(r=>{const a=r.athlete||{},o={rank:+r.current,pts:+r.points||0};if(a.id)byId[String(a.id)]=o;if(a.displayName)byName[a.displayName.toLowerCase()]=o});
+    v={byId,byName};if(Object.keys(byId).length)cache.set("ten-rank-"+t,{at:Date.now(),v})}catch(e){v={byId:{},byName:{}}}}R[t]=v}));
+  D.ten.rank=R;D.ten.teams={asOf:new Date().toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"}),at:Date.now(),teams:{}}}
+async function loadTennisScores(){const t0=ymd(0);
+  const res=await Promise.all(["atp","wta"].flatMap(t=>[0,1,2].map(async o=>{const d=ymd(o),k="ten"+t+d,c=SBC[k];if(c&&Date.now()-c.at<(d===t0?55e3:30*60e3))return c.v;
+    const v=parseTennis(await getJSON(`${ESPN}/site/v2/sports/tennis/${t}/scoreboard?dates=${d}`),t);SBC[k]={at:Date.now(),v};return v}).map(p=>p.catch(()=>null))));
+  if(res.every(x=>x==null))throw new Error("tennis feed");const seen=new Set(),games=[];res.forEach(v=>(v||[]).forEach(g=>{if(!seen.has(g.id)){seen.add(g.id);games.push(g)}}));
+  D.ten.live={games};D.ten.liveAt=Date.now();cache.set("ten-live",{live:D.ten.live,recs:{},at:D.ten.liveAt})}
+function parseMma(j){const out=[];(j.events||[]).forEach(ev=>(ev.competitions||[]).forEach(c=>{const cs=c.competitors||[];if(cs.length!==2)return;const h=cs.find(x=>x.order===1)||cs[0],a=cs.find(x=>x!==h);
+  const id=x=>String(x.id||(x.athlete&&x.athlete.id)||""),nm=x=>(x.athlete&&(x.athlete.displayName||x.athlete.fullName))||"TBD",rc=x=>((x.records||[])[0]||{}).summary||"";
+  const st=c.status||ev.status||{type:{}},state=(st.type||{}).state,ty=c.type||{};
+  const g={id:"f"+c.id,start_time:c.date||ev.date,home:id(h),away:id(a),neutral:true,title:ev.shortName||ev.name||"",wc:ty.text||ty.description||ty.abbreviation||ty.slug||"",
+    rounds:+((c.format&&c.format.regulation&&c.format.regulation.periods)||3),teams:{[id(h)]:{name:nm(h),rec:rc(h)},[id(a)]:{name:nm(a),rec:rc(a)}},
+    status:state==="pre"?"scheduled":state==="in"?"inprogress":((st.type||{}).completed?"closed":"postponed"),detail:(st.type||{}).shortDetail||""};
+  if(state==="post"&&(h.winner||a.winner))g.score={[g.home]:h.winner?1:0,[g.away]:h.winner?0:1};out.push(g)}));return out}
+async function loadMmaScores(){const c=SBC.mma;if(c&&Date.now()-c.at<120e3){D.mma.live={games:c.v};D.mma.liveAt=Date.now();return}
+  const j=await getJSON(`${ESPN}/site/v2/sports/mma/ufc/scoreboard`);let games=parseMma(j);const now=Date.now(),ds=new Set();
+  ((((j.leagues||[])[0]||{}).calendar)||[]).forEach(x=>{const sd=typeof x==="string"?x:(x&&(x.startDate||x.value||x.date));const t=Date.parse(sd);if(t&&t>now-864e5&&t<now+15*864e5){const d=new Date(t);ds.add(`${d.getUTCFullYear()}${String(d.getUTCMonth()+1).padStart(2,"0")}${String(d.getUTCDate()).padStart(2,"0")}`)}});
+  for(const d of [...ds].slice(0,3)){try{games=games.concat(parseMma(await getJSON(`${ESPN}/site/v2/sports/mma/ufc/scoreboard?dates=${d}`)))}catch(e){}}
+  const seen=new Set();games=games.filter(g=>!seen.has(g.id)&&seen.add(g.id));SBC.mma={at:Date.now(),v:games};
+  D.mma.live={games};D.mma.liveAt=Date.now();D.mma.teams=D.mma.teams||{asOf:"",at:Date.now(),teams:{}};cache.set("mma-live",{live:D.mma.live,recs:{},at:D.mma.liveAt})}
 /* --- NBA data --- */
 const NBA_SEASON=(()=>{const d=new Date();return d.getMonth()>=7?d.getFullYear()+1:d.getFullYear()})();
 const NBA_REST=1.5;
@@ -887,11 +977,11 @@ function totalsHtml(g){const p=gameProj(g);if(!p)return"";const L=LEAGUES[g.lg],
   return`<div class="note">${head}</div>${b2b.length?`<div class="note"><span class="chip td">Back-to-back</span> ${esc(b2b.join(" and "))} played yesterday (tired legs, -${NBA_REST} pts).</div>`:""}
   <details class="tot" data-k="${esc(key)}"${openMem.has(key)?" open":""}><summary>Totals and team totals</summary>
     <div class="row"><button type="button" class="btn sm dkBtn" data-g="${esc(key)}">DK line</button><span class="note">Fills in DraftKings' current total and spread</span></div>
-    <p class="note dkInfo"></p>
+    <p class="note dkInfo">${dkInfoMem[key]||""}</p>
     ${fld("t","Game total",p.tot,L.tsd*p.sdF,p.curH+p.curA)}
     ${(()=>{const v=lineMem[key+"s"]??"",mm=p.h-p.a,sd=L.sd*p.sdF;const o=v!==""&&isFinite(+v)?spTxt(mm,sd,+v):"";return`<div class="row chk ou"><span class="lab tl">${esc(H)} spread <span class="pv">${mm>=0?"-":"+"}${half(Math.abs(mm))}</span></span><input type="number" inputmode="decimal" step="0.5" class="spIn" data-k="${esc(key+"s")}" data-m="${mm.toFixed(2)}" data-sd="${sd.toFixed(2)}" value="${esc(v)}" placeholder="Line" aria-label="${esc(H)} spread"><span class="note spOut">${o}</span></div>`})()}
     ${fld("a",A+" team total",p.a,L.teamsd*p.sdF,p.curA)}${fld("h",H+" team total",p.h,L.teamsd*p.sdF,p.curH)}
-    <p class="note">Tap <b>DK line</b> to load DraftKings' numbers, or use − / + to set any line yourself (team totals aren't in DraftKings' free feed).${p.live?" Live numbers use the current score and time left.":""}</p></details>`}
+    <p class="note">Tap <b>DK line</b> to load DraftKings' total and spread. Team totals and halves/quarters get estimates from those numbers. Use − / + to adjust any line.${p.live?" Live numbers use the current score and time left.":""}</p></details>`}
 function spTxt(mm,sd,L){const p=Phi((mm+L)/Math.max(sd,0.3));return`Covers <b>${pct(p,0)}</b> · Other side <b>${pct(1-p,0)}</b>`}
 document.addEventListener("input",e=>{const t=e.target;if(!t.classList||!t.classList.contains("spIn"))return;lineMem[t.dataset.k]=t.value;const L=parseFloat(t.value),o=t.closest(".chk").querySelector(".spOut");o.innerHTML=isFinite(L)?spTxt(+t.dataset.m,+t.dataset.sd,L):""});
 function liveTdLine(g){if(!isLive(g)||(g.lg!=="nfl"&&g.lg!=="cfb"))return"";const n=nextTD(g);if(!n)return"";
@@ -938,7 +1028,7 @@ async function renderLiveTd(){const box=$("liveTd-nfl");if(!box)return;const tod
       ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Player</th><th>TDs</th><th>Next TD</th><th>Another TD</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${esc(r.name)}</b><div class="note">${esc(r.pos)} · ${esc(short(g,r.tid))}</div></td><td class="n">${r.so?`<b class="pos">${r.so}</b>`:"0"}</td><td class="n">${pct(r.next,0)}</td><td class="n">${pct(r.any,0)}</td></tr>`).join("")}</tbody></table></div>`:`<p class="note">Player stats aren't available right now, so only team chances are shown.</p>`}
       <div class="row"><button class="btn sm ghost" data-log="${esc(JSON.stringify({type:"Prop",key:"nfl:"+g.id}))}">Log a TD bet</button></div></div>`}).join("")}
 /* --- halves and quarters --- */
-const PSH={nfl:[0.21,0.29,0.21,0.29],cfb:[0.24,0.28,0.24,0.24],nba:[0.25,0.25,0.25,0.25]},TIEB={nfl:1.75,cfb:1.75,nba:0.5};
+const PSH={nfl:[0.19,0.31,0.20,0.30],cfb:[0.22,0.29,0.23,0.26],nba:[0.25,0.25,0.25,0.25]},TIEB={nfl:1.75,cfb:1.75,nba:0.5};
 const PER=[["1st half",[0,1]],["2nd half",[2,3]],["1st quarter",[0]],["2nd quarter",[1]],["3rd quarter",[2]],["4th quarter",[3]]];
 function periodLeft(g){const ck=String(g.clock||""),per=g.lg==="nba"?12:15;let mins=null;
   if(/^\d+:\d+(\.\d+)?$/.test(ck)){const[m,s]=ck.split(":").map(Number);mins=m+s/60}else if(/^\d+(\.\d+)?$/.test(ck))mins=+ck/60;
@@ -953,25 +1043,37 @@ function periodDist(g,idx){const p=gameProj(g);if(!p||!PSH[g.lg])return null;con
   const sdm=L.sd*1.08*Math.sqrt(vm),sdt=L.tsd*1.1*Math.sqrt(vt),mm=h-a,b=TIEB[g.lg];let pH,pA,pT;
   if(sdm<0.01){pH=mm>0?1:0;pA=mm<0?1:0;pT=mm===0?1:0}else{pH=1-Phi((b-mm)/sdm);pA=Phi((-b-mm)/sdm);pT=Math.max(0,1-pH-pA)}
   return{h,a,tot:h+a,mm,sdm,sdt,pH,pA,pT,cur,state:allDone?"done":anyLive?"live":"pre"}}
+const dkInfoMem={};
+function dkFor(g){const c=DKC[g.lg+":"+g.id];return c&&c.v&&c.v.total!=null?c.v:null}
+const estHalf=x=>Math.floor(x)+0.5;
+function dkPeriodEst(g,ix){const v=dkFor(g);if(!v||!PSH[g.lg])return null;const sh=ix.reduce((t,i)=>t+PSH[g.lg][i],0);
+  const tot=estHalf(v.total*sh),spr=v.spread==null?null:(v.spread<0?-1:1)*estHalf(Math.abs(v.spread)*sh*1.4);return{tot,spr}}
+function dkTeamEst(g){const v=dkFor(g);if(!v||v.spread==null)return null;return{h:estHalf((v.total-v.spread)/2),a:estHalf((v.total+v.spread)/2)}}
+function pCover(mm,sd,spr,lg){let t=-spr;const b=TIEB[lg]||0.5;if(Math.abs(t)<b)t=(t<0?-1:1)*b;return 1-Phi((t-mm)/Math.max(sd,0.3))}
 function periodsHtml(g){if(!PSH[g.lg]||!gameProj(g))return"";const key=g.lg+":"+g.id+":p",A=short(g,g.away),H=short(g,g.home);
-  const ds=PER.map(([nm,ix])=>[nm,periodDist(g,ix)]);
-  const rows=ds.map(([nm,d])=>{if(!d)return"";const sc=`${Math.round(d.a)}–${Math.round(d.h)}`;
+  const ds=PER.map(([nm,ix])=>[nm,periodDist(g,ix),dkPeriodEst(g,ix)]);
+  const rows=ds.map(([nm,d,e])=>{if(!d)return"";const sc=`${Math.round(d.a)}–${Math.round(d.h)}`;
     if(d.state==="done")return`<tr><td>${nm}</td><td class="n">${sc}</td><td colspan="2" class="note">Final · ${d.mm===0?"tie":esc(d.mm>0?H:A)+" won"}</td></tr>`;
     const fav=d.pH>=d.pA?H:A,sp=Math.round(Math.abs(d.mm)*2)/2;
-    return`<tr><td>${nm}${d.state==="live"?' <span class="live">Live</span>':""}</td><td class="n">${sc}</td><td>${esc(fav)} <b>${pct(Math.max(d.pH,d.pA),0)}</b>${d.pT>=0.03?`<div class="note">Tie ${pct(d.pT,0)}</div>`:""}<div class="note">Line ${esc(d.mm>=0?H:A)} ${sp?"-"+sp:"pk"}</div></td><td class="n">${half(d.tot)}</td></tr>`}).join("");
+    const dkS=e&&e.spr!=null?(()=>{const p=pCover(d.mm,d.sdm,e.spr,g.lg);return`<div class="note dkc">DK est ${esc(H)} ${e.spr>0?"+":""}${e.spr}: <b>${pct(p,0)}</b></div>`})():"";
+    const dkT=e?(()=>{const p=Phi((d.tot-e.tot)/Math.max(d.sdt,0.3));return`<div class="note dkc">DK est ${e.tot}<br>O <b>${pct(p,0)}</b> · U <b>${pct(1-p,0)}</b></div>`})():"";
+    return`<tr><td>${nm}${d.state==="live"?' <span class="live">Live</span>':""}</td><td><span class="n">${sc}</span><div class="note">${esc(d.mm>=0?H:A)} ${sp?"-"+sp:"pk"}</div>${dkS}</td><td>${esc(fav)} <b>${pct(Math.max(d.pH,d.pA),0)}</b>${d.pT>=0.03?`<div class="note">Tie ${pct(d.pT,0)}</div>`:""}</td><td><span class="n">${half(d.tot)}</span>${dkT}</td></tr>`}).join("");
   const sel=lineMem[key+"s"]??"0";
-  const opts=ds.map(([nm,d],k)=>!d||d.state==="done"?"":`<option value="${k}" data-tot="${d.tot.toFixed(2)}" data-sdt="${Math.max(d.sdt,0.3).toFixed(2)}" data-m="${d.mm.toFixed(2)}" data-sdm="${Math.max(d.sdm,0.3).toFixed(2)}" data-min="${d.state==="live"?d.cur:""}"${String(k)===String(sel)?" selected":""}>${nm}</option>`).join("");
+  const opts=ds.map(([nm,d,e],k)=>!d||d.state==="done"?"":`<option value="${k}" data-tot="${d.tot.toFixed(2)}" data-sdt="${Math.max(d.sdt,0.3).toFixed(2)}" data-m="${d.mm.toFixed(2)}" data-sdm="${Math.max(d.sdm,0.3).toFixed(2)}" data-min="${d.state==="live"?d.cur:""}"${e?` data-dkt="${e.tot}"${e.spr!=null?` data-dks="${e.spr}"`:""}`:""}${String(k)===String(sel)?" selected":""}>${nm}</option>`).join("");
   return`<details class="tot" data-k="${esc(key)}"${openMem.has(key)?" open":""}><summary>Halves and quarters</summary>
-    <div class="tablewrap"><table><thead><tr><th>Period</th><th>Proj ${esc(A)}–${esc(H)}</th><th>Winner</th><th>Total</th></tr></thead><tbody>${rows}</tbody></table></div>
-    ${opts?`<div class="pchk"><div class="row chk"><span class="lab tl">Check a line for</span><select class="pIn pSel" data-k="${esc(key+"s")}" aria-label="Period">${opts}</select></div>
+    ${dkFor(g)?`<p class="note dkc">DK est = estimated from DraftKings' full-game total and spread. Check the exact line in DraftKings.</p>`:`<p class="note">Tap <b>DK line</b> under “Totals and team totals” to add DraftKings estimates here.</p>`}
+    <div class="tablewrap"><table class="ptab"><thead><tr><th>Period</th><th>${esc(A)}–${esc(H)}</th><th>Winner</th><th>Total</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${opts?`<div class="pchk" data-lg="${g.lg}"><div class="row chk"><span class="lab tl">Check a line for</span><select class="pIn pSel" data-k="${esc(key+"s")}" aria-label="Period">${opts}</select></div>
     <div class="row chk ou"><span class="lab tl">Total</span><input type="number" inputmode="decimal" step="0.5" class="pIn pTot" data-k="${esc(key+"t")}" value="${esc(lineMem[key+"t"]??"")}" placeholder="Line" aria-label="Period total line"><span class="note pTotO"></span></div>
-    <div class="row chk ou"><span class="lab tl">${esc(H)} spread</span><input type="number" inputmode="decimal" step="0.5" class="pIn pSpr" data-k="${esc(key+"m")}" value="${esc(lineMem[key+"m"]??"")}" placeholder="e.g. -1.5" aria-label="${esc(H)} period spread"><span class="note pSprO"></span></div></div>`:""}
+    <div class="row chk ou"><span class="lab tl">${esc(H)} spread</span><input type="number" inputmode="decimal" step="0.5" class="pIn pSpr" data-k="${esc(key+"m")}" value="${esc(lineMem[key+"m"]??"")}" placeholder="Line" aria-label="${esc(H)} period spread"><span class="note pSprO"></span></div></div>`:""}
     <p class="note">Football quarters often end tied, so the tie chance is shown. A tie usually pushes a 2-way quarter or half moneyline.${isLive(g)?" Live rows use the score so far and time left in the period.":""}</p></details>`}
 function pchkCalc(box){if(!box)return;const sel=box.querySelector(".pSel"),op=sel&&sel.selectedOptions&&sel.selectedOptions[0];if(!op)return;
   const t=parseFloat(box.querySelector(".pTot").value),m=parseFloat(box.querySelector(".pSpr").value);
   box.querySelector(".pTotO").innerHTML=isFinite(t)?ouTxt(+op.dataset.tot,+op.dataset.sdt,t,op.dataset.min!==""?+op.dataset.min:null):"";
-  box.querySelector(".pSprO").innerHTML=isFinite(m)?(()=>{const p=Phi((+op.dataset.m+m)/+op.dataset.sdm);return`Covers <b>${pct(p,0)}</b> · Other side <b>${pct(1-p,0)}</b>`})():""}
-["input","change"].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(!t.classList||!t.classList.contains("pIn"))return;lineMem[t.dataset.k]=t.value;pchkCalc(t.closest(".pchk"))}));
+  box.querySelector(".pSprO").innerHTML=isFinite(m)?(()=>{const p=pCover(+op.dataset.m,+op.dataset.sdm,m,box.dataset.lg);return`Covers <b>${pct(p,0)}</b> · Other side <b>${pct(1-p,0)}</b>`})():""}
+["input","change"].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(!t.classList||!t.classList.contains("pIn"))return;lineMem[t.dataset.k]=t.value;
+  if(t.classList.contains("pSel")&&ev==="change"){const box=t.closest(".pchk"),op=t.selectedOptions[0];if(op&&op.dataset.dkt){const ti=box.querySelector(".pTot"),si=box.querySelector(".pSpr");ti.value=op.dataset.dkt;lineMem[ti.dataset.k]=ti.value;if(op.dataset.dks!=null){si.value=op.dataset.dks;lineMem[si.dataset.k]=si.value}}}
+  pchkCalc(t.closest(".pchk"))}));
 /* --- soccer --- */
 const SOCCER=[["eng.1","Premier League"],["esp.1","LaLiga"],["ita.1","Serie A"],["ger.1","Bundesliga"],["fra.1","Ligue 1"],["uefa.champions","Champions League"],["usa.1","MLS"]];
 const SOCC={};
@@ -1172,7 +1274,10 @@ document.addEventListener("click",async e=>{const b=e.target.closest&&e.target.c
   if(v.spread!=null)parts.push(`${esc(H)} ${v.spread>0?"+":""}${v.spread}`);
   if(v.mlH!=null&&v.mlA!=null&&md){const iH=impl(v.mlH),iA=impl(v.mlA);parts.push(`Moneyline ${esc(A)} ${amer(v.mlA)} · ${esc(H)} ${amer(v.mlH)}`);
     if(iH&&iA){const s=iH+iA+(v.draw!=null&&impl(v.draw)?impl(v.draw):0);parts.push(`DraftKings gives ${esc(H)} ${pct(iH/s,0)}, model says ${pct(md.pH,0)}`)}}
-  info.innerHTML=`<b>${esc(v.prov)}:</b> ${parts.join(" · ")}`});
+  const te=dkTeamEst(g);if(te){const ai=box.querySelector(`.ouIn[data-k="${CSS.escape(key+"a")}"]`),hi=box.querySelector(`.ouIn[data-k="${CSS.escape(key+"h")}"]`);if(ai)setStepV(ai,te.a);if(hi)setStepV(hi,te.h)}
+  if(PSH[g.lg]){const pk=key+":p",selK=lineMem[pk+"s"]??"0",ix=(PER[+selK]||PER[0])[1],e=dkPeriodEst(g,ix);if(e){lineMem[pk+"t"]=String(e.tot);if(e.spr!=null)lineMem[pk+"m"]=String(e.spr)}openMem.add(pk)}
+  const html=`<b>${esc(v.prov)}:</b> ${parts.join(" · ")}${te?`<br>Team totals filled with estimates (${esc(A)} ${te.a}, ${esc(H)} ${te.h}) from DraftKings' total and spread.`:""}`;dkInfoMem[key]=html;info.innerHTML=html;
+  setTimeout(renderGames,60)});
 /* --- tap-to-adjust buttons for every line, odds and stake box --- */
 const STEPCFG=[
   [".ouIn,.pTot,.socIn,.xIn,.nline,.totIn,.lineIn",{step:0.5}],
