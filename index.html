@@ -216,7 +216,7 @@ details p{margin:.5rem 0 0;max-width:62ch}
 /* layout C: sticky sport strip + bottom tab bar */
 .sportbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;margin-top:10px;padding:10px 12px!important;gap:8px;box-shadow:0 6px 14px -10px rgba(0,0,0,.6)}
 .sportbar h2{font-size:1rem;margin:0}
-.sportbar .lgsel{display:flex;flex-wrap:nowrap!important;overflow-x:auto;gap:6px;scroll-snap-type:x proximity;-webkit-mask-image:linear-gradient(90deg,#000 90%,transparent);mask-image:linear-gradient(90deg,#000 90%,transparent);padding-right:24px}
+.sportbar .lgsel{display:flex;flex-wrap:nowrap!important;overflow-x:auto;gap:6px;scroll-snap-type:x proximity;}
 .sportbar .lgsel button{flex:0 0 auto!important;flex-direction:column;justify-content:center;gap:3px;min-width:62px;padding:7px 8px!important;font-size:.66rem!important;letter-spacing:.03em;scroll-snap-align:start}
 .sportbar .lgsel button svg{width:18px;height:18px}
 nav{position:fixed!important;left:0;right:0;bottom:0;top:auto!important;margin:0 auto!important;max-width:760px;z-index:20;background:var(--surface)!important;border-top:1px solid var(--line);display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr));gap:0!important;overflow:visible!important;padding:6px max(4px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px))!important;box-shadow:0 -8px 18px -12px rgba(0,0,0,.6)}
@@ -237,10 +237,17 @@ nav button[aria-selected="true"]{color:var(--turf)!important;background:color-mi
 .lsg .lead{color:var(--turf)}
 .lstab{overflow-x:auto}.lstab table{border-collapse:collapse;font:.78rem var(--mono);width:100%}.lstab th,.lstab td{padding:3px 5px;text-align:center;border-bottom:1px solid var(--line)}.lstab th:first-child,.lstab td:first-child{text-align:left;font-family:var(--body);font-weight:600}.lstab td.tot{font-weight:700}
 .tgrp{grid-column:1/-1;display:flex;align-items:center;gap:6px;margin:6px 0 -2px;font:700 .82rem var(--body);color:var(--ink);border-bottom:1px solid var(--line);padding-bottom:4px}.tgrp svg{width:15px;height:15px;color:var(--turf)}.tgrp span{font-weight:600;color:var(--muted);font-size:.75rem}
-.sportbar .dfsel{display:flex;flex-wrap:nowrap!important;overflow-x:auto;gap:6px;padding-bottom:0;-webkit-mask-image:linear-gradient(90deg,#000 90%,transparent);mask-image:linear-gradient(90deg,#000 90%,transparent);padding-right:24px}
+.sportbar .dfsel{display:flex;flex-wrap:nowrap!important;overflow-x:auto;gap:6px;padding-bottom:0;}
 .sportbar .dfsel button{flex:0 0 auto;font-size:.7rem!important;padding:5px 10px!important}
 .sportbar .dfsel:empty{display:none}
 .hdrow{flex-wrap:nowrap!important;gap:8px}.hdrow h1{white-space:nowrap}.hdrow .tag{font-size:.62rem;white-space:nowrap}.hdrow .btn{font-size:.72rem!important;padding:5px 10px!important}
+.scw{position:relative;min-width:0}
+.scw>.sca{position:absolute;top:0;bottom:0;width:40px;display:flex;align-items:center;border:0;padding:0;cursor:pointer;z-index:3;background:transparent}
+.scw>.sca.l{left:-4px;justify-content:flex-start;background:linear-gradient(90deg,var(--surface) 45%,transparent)}
+.scw>.sca.r{right:-4px;justify-content:flex-end;background:linear-gradient(270deg,var(--surface) 45%,transparent)}
+.scw>.sca i{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--turf);color:var(--bg);box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.scw>.sca svg{width:15px;height:15px}
+.scw>.sca[hidden]{display:none}
 </style>
 
 </head>
@@ -1856,6 +1863,20 @@ function lwStart(){clearInterval(LW.timer);LW.timer=setInterval(lwTick,30000);re
 document.querySelector('nav button[data-tab="live"]').addEventListener("click",lwStart);
 if(!$("p-live").hidden)setTimeout(lwStart,600);
 
+/* --- arrows on sideways-scrolling strips --- */
+const SCSEL=".lgsel,.dfsel,.tablewrap,.lstab";
+const CHEV=d=>`<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="${d==="l"?"M15 5l-7 7 7 7":"M9 5l7 7-7 7"}"/></svg></i>`;
+function scUpd(el){const w=el.parentElement;if(!w||!w.classList.contains("scw"))return;const l=w.querySelector(":scope>.sca.l"),r=w.querySelector(":scope>.sca.r");
+  const max=el.scrollWidth-el.clientWidth;l.hidden=!(max>4&&el.scrollLeft>4);r.hidden=!(max>4&&el.scrollLeft<max-4)}
+function armScroll(el){if(el.dataset.sc)return;el.dataset.sc=1;const w=document.createElement("div");w.className="scw";el.parentNode.insertBefore(w,el);w.appendChild(el);
+  ["l","r"].forEach(d=>{const b=document.createElement("button");b.type="button";b.className="sca "+d;b.setAttribute("aria-label",d==="l"?"Scroll left":"Scroll right");b.innerHTML=CHEV(d);b.hidden=true;
+    b.addEventListener("click",e=>{e.stopPropagation();el.scrollBy({left:(d==="l"?-1:1)*Math.max(120,el.clientWidth*0.7),behavior:"smooth"})});w.appendChild(b)});
+  el.addEventListener("scroll",()=>scUpd(el),{passive:true});if(window.ResizeObserver)new ResizeObserver(()=>scUpd(el)).observe(el);
+  new MutationObserver(()=>requestAnimationFrame(()=>scUpd(el))).observe(el,{childList:true,subtree:true,characterData:true});requestAnimationFrame(()=>scUpd(el))}
+function armAll(){document.querySelectorAll(SCSEL).forEach(armScroll)}
+let scT=null;new MutationObserver(()=>{clearTimeout(scT);scT=setTimeout(armAll,80)}).observe(document.body,{childList:true,subtree:true});
+window.addEventListener("resize",()=>document.querySelectorAll(SCSEL).forEach(scUpd));document.addEventListener("visibilitychange",()=>document.querySelectorAll(SCSEL).forEach(scUpd));
+armAll();
 /* --- quick logging & auto-grading --- */
 var Q={g:null,side:null,ou:null,line:null};
 function localDate(s){const d=new Date(s);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
