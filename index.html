@@ -65,6 +65,7 @@ header p{margin:.4rem 0 0;color:var(--muted);max-width:60ch}
 .pl .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .pl .chance{font-family:var(--mono);font-weight:600;font-size:1.3rem;color:var(--turf)}
 .pl ul{margin:0;padding-left:1.1rem}
+
 .lgsel button[aria-pressed="true"]{background:var(--turf);color:var(--bg)}
 .lgsel{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.lgsel::-webkit-scrollbar{display:none}
 .lgsel button{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px}
@@ -199,7 +200,7 @@ details p{margin:.5rem 0 0;max-width:62ch}
 .subtab[aria-pressed="true"]{background:var(--turf);color:var(--surface)}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:8px}
 .tsec{grid-column:1/-1;margin:8px 0 0;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.tile{appearance:none;text-align:left;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:8px 9px;display:flex;flex-direction:column;gap:4px;cursor:pointer;min-width:0}
+.tile{appearance:none;text-align:left;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--line);border-radius:10px;padding:8px 7px;display:flex;flex-direction:column;gap:4px;cursor:pointer;min-width:0}
 .tile.sel{outline:2px solid var(--turf);outline-offset:-1px}
 .tile.close{border-left-color:var(--bad)}.tile.upset{border-left-color:var(--warn)}
 .tmeta{display:flex;justify-content:space-between;align-items:center;gap:4px;font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden}
@@ -212,6 +213,30 @@ details p{margin:.5rem 0 0;max-width:62ch}
 .tflag .up{color:var(--good)}.tflag .cl{color:var(--bad)}.tflag .us{color:var(--warn)}
 .tdet{grid-column:1/-1;background:var(--surface);border:1px solid var(--turf);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .lwhelp{margin-top:10px}.lwhelp summary{cursor:pointer;font-size:.85rem;font-weight:600;color:var(--turf)}
+/* layout C: sticky sport strip + bottom tab bar */
+.sportbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;margin-top:10px;padding:10px 12px!important;gap:8px;box-shadow:0 6px 14px -10px rgba(0,0,0,.6)}
+.sportbar h2{font-size:1rem;margin:0}
+.sportbar .lgsel{display:flex;flex-wrap:nowrap!important;overflow-x:auto;gap:6px;scroll-snap-type:x proximity;-webkit-mask-image:linear-gradient(90deg,#000 90%,transparent);mask-image:linear-gradient(90deg,#000 90%,transparent);padding-right:24px}
+.sportbar .lgsel button{flex:0 0 auto!important;flex-direction:column;justify-content:center;gap:3px;min-width:62px;padding:7px 8px!important;font-size:.66rem!important;letter-spacing:.03em;scroll-snap-align:start}
+.sportbar .lgsel button svg{width:18px;height:18px}
+nav{position:fixed!important;left:0;right:0;bottom:0;top:auto!important;margin:0 auto!important;max-width:760px;z-index:20;background:var(--surface)!important;border-top:1px solid var(--line);display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr));gap:0!important;overflow:visible!important;padding:6px max(4px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px))!important;box-shadow:0 -8px 18px -12px rgba(0,0,0,.6)}
+nav button{display:flex!important;flex-direction:column;align-items:center;gap:3px;border:0!important;background:transparent!important;color:var(--muted)!important;font-family:var(--body)!important;font-size:.6rem!important;font-weight:600!important;letter-spacing:.01em!important;text-transform:none!important;padding:5px 0!important;border-radius:8px!important;min-width:0}
+nav button svg{width:22px;height:22px}
+nav button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+nav button[aria-selected="true"]{color:var(--turf)!important;background:color-mix(in srgb,var(--turf) 14%,transparent)!important}
+.wrap{padding-bottom:calc(86px + env(safe-area-inset-bottom,0px))!important}
+@media (max-width:640px){header p{display:none}header h1{font-size:1.9rem}}
+/* tile line scores */
+.lsg{display:grid;align-items:baseline;column-gap:2px;row-gap:1px}
+.lsg .h{font:600 .56rem var(--mono);color:var(--muted);text-align:center;text-transform:uppercase}
+.lsg .ab{font-weight:700;font-size:.85rem;text-transform:uppercase;overflow:hidden;white-space:nowrap;text-overflow:clip}
+.lsg .q{font:500 .64rem var(--mono);color:var(--muted);text-align:center}
+.lsg .q.cur{color:var(--ink);font-weight:700}
+.lsg .t{font:700 .98rem var(--mono);text-align:right}
+.lsg .p{font:600 .72rem var(--mono);color:var(--muted);text-align:right}
+.lsg .lead{color:var(--turf)}
+.lstab{overflow-x:auto}.lstab table{border-collapse:collapse;font:.78rem var(--mono);width:100%}.lstab th,.lstab td{padding:3px 5px;text-align:center;border-bottom:1px solid var(--line)}.lstab th:first-child,.lstab td:first-child{text-align:left;font-family:var(--body);font-weight:600}.lstab td.tot{font-weight:700}
+.tgrp{grid-column:1/-1;display:flex;align-items:center;gap:6px;margin:6px 0 -2px;font:700 .82rem var(--body);color:var(--ink);border-bottom:1px solid var(--line);padding-bottom:4px}.tgrp svg{width:15px;height:15px;color:var(--turf)}.tgrp span{font-weight:600;color:var(--muted);font-size:.75rem}
 </style>
 
 </head>
@@ -221,6 +246,11 @@ details p{margin:.5rem 0 0;max-width:62ch}
   <h1>Line<span>check</span></h1>
   <p>Research and math for football, basketball, baseball, hockey, soccer, tennis, UFC, golf and racing. Built for betting on DraftKings. Your own win estimate, compared with the line. You place every bet yourself.</p>
 </header>
+
+<div class="card sportbar">
+  <div class="row" style="justify-content:space-between"><h2>Sport</h2><span class="row" style="gap:6px"><span class="tag" id="liveTag">Loading…</span><button class="btn sm ghost" id="refreshBtn">Refresh</button></span></div>
+  <div class="row lgsel" role="group" aria-label="Sport"></div>
+</div>
 
 <nav role="tablist">
   <button role="tab" id="t-games" aria-selected="true" data-tab="games">Games</button>
@@ -236,8 +266,7 @@ details p{margin:.5rem 0 0;max-width:62ch}
 <!-- GAMES -->
 <section class="panel" id="p-games">
   <div class="card">
-    <div class="row" style="justify-content:space-between"><h2>This week's games</h2><span class="row" style="gap:6px"><span class="tag" id="liveTag">Loading…</span><button class="btn sm ghost" id="refreshBtn">Refresh</button></span></div>
-    <div class="row lgsel" role="group" aria-label="League"></div>
+    <h2>This week's games</h2>
     <p class="note">Win chances come from each team's season results plus home field. They don't use DraftKings' odds. Injuries aren't included for football, so tap <b>Dig in</b> to add them. NBA picks include back-to-back rest. While the app is open, scores and chances refresh every minute.</p>
     <div class="row dfsel" id="dayFilter" role="group" aria-label="Filter by date"></div>
     <p class="note" id="statsAsOf"></p>
@@ -310,7 +339,7 @@ details p{margin:.5rem 0 0;max-width:62ch}
     <div class="card"><h2>NHL props</h2><p class="note">Skater chances use goals, assists, points and shots per game, blending this season with last season while it's early, adjusted for how many goals the opponent allows. Players listed out are removed. Power-play roles and line changes aren't included. No DraftKings odds are used.</p><h3>Anytime goal scorers</h3><p class="note">Chance to score 1+ goal, with 1+ point chance.</p><div id="tdBoard-nhl"></div></div>
     <div id="propList-nhl" style="display:flex;flex-direction:column;gap:10px"></div>
   </div>
-  <div class="empty" id="propsNone" hidden>Player props cover the NFL, NBA, MLB, NHL and soccer for now. Choose one of those, or All, on the Games tab.</div>
+  <div class="empty" id="propsNone" hidden>Player props cover the NFL, NBA, MLB, NHL and soccer for now. Choose one of those, or All, at the top.</div>
 </section>
 
 <!-- ANALYZE -->
@@ -485,7 +514,7 @@ details p{margin:.5rem 0 0;max-width:62ch}
   </div>
   <div class="card">
     <h2>Bet types, plainly</h2>
-    <details><summary>Live tab and player status</summary><p>The Live tab follows the sport picked on the Games tab. It has two sub-tabs. <b>Scores</b> shows every game as a small tile: live games with their win chances, games starting in the next 3 hours and today's finals. Tap a tile for details. <b>Player status</b> shows the injury report. <b>Upset watch</b> flags a pregame favorite that is losing. <b>Close finish</b> flags a late game that is still near 50/50. Player status lists each team's injury report: Out and Suspended players won't play, Doubtful players probably won't, Questionable is close to a coin flip, and Day-to-day is minor. <b>Left early</b> means a news note says the player exited a game in the last day. Check status before betting a player prop. Books usually void a prop if the player doesn't play at all, but not if he leaves early.</p></details>
+    <details><summary>Live tab and player status</summary><p>The Live tab follows the sport picked at the top. It has two sub-tabs. <b>Scores</b> shows every game as a small tile: live games with their win chances, games starting in the next 3 hours and today's finals. Tap a tile for details. <b>Player status</b> shows the injury report. <b>Upset watch</b> flags a pregame favorite that is losing. <b>Close finish</b> flags a late game that is still near 50/50. Player status lists each team's injury report: Out and Suspended players won't play, Doubtful players probably won't, Questionable is close to a coin flip, and Day-to-day is minor. <b>Left early</b> means a news note says the player exited a game in the last day. Check status before betting a player prop. Books usually void a prop if the player doesn't play at all, but not if he leaves early.</p></details>
     <details open><summary>Moneyline</summary><p>Pick who wins. Negative odds show what you risk to win $100; positive odds show what $100 wins.</p><div class="ex-line">-150: bet $150 to win $100 · +130: bet $100 to win $130</div></details>
     <details><summary>Point spread</summary><p>The favorite must win by more than the spread; the underdog covers by losing by less (or winning). Most spreads are priced near -110 on both sides, so you need to win about 52.4% to break even.</p><div class="ex-line">Steelers -3.5: they must win by 4 or more</div></details>
     <details><summary>Total (over/under)</summary><p>Bet on the combined score of both teams going over or under a number. Weather, pace and injuries to offensive stars move totals most.</p><div class="ex-line">O/U 44.5: a 24-21 final (45) goes over</div></details>
@@ -656,6 +685,15 @@ odds();
 
 /* --- tabs --- */
 const TABS=["games","live","parlay","props","analyze","odds","tracker","guide"];
+const TABICO={games:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+live:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M8 8.5a5 5 0 0 0 0 7M16 8.5a5 5 0 0 1 0 7M5 5.5a9 9 0 0 0 0 13M19 5.5a9 9 0 0 1 0 13"/></svg>',
+parlay:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.6 0l3-3a4 4 0 0 0-5.6-5.6l-1 1"/><path d="M14 10a4 4 0 0 0-5.6 0l-3 3a4 4 0 0 0 5.6 5.6l1-1"/></svg>',
+props:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>',
+analyze:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg>',
+odds:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></svg>',
+tracker:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l2 2 3-3M4 15l2 2 3-3M12 8h8M12 16h8"/></svg>',
+guide:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20"/></svg>'};
+document.querySelectorAll("nav button").forEach(b=>{const t=b.textContent.trim();if(TABICO[b.dataset.tab])b.innerHTML=TABICO[b.dataset.tab]+`<span>${t}</span>`});
 function show(t){document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));TABS.forEach(x=>$("p-"+x).hidden=x!==t);try{localStorage.setItem("ge-tab",t)}catch(e){}}
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.tab)));
 try{const t=localStorage.getItem("ge-tab");if(t&&$("p-"+t))show(t)}catch(e){}
@@ -703,7 +741,7 @@ function slate(){
   return out.sort((a,b)=>Date.parse(a.start_time)-Date.parse(b.start_time));
 }
 function rec(g,c){if(g.lg==="ten"){const r=tenRank(c,tname(g,c),g.tour);return r?"#"+r.rank:""}const t=teamInfo(g.lg,c);return (t&&t.rec)||(g.teams&&g.teams[c]&&g.teams[c].rec)||""}
-function renderLg(){document.querySelectorAll(".lgsel button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lg===LG))}
+function renderLg(){document.querySelectorAll(".lgsel button").forEach(b=>{b.setAttribute("aria-pressed",b.dataset.lg===LG);if(b.dataset.lg===LG&&!b.dataset.seen){b.dataset.seen=1;const box=b.parentElement;if(box&&box.scrollWidth>box.clientWidth)box.scrollLeft=Math.max(0,b.offsetLeft-box.offsetLeft-12)}else if(b.dataset.lg!==LG)delete b.dataset.seen})}
 function renderGames(){
   const ae=document.activeElement;if(ae&&ae.classList&&(ae.classList.contains("ouIn")||ae.classList.contains("pIn")||ae.classList.contains("socIn")||ae.classList.contains("spIn")||ae.classList.contains("fOdds"))){pendingRender=true;return}
   renderLg();
@@ -763,7 +801,7 @@ function filterText(){return `${LGN[LG]||"All sports"} · ${DF==="all"?"All days
 function dateFilter(gs){return DF==="all"||DF==="live"?gs:gs.filter(g=>localDate(effT(g))===DF)}
 function renderParlays(gs){
   gs=dateFilter(slate());
-  $("parlayFilterNote").textContent=`Showing: ${filterText()}. Change this on the Games tab.`+(DF==="live"?" Parlays use games that haven't started, so every upcoming day is included.":"");
+  $("parlayFilterNote").textContent=`Showing: ${filterText()}. Pick the sport above; change the day on the Games tab.`+(DF==="live"?" Parlays use games that haven't started, so every upcoming day is included.":"");
   const L=legs(gs).sort((a,b)=>b.p-a.p);const out=[];
   [2,3,4].forEach(n=>{if(L.length<n)return;const set=L.slice(0,n);const p=set.reduce((s,l)=>s*l.p,1);
     out.push(`<div class="pl"><div class="hd"><h3>${n}-team parlay</h3><span class="chance">${pct(p,0)} to hit</span></div>
@@ -910,7 +948,7 @@ const LGICON={nfl:"football",cfb:"football",nba:"basketball",wnba:"basketball",n
 const icon=(lg,cls="sico")=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[LGICON[lg]]||""}</svg>`;
 const LGBTN=[["all","All"],["nfl","NFL"],["cfb","NCAAF"],["nba","NBA"],["ncaab","NCAAB"],["ncaaw","NCAAW"],["wnba","WNBA"],["mlb","MLB"],["nhl","NHL"],["soc","Soccer"],["ten","Tennis"],["mma","UFC"],["golf","Golf"],["f1","F1"],["nas","NASCAR"]];
 document.querySelectorAll(".lgsel").forEach(box=>{box.innerHTML=LGBTN.map(([k,t])=>`<button class="btn sm ghost" data-lg="${k}">${icon(k)}${t}</button>`).join("");
-  box.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{LG=b.dataset.lg;try{localStorage.setItem("ge-lg",LG)}catch(e){}renderGames()}))});
+  box.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{LG=b.dataset.lg;try{localStorage.setItem("ge-lg",LG)}catch(e){}renderGames();if(!$("p-props").hidden)renderProps();if(!$("p-live").hidden){LW.sel=null;renderLive()}}))});
 /* --- tennis and UFC --- */
 function setP(p,bo){let lo=0,hi=1;for(let i=0;i<40;i++){const s=(lo+hi)/2,f=bo===5?s*s*s*(10-15*s+6*s*s):s*s*(3-2*s);if(f<p)lo=s;else hi=s}return(lo+hi)/2}
 function tenRank(id,name,tour){const R=(D.ten.rank||{})[tour]||{};return(R.byId&&R.byId[String(id)])||(R.byName&&R.byName[String(name||"").toLowerCase()])||null}
@@ -1513,7 +1551,7 @@ if(!$("p-props").hidden)setTimeout(renderProps,500);
 async function renderProps(){
   const PLGS=["nba","nfl","mlb","nhl","soc"];const want=LG==="all"?PLGS:PLGS.includes(LG)?[LG]:[];
   $("propsNba").hidden=!want.includes("nba");$("propsNfl").hidden=!want.includes("nfl");$("propsSoc").hidden=!want.includes("soc");$("propsMlb").hidden=!want.includes("mlb");$("propsNhl").hidden=!want.includes("nhl");$("propsNone").hidden=!!want.length;
-  $("propFilterNote").textContent=`Showing: ${filterText()}. Change this on the Games tab.`+(DF==="live"?" Live shows the NFL touchdown tracker and soccer next-goal chances. Pregame props show when you pick a day or All.":"");
+  $("propFilterNote").textContent=`Showing: ${filterText()}. Pick the sport above; change the day on the Games tab.`+(DF==="live"?" Live shows the NFL touchdown tracker and soccer next-goal chances. Pregame props show when you pick a day or All.":"");
   for(const l of want){try{await (l==="nba"?renderNbaProps():l==="soc"?renderSocProps():l==="mlb"?renderMlbProps():l==="nhl"?renderNhlProps():renderNflProps())}catch(e){}}
 }
 /* --- NBA player props --- */
@@ -1721,26 +1759,43 @@ function lwFlags(g,md){const L=LEAGUES[g.lg],sc=g.score||{};const f={close:false
   if(pre!=null&&sh!=null&&sa!=null&&((pre>=0.6&&sa>sh)||(pre<=0.4&&sh>sa)))f.upset=true;
   if(remaining(g)<0.25&&md.pH>0.25&&md.pH<0.75)f.close=true;return f}
 function tAbbr(g,c){const t=g.teams&&g.teams[c];if(g.lg==="ten"||g.lg==="mma")return short(g,c);return (t&&t.abbr)||short(g,c)}
+function fmtClock(g){const d=String(g.detail||"");if(!isLive(g))return d;const L=g.lg;
+  const m=d.match(/^(\d+:\d+(?:\.\d+)?)\s*-\s*(\d+)(?:st|nd|rd|th)/i);if(m){const n=+m[2],pre=L==="nhl"?"P":L==="ncaab"?"H":"Q";return`${pre}${n} · ${m[1]} left`}
+  const ot=d.match(/^(\d+:\d+(?:\.\d+)?)\s*-\s*(\d*\s*OT)/i);if(ot)return`${ot[2].replace(/\s/g,"")} · ${ot[1]} left`;
+  if(L==="soc"){const mm=d.match(/^(\d+)(\+\d+)?'/);if(mm)return`${mm[1]}${mm[2]||""} min played`}
+  return d}
+function lsInfo(g){if(!g.ls||!(g.ls.h.length||g.ls.a.length))return null;const np=(CLOCK[g.lg]&&CLOCK[g.lg][0])||(g.lg==="soc"?2:g.lg==="mlb"?9:0);if(!np)return null;
+  const n=Math.max(g.ls.h.length,g.ls.a.length);const labs=[];for(let i=0;i<Math.max(np,n);i++)labs.push(i<np?String(i+1):(n-np>1?"OT"+(i-np+1):"OT"));return{np,n,labs}}
+function tileRows(g,md,live,fin){const sc=g.score||{},sh=sc[g.home],sa=sc[g.away],has=(live||fin)&&sh!=null&&sa!=null;
+  const lead=c=>has&&(c===g.home?sh>sa:sa>sh);const LI=g.lg==="mlb"?null:lsInfo(g);
+  if(LI&&has){const cols=LI.labs.length,showP=!!md&&cols<=4;const cur=live?LI.n-1:-1;
+    const tpl=`minmax(2.3em,1fr) repeat(${cols},minmax(11px,auto)) 1.8em${showP?" 2.3em":""}`;
+    const row=(c,arr,p)=>`<span class="ab${lead(c)?" lead":""}">${esc(tAbbr(g,c))}</span>${LI.labs.map((_,i)=>`<span class="q${i===cur?" cur":""}">${arr[i]!=null?arr[i]:""}</span>`).join("")}<span class="t">${sc[c]}</span>${showP?`<span class="p${lead(c)?" lead":""}">${p!=null?pct(p,0):""}</span>`:""}`;
+    return`<div class="lsg" style="grid-template-columns:${tpl}"><span></span>${LI.labs.map(l=>`<span class="h">${l}</span>`).join("")}<span class="h" style="text-align:right">T</span>${showP?`<span class="h" style="text-align:right">Win</span>`:""}
+      ${row(g.away,g.ls.a,md&&md.pA)}${row(g.home,g.ls.h,md&&md.pH)}</div>`}
+  const r=(c,p)=>`<div class="trow${lead(c)?" lead":""}"><span class="ab">${esc(tAbbr(g,c))}</span><span class="ts">${has?sc[c]:""}</span><span class="tp">${md&&p!=null?pct(p,0):""}</span></div>`;
+  return r(g.away,md&&md.pA)+r(g.home,md&&md.pH)}
+function lsTable(g){const LI=lsInfo(g);if(!LI||!(g.score))return"";const sc=g.score;
+  return`<div class="lstab"><table><tr><th></th>${LI.labs.map(l=>`<th>${l}</th>`).join("")}<th>T</th></tr>${[g.away,g.home].map(c=>{const arr=c===g.home?g.ls.h:g.ls.a;return`<tr><td>${esc(tAbbr(g,c))}</td>${LI.labs.map((_,i)=>`<td>${arr[i]!=null?arr[i]:""}</td>`).join("")}<td class="tot">${sc[c]??""}</td></tr>`}).join("")}</table></div>`}
 function lwTile(g){const fin=DONE.includes(g.status),live=isLive(g),sc=g.score||{},k=g.lg+":"+g.id,sel=LW.sel===k;
-  const meta=`<div class="tmeta"><span>${live?`<span class="ldot" aria-hidden="true"></span>${esc(g.detail||"Live")}`:fin?"Final":esc(new Date(g.start_time).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}))}</span><span class="ico" title="${esc(LEAGUES[g.lg].label)}">${icon(g.lg)}</span></div>`;
+  const meta=`<div class="tmeta"><span>${live?`<span class="ldot" aria-hidden="true"></span>${esc(fmtClock(g)||"Live")}`:fin?"Final":esc(new Date(g.start_time).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}))}</span><span class="ico" title="${esc(LEAGUES[g.lg].label)}">${icon(g.lg)}</span></div>`;
   if(g.field)return`<button type="button" class="tile${sel?" sel":""}" data-k="${esc(k)}">${meta}<div class="trow"><span class="ab">${esc(g.name||g.title||"Event")}</span></div><div class="tflag">Leaderboard on Games</div></button>`;
   const md=fin?null:model(g);if(live&&md)lwTrack(g,md.pH);const F=lwFlags(g,md);
   const sh=sc[g.home],sa=sc[g.away],lead=c=>(live||fin)&&sh!=null&&sa!=null&&(c===g.home?sh>sa:sa>sh);
-  const row=(c,p)=>`<div class="trow${lead(c)?" lead":""}"><span class="ab">${esc(tAbbr(g,c))}</span><span class="ts">${(live||fin)&&sc[c]!=null?sc[c]:""}</span><span class="tp">${md&&p!=null?pct(p,0):""}</span></div>`;
-  let fl=[];if(F.close)fl.push(`<span class="cl">Close finish</span>`);if(F.upset)fl.push(`<span class="us">Upset watch</span>`);
+    let fl=[];if(F.close)fl.push(`<span class="cl">Close finish</span>`);if(F.upset)fl.push(`<span class="us">Upset watch</span>`);
   if(live&&md){const s=lwSwing(g,md.pH);if(s)fl.push(`<span class="up">▲ ${esc(tAbbr(g,s.d>0?g.home:g.away))} +${Math.round(Math.abs(s.d)*100)}</span>`)}
-  if(md&&md.pD!=null)fl.push(`Draw ${pct(md.pD,0)}`);if(!live&&!fin&&g.sit==null&&!fl.length&&g.title)fl.push(esc(g.title));
-  return`<button type="button" class="tile${sel?" sel":""}${F.close?" close":F.upset?" upset":""}" data-k="${esc(k)}" aria-expanded="${sel}">${meta}${row(g.away,md&&md.pA)}${row(g.home,md&&md.pH)}<div class="tflag">${fl.join(" · ")}</div></button>`}
+  if(md&&md.pD!=null)fl.push(`Draw ${pct(md.pD,0)}`);{const LI=g.lg==="mlb"?null:lsInfo(g);if(md&&LI&&LI.labs.length>4&&(live||fin)){const fav=md.pH>=md.pA?g.home:g.away;fl.push(`${esc(tAbbr(g,fav))} ${pct(Math.max(md.pH,md.pA),0)} to win`)}}if(!live&&!fin&&g.sit==null&&!fl.length&&g.title)fl.push(esc(g.title));
+  return`<button type="button" class="tile${sel?" sel":""}${F.close?" close":F.upset?" upset":""}" data-k="${esc(k)}" aria-expanded="${sel}">${meta}${tileRows(g,md,live,fin)}<div class="tflag">${fl.join(" · ")}</div></button>`}
 function lwDetail(g){const fin=DONE.includes(g.status),live=isLive(g),sc=g.score||{},md=fin?null:model(g);
   const side=(c,p)=>`<div class="tm"><div class="nm">${esc(tname(g,c))}<small>${esc(rec(g,c))}</small></div><div class="sc">${(live||fin)&&sc[c]!=null?sc[c]:""}</div><div class="pc">${md&&p!=null?pct(p,0):""}</div></div>`;
   if(g.field)return`<div class="tdet"><b>${esc(g.name||g.title||"")}</b><p class="note">${live?"In progress. ":""}The leaderboard and finishing chances are on the Games tab.</p></div>`;
   let sit="";if(live){if(g.sit&&g.sit.dd){const pa=g.teams&&g.teams[g.sit.poss];sit=`${pa?esc(short(g,g.sit.poss))+" ball · ":""}${esc(g.sit.dd)}${g.sit.rz?" · Red zone":""}`}else if(g.lg==="ten"&&g.sets)sit="Sets: "+g.sets.h.map((v,i)=>`${v}-${g.sets.a[i]??0}`).join(", ")}
   let sw="";if(live&&md){const s=lwSwing(g,md.pH);if(s)sw=`<span class="swing">▲ ${esc(short(g,s.d>0?g.home:g.away))} +${Math.round(Math.abs(s.d)*100)} pts in ${s.mins} min</span>`}
   const canX=live&&g.lg!=="ten"&&g.lg!=="mma";
-  return`<div class="tdet"><div class="meta" style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);text-transform:uppercase;font-weight:600"><span>${live?`<span class="live">Live</span> ${esc(g.detail||"")}`:fin?"Final":esc(whenTxt(g))}</span><span class="lgtag">${icon(g.lg)}${esc(LEAGUES[g.lg].label)}${g.title?" · "+esc(g.title):""}</span></div>
+  return`<div class="tdet"><div class="meta" style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);text-transform:uppercase;font-weight:600"><span>${live?`<span class="live">Live</span> ${esc(fmtClock(g))}`:fin?"Final":esc(whenTxt(g))}</span><span class="lgtag">${icon(g.lg)}${esc(LEAGUES[g.lg].label)}${g.title?" · "+esc(g.title):""}</span></div>
     ${side(g.away,md&&md.pA)}${side(g.home,md&&md.pH)}${md&&md.pD!=null?`<div class="tm"><div class="nm drw">Draw</div><div class="sc"></div><div class="pc">${pct(md.pD,0)}</div></div>`:""}
     ${md&&g.lg!=="soc"?`<div class="bar" aria-hidden="true"><i style="width:${(md.pA*100).toFixed(1)}%;opacity:.45"></i></div>`:""}
-    ${sit?`<div class="note">${sit}</div>`:""}${sw?`<div>${sw}</div>`:""}
+    ${(live||fin)?lsTable(g):""}${sit?`<div class="note">${sit}</div>`:""}${sw?`<div>${sw}</div>`:""}
     ${canX?`<div class="lwbody">${lwBody(g)}</div>`:!live&&!fin?`<p class="note">Starts ${esc(whenTxt(g))}. Full pregame markets are on the Games tab.</p>`:""}
     <div class="row" style="justify-content:flex-end;gap:6px"><button type="button" class="btn sm ghost" data-log="${esc(JSON.stringify({key:g.lg+":"+g.id}))}">Log bet</button></div></div>`}
 function lwInjRow(i){return`<div class="injrow"><span class="badge ${stCls(i.st)}">${esc(lwLeftEarly(i)?"Left early":i.st)}</span><span><b>${esc(i.n)}</b> ${esc(i.pos)}${i.why?" · "+esc(i.why):""}${i.ret&&stSev(i.st)<=1?` · back ${esc(new Date(i.ret+"T12:00:00").toLocaleDateString([], {month:"short",day:"numeric"}))}?`:""}</span>${i.c?`<span class="why">${esc(i.c.slice(0,220))}</span>`:""}</div>`}
@@ -1761,8 +1816,10 @@ async function renderInjuries(gs){const box=$("lwInj"),lb=$("lwLeft");const use=
 function lwDraw(live,soon,fin){const y=window.scrollY;const fin8=fin.slice(0,12),every=[...live,...soon,...fin8];
   if(LW.sel&&!every.some(g=>g.lg+":"+g.id===LW.sel))LW.sel=null;
   const W=($("lwList").clientWidth||360),cols=Math.max(1,Math.floor((W+8)/(158+8)));
-  const sec=(t,l)=>{if(!l.length)return"";let out=`<h3 class="tsec">${t} (${l.length})</h3>`,pend=null;
-    l.forEach((g,i)=>{out+=lwTile(g);if(g.lg+":"+g.id===LW.sel)pend=g;if(pend&&((i+1)%cols===0||i===l.length-1)){out+=lwDetail(pend);pend=null}});return out};
+  const grp=l=>{let out="",pend=null;l.forEach((g,i)=>{out+=lwTile(g);if(g.lg+":"+g.id===LW.sel)pend=g;if(pend&&((i+1)%cols===0||i===l.length-1)){out+=lwDetail(pend);pend=null}});return out};
+  const sec=(t,l)=>{if(!l.length)return"";let out=`<h3 class="tsec">${t} (${l.length})</h3>`;const lgs=Object.keys(LEAGUES).filter(k=>l.some(g=>g.lg===k));
+    if(lgs.length<2)return out+grp(l);
+    lgs.forEach(k=>{const sub=l.filter(g=>g.lg===k);out+=`<h4 class="tgrp">${icon(k)}${esc(LEAGUES[k].label)} <span>${sub.length}</span></h4>`+grp(sub)});return out};
   $("lwList").innerHTML=(live.length?"":`<div class="empty">No ${LG==="all"?"":esc(LEAGUES[LG].label)+" "}games are live right now.${soon.length?" Here's what starts soon.":""}</div>`)+`<div class="tiles">${sec("Live now",live)}${sec("Starting soon",soon)}${sec("Final today",fin8)}</div>`;
   $("lwList").querySelectorAll(".tile").forEach(t=>t.addEventListener("click",async()=>{const k=t.dataset.k;LW.sel=LW.sel===k?null:k;lwDraw(live,soon,fin);
     const g=live.find(x=>x.lg+":"+x.id===k);if(g&&LW.sel===k&&!g.field&&g.lg!=="ten"&&g.lg!=="mma"){await lwSummary(g);if(LW.sel===k)lwDraw(live,soon,fin)}}));
@@ -1771,7 +1828,7 @@ function lwSub(s){LW.sub=s;try{localStorage.setItem("ge-lwsub",s)}catch(e){}docu
 document.querySelectorAll(".subtab").forEach(b=>b.addEventListener("click",()=>lwSub(b.dataset.sub)));
 try{lwSub(localStorage.getItem("ge-lwsub")||"scores")}catch(e){lwSub("scores")}
 async function renderLive(){if($("p-live").hidden)return;
-  $("lwFilterNote").textContent=`Showing: ${filterText()}. Change this on the Games tab.`;
+  $("lwFilterNote").textContent=`Showing: ${filterText()}. Pick the sport above; change the day on the Games tab.`;
   const all=lwGames(),now=Date.now();
   const live=all.filter(g=>isLive(g)&&g.status!=="postponed");
   const soon=all.filter(g=>!isLive(g)&&!DONE.includes(g.status)&&!g.field&&Date.parse(g.start_time)>now-30*60e3&&Date.parse(g.start_time)<now+3*3600e3).sort((a,b)=>Date.parse(a.start_time)-Date.parse(b.start_time));
