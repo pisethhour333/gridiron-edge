@@ -248,6 +248,9 @@ nav button[aria-selected="true"]{color:var(--turf)!important;background:color-mi
 .scw>.sca i{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--turf);color:var(--bg);box-shadow:0 2px 6px rgba(0,0,0,.35)}
 .scw>.sca svg{width:15px;height:15px}
 .scw>.sca[hidden]{display:none}
+.ha{display:inline-block;vertical-align:3px;margin-left:7px;padding:0 5px;border-radius:4px;font:700 .58rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line)}
+.ha.hm{color:var(--turf);border-color:color-mix(in srgb,var(--turf) 50%,transparent)}
+.at{font-style:normal;font-weight:600;color:var(--muted);margin-right:1px;font-size:.8em}
 </style>
 
 </head>
@@ -524,6 +527,7 @@ nav button[aria-selected="true"]{color:var(--turf)!important;background:color-mi
   </div>
   <div class="card">
     <h2>Bet types, plainly</h2>
+    <details><summary>Who is home and who is away</summary><p>Games are always listed away team first, home team second, the same as "Cowboys @ Packers" on DraftKings. Each team also has an <b>Away</b> or <b>Home</b> tag, and live tiles put an <b>@</b> in front of the home team. A tag with a * means the game is at a neutral site, so neither team really has home advantage and the app doesn't give one.</p></details>
     <details><summary>Live tab and player status</summary><p>The Live tab follows the sport picked at the top. It has two sub-tabs. <b>Scores</b> shows every game as a small tile: live games with their win chances, games starting in the next 3 hours and today's finals. Tap a tile for details. <b>Player status</b> shows the injury report. <b>Upset watch</b> flags a pregame favorite that is losing. <b>Close finish</b> flags a late game that is still near 50/50. Player status lists each team's injury report: Out and Suspended players won't play, Doubtful players probably won't, Questionable is close to a coin flip, and Day-to-day is minor. <b>Left early</b> means a news note says the player exited a game in the last day. Check status before betting a player prop. Books usually void a prop if the player doesn't play at all, but not if he leaves early.</p></details>
     <details open><summary>Moneyline</summary><p>Pick who wins. Negative odds show what you risk to win $100; positive odds show what $100 wins.</p><div class="ex-line">-150: bet $150 to win $100 · +130: bet $100 to win $130</div></details>
     <details><summary>Point spread</summary><p>The favorite must win by more than the spread; the underdog covers by losing by less (or winning). Most spreads are priced near -110 on both sides, so you need to win about 52.4% to break even.</p><div class="ex-line">Steelers -3.5: they must win by 4 or more</div></details>
@@ -743,6 +747,8 @@ function model(g){
 }
 const tname=(g,c)=>(g.teams&&g.teams[c]&&g.teams[c].name)||(teamInfo(g.lg,c)||{}).name||c;
 const short=(g,c)=>{const n=tname(g,c);if(g.lg==="cfb"){const w=n.split(" ");return w.length>2?w.slice(0,-1).join(" "):w[0]}return n.split(" ").slice(-1)[0]};
+function hasHA(g){return !g.field&&g.lg!=="ten"&&g.lg!=="mma"}
+function haTag(g,c){if(!hasHA(g))return"";const hm=c===g.home;return`<span class="ha${hm?" hm":""}">${g.neutral?(hm?"Home*":"Away*"):hm?"Home":"Away"}</span>`}
 function whenTxt(g){return new Date(g.start_time).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})}
 function slate(){
   const now=Date.now(),out=[];
@@ -783,7 +789,7 @@ function renderGames(){
     const day=new Date(effT(g)).toLocaleDateString([], {weekday:"long",month:"short",day:"numeric"});
     const head=day!==lastDay?`<h3 style="margin-top:6px">${esc(day)}</h3>`:"";lastDay=day;
     if(g.field)return head+fieldCardHtml(g);
-    const side=(c,p,fav)=>`<div class="tm${fav?" fav":""}"><div class="nm">${esc(tname(g,c))}<small>${esc(rec(g,c))}</small></div><div class="sc">${(live||fin)&&sc[c]!=null?sc[c]:""}</div><div class="pc">${md?pct(p,0):fin?"":"—"}</div></div>`;
+    const side=(c,p,fav)=>`<div class="tm${fav?" fav":""}"><div class="nm">${esc(tname(g,c))}${haTag(g,c)}<small>${esc(rec(g,c))}</small></div><div class="sc">${(live||fin)&&sc[c]!=null?sc[c]:""}</div><div class="pc">${md?pct(p,0):fin?"":"—"}</div></div>`;
     const favH=md&&md.pH>=md.pA;const sp=md?Math.round(Math.abs(md.m)*2)/2:0;
     return`${head}<div class="gm"><div class="meta"><span>${live?`<span class="live">Live</span> ${esc(g.detail||"")}`:fin?"Final":esc(whenTxt(g))}</span><span class="lgtag">${icon(g.lg)}${esc(LEAGUES[g.lg].label)}${g.title?" · "+esc(g.title):""}</span></div>
       ${side(g.away,md&&md.pA,md&&!favH)}${side(g.home,md&&md.pH,md&&favH)}${md&&md.pD!=null?`<div class="tm"><div class="nm drw">Draw</div><div class="sc"></div><div class="pc">${pct(md.pD,0)}</div></div>`:""}
@@ -1783,10 +1789,10 @@ function tileRows(g,md,live,fin){const sc=g.score||{},sh=sc[g.home],sa=sc[g.away
   const lead=c=>has&&(c===g.home?sh>sa:sa>sh);const LI=g.lg==="mlb"?null:lsInfo(g);
   if(LI&&has){const cols=LI.labs.length,showP=!!md&&cols<=4;const cur=live?LI.n-1:-1;
     const tpl=`minmax(2.3em,1fr) repeat(${cols},minmax(11px,auto)) 1.8em${showP?" 2.3em":""}`;
-    const row=(c,arr,p)=>`<span class="ab${lead(c)?" lead":""}">${esc(tAbbr(g,c))}</span>${LI.labs.map((_,i)=>`<span class="q${i===cur?" cur":""}">${arr[i]!=null?arr[i]:""}</span>`).join("")}<span class="t">${sc[c]}</span>${showP?`<span class="p${lead(c)?" lead":""}">${p!=null?pct(p,0):""}</span>`:""}`;
+    const row=(c,arr,p)=>`<span class="ab${lead(c)?" lead":""}">${c===g.home&&hasHA(g)?'<i class="at">@</i>':""}${esc(tAbbr(g,c))}</span>${LI.labs.map((_,i)=>`<span class="q${i===cur?" cur":""}">${arr[i]!=null?arr[i]:""}</span>`).join("")}<span class="t">${sc[c]}</span>${showP?`<span class="p${lead(c)?" lead":""}">${p!=null?pct(p,0):""}</span>`:""}`;
     return`<div class="lsg" style="grid-template-columns:${tpl}"><span></span>${LI.labs.map(l=>`<span class="h">${l}</span>`).join("")}<span class="h" style="text-align:right">T</span>${showP?`<span class="h" style="text-align:right">Win</span>`:""}
       ${row(g.away,g.ls.a,md&&md.pA)}${row(g.home,g.ls.h,md&&md.pH)}</div>`}
-  const r=(c,p)=>`<div class="trow${lead(c)?" lead":""}"><span class="ab">${esc(tAbbr(g,c))}</span><span class="ts">${has?sc[c]:""}</span><span class="tp">${md&&p!=null?pct(p,0):""}</span></div>`;
+  const r=(c,p)=>`<div class="trow${lead(c)?" lead":""}"><span class="ab">${c===g.home&&hasHA(g)?'<i class="at">@</i>':""}${esc(tAbbr(g,c))}</span><span class="ts">${has?sc[c]:""}</span><span class="tp">${md&&p!=null?pct(p,0):""}</span></div>`;
   return r(g.away,md&&md.pA)+r(g.home,md&&md.pH)}
 function lsTable(g){const LI=lsInfo(g);if(!LI||!(g.score))return"";const sc=g.score;
   return`<div class="lstab"><table><tr><th></th>${LI.labs.map(l=>`<th>${l}</th>`).join("")}<th>T</th></tr>${[g.away,g.home].map(c=>{const arr=c===g.home?g.ls.h:g.ls.a;return`<tr><td>${esc(tAbbr(g,c))}</td>${LI.labs.map((_,i)=>`<td>${arr[i]!=null?arr[i]:""}</td>`).join("")}<td class="tot">${sc[c]??""}</td></tr>`}).join("")}</table></div>`}
@@ -1800,7 +1806,7 @@ function lwTile(g){const fin=DONE.includes(g.status),live=isLive(g),sc=g.score||
   if(md&&md.pD!=null)fl.push(`Draw ${pct(md.pD,0)}`);{const LI=g.lg==="mlb"?null:lsInfo(g);if(md&&LI&&LI.labs.length>4&&(live||fin)){const fav=md.pH>=md.pA?g.home:g.away;fl.push(`${esc(tAbbr(g,fav))} ${pct(Math.max(md.pH,md.pA),0)} to win`)}}if(!live&&!fin&&g.sit==null&&!fl.length&&g.title)fl.push(esc(g.title));
   return`<button type="button" class="tile${sel?" sel":""}${F.close?" close":F.upset?" upset":""}" data-k="${esc(k)}" aria-expanded="${sel}">${meta}${tileRows(g,md,live,fin)}<div class="tflag">${fl.join(" · ")}</div></button>`}
 function lwDetail(g){const fin=DONE.includes(g.status),live=isLive(g),sc=g.score||{},md=fin?null:model(g);
-  const side=(c,p)=>`<div class="tm"><div class="nm">${esc(tname(g,c))}<small>${esc(rec(g,c))}</small></div><div class="sc">${(live||fin)&&sc[c]!=null?sc[c]:""}</div><div class="pc">${md&&p!=null?pct(p,0):""}</div></div>`;
+  const side=(c,p)=>`<div class="tm"><div class="nm">${esc(tname(g,c))}${haTag(g,c)}<small>${esc(rec(g,c))}</small></div><div class="sc">${(live||fin)&&sc[c]!=null?sc[c]:""}</div><div class="pc">${md&&p!=null?pct(p,0):""}</div></div>`;
   if(g.field)return`<div class="tdet"><b>${esc(g.name||g.title||"")}</b><p class="note">${live?"In progress. ":""}The leaderboard and finishing chances are on the Games tab.</p></div>`;
   let sit="";if(live){if(g.sit&&g.sit.dd){const pa=g.teams&&g.teams[g.sit.poss];sit=`${pa?esc(short(g,g.sit.poss))+" ball · ":""}${esc(g.sit.dd)}${g.sit.rz?" · Red zone":""}`}else if(g.lg==="ten"&&g.sets)sit="Sets: "+g.sets.h.map((v,i)=>`${v}-${g.sets.a[i]??0}`).join(", ")}
   let sw="";if(live&&md){const s=lwSwing(g,md.pH);if(s)sw=`<span class="swing">▲ ${esc(short(g,s.d>0?g.home:g.away))} +${Math.round(Math.abs(s.d)*100)} pts in ${s.mins} min</span>`}
