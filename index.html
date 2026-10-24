@@ -251,6 +251,7 @@ nav button[aria-selected="true"]{color:var(--turf)!important;background:color-mi
 .ha{display:inline-block;vertical-align:3px;margin-left:7px;padding:0 5px;border-radius:4px;font:700 .58rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line)}
 .ha.hm{color:var(--turf);border-color:color-mix(in srgb,var(--turf) 50%,transparent)}
 .at{font-style:normal;font-weight:600;color:var(--muted);margin-right:1px;font-size:.8em}
+.pfcard{padding:10px 12px!important;gap:8px}.pfsel button[aria-pressed="true"]{background:var(--turf);color:var(--bg)}
 </style>
 
 </head>
@@ -336,8 +337,9 @@ nav button[aria-selected="true"]{color:var(--turf)!important;background:color-mi
     <div id="propList-nba" style="display:flex;flex-direction:column;gap:10px"></div>
   </div>
   <div id="propsNfl" style="display:flex;flex-direction:column;gap:10px">
+    <div class="card pfcard"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">NFL props</h2></div><div class="row dfsel pfsel" id="pf-nfl" role="group" aria-label="Filter NFL props by stat"></div></div>
     <div id="liveTd-nfl" style="display:flex;flex-direction:column;gap:10px"></div>
-    <div class="card"><h2>NFL props</h2><p class="note" id="propIntro-nfl"></p><h3 id="boardH-nfl">Most likely touchdown scorers</h3><p class="note" id="boardNote-nfl"></p><div id="tdBoard-nfl"></div></div>
+    <div class="card" id="nflBoardCard"><details class="lwhelp"><summary>How these projections work</summary><p class="note" id="propIntro-nfl"></p></details><h3 id="boardH-nfl">Most likely touchdown scorers</h3><p class="note" id="boardNote-nfl"></p><div id="tdBoard-nfl"></div></div>
     <div id="propList-nfl" style="display:flex;flex-direction:column;gap:10px"></div>
   </div>
   <div id="propsSoc" style="display:flex;flex-direction:column;gap:10px">
@@ -1537,6 +1539,17 @@ function projFor(g,tid,p){
 }
 const overP=(pr,L)=>Phi((pr.proj-L)/pr.sd);
 function propGames(){return slate().filter(g=>g.lg==="nfl"&&upcoming(g))}
+/* --- NFL prop stat filter --- */
+const NFLPF=[["all","All"],["pass","Passing"],["rush","Rushing"],["rec","Receiving"],["td","Touchdowns"]];
+let NFLF="all";try{NFLF=localStorage.getItem("ge-pfnfl")||"all"}catch(e){}
+function nflFilterBar(){const box=$("pf-nfl");if(!box)return;box.innerHTML=NFLPF.map(([k,t])=>`<button type="button" class="btn sm ghost" data-pf="${k}" aria-pressed="${NFLF===k}">${t}</button>`).join("");
+  box.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{NFLF=b.dataset.pf;try{localStorage.setItem("ge-pfnfl",NFLF)}catch(e){}nflFilterBar();applyNflFilter()}))}
+function applyNflFilter(){const lab={pass:"passing",rush:"rushing",rec:"receiving",td:"touchdown"}[NFLF];
+  document.querySelectorAll("#propList-nfl .prop").forEach(el=>{el.hidden=NFLF==="all"?false:NFLF==="td"?el.dataset.td!=="1":el.dataset.kind!==NFLF;
+    el.querySelectorAll(".chip").forEach(c=>{c.hidden=NFLF==="td"&&!c.classList.contains("td")});const pr=el.querySelector(".pr"),ck=el.querySelector(".chk");if(pr)pr.hidden=NFLF==="td";if(ck)ck.hidden=NFLF==="td"});
+  document.querySelectorAll("#propList-nfl .pteam").forEach(t=>{const all=t.querySelectorAll(".prop").length,vis=[...t.querySelectorAll(".prop")].filter(x=>!x.hidden).length,n=t.querySelector(".pfnone");if(n){n.hidden=!(all&&!vis);n.textContent=`No ${lab||""} props for this team.`}});
+  const bc=$("nflBoardCard"),lt=$("liveTd-nfl");if(bc){const show=NFLF==="all"||NFLF==="td";["boardH-nfl","boardNote-nfl","tdBoard-nfl"].forEach(id=>{const x=$(id);if(x)x.hidden=!show})}if(lt)lt.hidden=!(NFLF==="all"||NFLF==="td")}
+nflFilterBar();
 async function renderNflProps(){
   setPropText("nfl");
   renderLiveTd();
@@ -1551,17 +1564,18 @@ async function renderNflProps(){
     const teams=[g.away,g.home].map(tid=>{const ps=(pg[tid]||[]);
       const rows=ps.map((p,i)=>{const pr=projFor(g,tid,p);if(!pr)return"";const cfg=PROPCFG[p.kind];
         if(pr.anyTD!=null&&p.td>0)tds.push({p,g,tid,ch:pr.anyTD});
-        return`<div class="prop"><div class="ph"><b>${esc(p.name)}</b> <span class="note">${esc(p.pos)} · ${esc(p.line)}</span></div>
+        return`<div class="prop" data-kind="${esc(p.kind)}" data-td="${pr.anyTD!=null?1:0}"><div class="ph"><b>${esc(p.name)}</b> <span class="note">${esc(p.pos)} · ${esc(p.line)}</span></div>
           <div class="pr"><span class="lab">${cfg.label}</span><span class="pv">Proj ${Math.round(pr.proj)}</span></div>
           <div class="chips">${cfg.lines.map(L=>`<span class="chip">${L}+ <b>${pct(overP(pr,L),0)}</b></span>`).join("")}
           ${pr.anyTD!=null?`<span class="chip td">Anytime TD <b>${pct(pr.anyTD,0)}</b></span>`:""}${pr.anyTD!=null?(()=>{const nt=nextTD(g),gp=teamGp(tid);if(!nt||!gp)return"";const f=(String(tid)===String(g.home)?nt.h:nt.a)*tdShare(tid,p.td,p.yds,gp);return`<span class="chip td">First TD <b>${pct(f,0)}</b></span>`})():""}${pr.twoPass!=null?`<span class="chip td">2+ pass TD <b>${pct(pr.twoPass,0)}</b></span>`:""}</div>
           <div class="row chk"><input type="number" inputmode="decimal" step="0.5" placeholder="Your line, e.g. ${cfg.lines[1]-0.5}" id="ln-${esc(g.id)}-${esc(tid)}-${i}" data-proj="${pr.proj.toFixed(2)}" data-sd="${pr.sd.toFixed(2)}" class="lineIn" aria-label="Check a ${cfg.label} line for ${esc(p.name)}"><span class="note lineOut"></span><button type="button" class="btn sm ghost logprop" data-key="${esc("nfl:"+g.id)}" data-name="${esc(p.name)}" data-lab="${esc(cfg.label.toLowerCase())}">Log bet</button></div></div>`}).join("");
-      return`<div class="pteam"><h3>${esc(tname(g,tid))}</h3>${rows||`<p class="note">Player stats not available yet.</p>`}</div>`}).join("");
+      return`<div class="pteam"><h3>${esc(tname(g,tid))}</h3>${rows||`<p class="note">Player stats not available yet.</p>`}<p class="note pfnone" hidden></p></div>`}).join("");
     return`<div class="gm"><div class="meta"><span>${esc(whenTxt(g))}</span><span>${esc(short(g,g.away))} @ ${esc(short(g,g.home))}</span></div>${teams}</div>`}).join("");
   document.querySelectorAll(".lineIn").forEach(inp=>inp.addEventListener("input",()=>{const L=parseFloat(inp.value),o=inp.closest(".chk,.row").querySelector(".lineOut");if(!isFinite(L)){o.textContent="";return}
     const p=Phi((+inp.dataset.proj-L)/+inp.dataset.sd);o.innerHTML=`Over <b>${pct(p,0)}</b> · Under <b>${pct(1-p,0)}</b>`}));
   document.querySelectorAll(".logprop").forEach(b=>b.addEventListener("click",()=>{const L=b.parentNode.querySelector(".lineIn").value;const g=findGame(b.dataset.key);
     startLog({type:"Prop",key:b.dataset.key,pick:`${b.dataset.name} ${L?"Over "+L+" ":""}${b.dataset.lab}`})}));
+  applyNflFilter();
   tds.sort((a,b)=>b.ch-a.ch);
   $("tdBoard-nfl").innerHTML=tds.length?`<ol class="tdl">${tds.slice(0,10).map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(t.p.pos)}, ${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))}</span></span><span class="pv">${pct(t.ch,0)}</span></li>`).join("")}</ol>`:`<p class="note">No touchdown data yet.</p>`;
 }
