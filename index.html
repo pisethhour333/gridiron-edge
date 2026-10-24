@@ -562,6 +562,7 @@ nav button[aria-selected="true"]{color:var(--turf)!important;background:color-mi
   <div class="card">
     <h2>Bet types, plainly</h2>
     <details><summary>Ticket: copying picks into DraftKings</summary><p>Tap <b>+ Ticket</b> on a game, a parlay or a player prop to collect picks. In leaderboards and player cards, the gold <b>+</b> adds that exact pick, and you can tap any chance chip (like <b>Anytime TD 18%</b> or <b>75+ 36%</b>) to add it. <b>DK ›</b> on any row opens DraftKings at that team's or game's page. The gold <b>Ticket</b> button at the bottom right opens your list with each pick's chance, the combined chance and the fair parlay odds. <b>Find in DraftKings</b> opens that team's odds page in DraftKings, and the gray line under each pick shows where to tap there. Tick each pick off as you add it. DraftKings doesn't let outside apps fill in your betslip, so you still tap the picks in DraftKings yourself. When you've placed the bet, tap <b>Log to Tracker</b> and enter the odds and stake from your DraftKings slip.</p></details>
+    <details><summary>How college football picks work</summary><p>College schedules are very uneven, so raw points scored and allowed can mislead. Linecheck rates every FBS team's offense and defense against the teams it actually played, using every FBS score this season. Early in the season, last season's ratings fill in. A team's projected points are its offense rating plus the opponent's defense rating, plus about a field goal for the home side. Win chances, spreads, totals, team totals, halves and quarters all come from these ratings. Games against FCS teams count, with FCS teams rated as one group.</p></details>
     <details><summary>Who is home and who is away</summary><p>Games are always listed away team first, home team second, the same as "Cowboys @ Packers" on DraftKings. Each team also has an <b>Away</b> or <b>Home</b> tag, and live tiles put an <b>@</b> in front of the home team. A tag with a * means the game is at a neutral site, so neither team really has home advantage and the app doesn't give one.</p></details>
     <details><summary>Live tab and player status</summary><p>The Live tab follows the sport picked at the top. It has two sub-tabs. <b>Scores</b> shows every game as a small tile: live games with their win chances, games starting in the next 3 hours and today's finals. Tap a tile for details. <b>Player status</b> shows the injury report. <b>Upset watch</b> flags a pregame favorite that is losing. <b>Close finish</b> flags a late game that is still near 50/50. Player status lists each team's injury report: Out and Suspended players won't play, Doubtful players probably won't, Questionable is close to a coin flip, and Day-to-day is minor. <b>Left early</b> means a news note says the player exited a game in the last day. Check status before betting a player prop. Books usually void a prop if the player doesn't play at all, but not if he leaves early.</p></details>
     <details open><summary>Moneyline</summary><p>Pick who wins. Negative odds show what you risk to win $100; positive odds show what $100 wins.</p><div class="ex-line">-150: bet $150 to win $100 · +130: bet $100 to win $130</div></details>
@@ -807,7 +808,7 @@ function renderGames(){
   renderLg();
   const notes=[];const n=D.nfl.teams,c=D.cfb.teams,b=D.nba.teams,sh=k=>LG==="all"||LG===k;
   if(n&&n.asOf&&sh("nfl"))notes.push(`NFL season stats updated ${n.asOf}.`);
-  if(c&&c.asOf&&sh("cfb"))notes.push(`College season stats updated ${c.asOf}. College picks are rougher, since schedules vary so much.`);
+  if(c&&c.asOf&&sh("cfb"))notes.push(`College ratings updated ${c.asOf}${c.fit?`, adjusted for strength of schedule using ${c.fit.games} FBS results this season${c.fit.prior?" plus last season early on":""}`:""}. College picks are still rougher than NFL.`);
   Object.keys(TEAMLG).forEach(k=>{const t=D[k].teams;if(t&&t.asOf&&sh(k))notes.push(`${LEAGUES[k].label} ratings updated ${t.asOf}${k==="ncaab"||k==="ncaaw"?", blended with last season early on. College picks are rougher because schedules vary so much":", blended with last season early on"}.`)});
   if(D.ten.teams&&sh("ten"))notes.push("Tennis chances use official ATP and WTA ranking points.");if(sh("mma")&&D.mma.live)notes.push("UFC chances use each fighter's pro record and are rough.");
   if(sh("golf")&&D.golf.live)notes.push("Golf chances use season scoring averages.");if((sh("f1")||sh("nas"))&&(D.f1.live||D.nas.live))notes.push("Racing chances use points per race this season.");
@@ -884,6 +885,32 @@ async function getJSON(u){const r=await fetch(u,{cache:"no-store"});if(!r.ok)thr
 function stat(e,n){const s=(e.stats||[]).find(x=>x.name===n);return s&&s.value!=null?+s.value:null}
 function collectEntries(o,out){if(!o||typeof o!=="object")return;if(Array.isArray(o.entries))o.entries.forEach(e=>{if(e&&e.team)out.push(e)});if(o.standings)collectEntries(o.standings,out);(o.children||[]).forEach(c=>collectEntries(c,out))}
 const cache={get(k){try{return JSON.parse(localStorage.getItem("ge-c-"+k)||"null")}catch(e){return null}},set(k,v){try{localStorage.setItem("ge-c-"+k,JSON.stringify(v))}catch(e){}}};
+/* --- college football: schedule-adjusted offense/defense ratings --- */
+async function cfbGames(year,weeks,types){const out=[];const jobs=[];types.forEach(st=>weeks(st).forEach(w=>jobs.push([st,w])));
+  for(let i=0;i<jobs.length;i+=5){await Promise.all(jobs.slice(i,i+5).map(async([st,w])=>{try{const j=await getJSON(`${ESPN}/site/v2/sports/football/college-football/scoreboard?groups=80&limit=400&dates=${year}&seasontype=${st}&week=${w}`);
+    (j.events||[]).forEach(ev=>{const c=ev.competitions&&ev.competitions[0];if(!c||!(ev.status||c.status||{type:{}}).type.completed)return;const h=c.competitors.find(x=>x.homeAway==="home"),a=c.competitors.find(x=>x.homeAway==="away");if(!h||!a)return;
+      out.push({id:String(ev.id),h:String(h.team.id),a:String(a.team.id),hs:+h.score||0,as:+a.score||0,n:!!c.neutralSite})})}catch(e){}}))}
+  const seen=new Set();return out.filter(g=>!seen.has(g.id)&&seen.add(g.id))}
+function cfbSolve(games,fbs,prior,lam,hfa){const T=t=>fbs.has(t)?t:"FCS";const off={},def={},n={};games.forEach(g=>{[T(g.h),T(g.a)].forEach(t=>{off[t]=off[t]||0;def[t]=def[t]||0;n[t]=(n[t]||0)+1})});
+  const P=t=>prior&&prior[t]?prior[t]:{off:0,def:0};let mu=games.reduce((s,g)=>s+g.hs+g.as,0)/Math.max(1,2*games.length);
+  for(let it=0;it<60;it++){const so={},sd={};
+    games.forEach(g=>{const h=T(g.h),a=T(g.a),hh=g.n?0:hfa/2;so[h]=(so[h]||0)+(g.hs-mu-def[a]-hh);so[a]=(so[a]||0)+(g.as-mu-def[h]+hh)});
+    Object.keys(off).forEach(t=>{off[t]=(so[t]+lam*P(t).off)/(n[t]+lam)});
+    games.forEach(g=>{const h=T(g.h),a=T(g.a),hh=g.n?0:hfa/2;sd[a]=(sd[a]||0)+(g.hs-mu-off[h]-hh);sd[h]=(sd[h]||0)+(g.as-mu-off[a]+hh)});
+    Object.keys(def).forEach(t=>{def[t]=(sd[t]+lam*P(t).def)/(n[t]+lam)});
+    const fb=Object.keys(off).filter(t=>t!=="FCS");const mo=fb.reduce((s,t)=>s+off[t],0)/fb.length,md=fb.reduce((s,t)=>s+def[t],0)/fb.length;fb.concat(["FCS"]).forEach(t=>{if(off[t]!=null){off[t]-=mo;def[t]-=md}});
+    mu=games.reduce((s,g)=>{const h=T(g.h),a=T(g.a);return s+(g.hs-off[h]-def[a])+(g.as-off[a]-def[h])},0)/Math.max(1,2*games.length)}
+  let rt=0,rm=0;games.forEach(g=>{const h=T(g.h),a=T(g.a),hh=g.n?0:hfa/2,ph=mu+off[h]+def[a]+hh,pa=mu+off[a]+def[h]-hh;rt+=(g.hs+g.as-ph-pa)**2;rm+=(g.hs-g.as-ph+pa)**2});
+  const k=Math.max(1,games.length);return{mu,off,def,n,tsd:Math.sqrt(rt/k),msd:Math.sqrt(rm/k)}}
+async function loadCfbFit(fbs){const y=seasonYear(true),HFA=LEAGUES.cfb.hfa;
+  let last=cache.get("cfb-fit-last");if(!last||last.y!==y-1||Date.now()-last.at>30*864e5){const gl=await cfbGames(y-1,st=>st===2?Array.from({length:16},(_,i)=>i+1):[1],[2,3]);
+    if(gl.length>300){const f=cfbSolve(gl,fbs,null,2,HFA);last={y:y-1,at:Date.now(),off:f.off,def:f.def};cache.set("cfb-fit-last",last)}else last=null}
+  const prior={};if(last)Object.keys(last.off).forEach(t=>{prior[t]={off:last.off[t]*0.55,def:last.def[t]*0.55}});
+  const cw=Math.max(1,Math.min(17,(D.cfb.week||16)));const cc=cache.get("cfb-fit-cur");if(cc&&cc.y===y&&cc.w===cw&&Date.now()-cc.at<3*3600e3)return cc.v;
+  const gc=await cfbGames(y,st=>Array.from({length:cw},(_,i)=>i+1),[2]);
+  if(gc.length<40&&!last)return null;
+  const f=cfbSolve(gc,fbs,prior,last?3:2,HFA);const v={mu:f.mu,off:f.off,def:f.def,tsd:f.tsd,msd:f.msd,games:gc.length,prior:!!last};cache.set("cfb-fit-cur",{y,w:cw,at:Date.now(),v});return v}
+function cfbSpread(F){if(F&&F.games>150){LEAGUES.cfb.tsd=Math.min(19,Math.max(13,F.tsd));LEAGUES.cfb.sd=Math.min(18.5,Math.max(13.5,F.msd))}}
 async function loadStandings(lg){
   if(lg==="golf")return loadGolfStats();
   if(RACE[lg])return loadRaceStandings(lg);
@@ -898,7 +925,9 @@ async function loadStandings(lg){
     const pf=stat(e,"pointsFor"),pa=stat(e,"pointsAgainst");
     teams[t.id]={name:t.displayName,gp,pf:pf!=null&&pa!=null&&(pf+pa)>0?pf:null,pa,wp:(w+ti/2)/gp,rec:`${w}-${l}${ti?"-"+ti:""}`}});
   if(!Object.keys(teams).length)throw new Error("empty standings");
-  D[lg].teams={asOf:new Date().toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"}),at:Date.now(),teams};cache.set(lg+"-teams",D[lg].teams);
+  let FIT=null;if(lg==="cfb"){try{const fit=await loadCfbFit(new Set(Object.keys(teams)));if(fit){Object.keys(teams).forEach(id=>{if(fit.off[id]!=null){const t=teams[id];t.off=fit.mu+fit.off[id];t.def=fit.mu+fit.def[id];t.nr=fit.off[id]-fit.def[id];t.fit=1}});
+    FIT={mu:fit.mu,games:fit.games,prior:fit.prior,tsd:fit.tsd,msd:fit.msd};cfbSpread(FIT)}}catch(e){}}
+  D[lg].teams={asOf:new Date().toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"}),at:Date.now(),teams,fit:FIT};cache.set(lg+"-teams",D[lg].teams);
 }
 const recSum=c=>(c.records&&c.records[0]&&c.records[0].summary)||"";
 function parseEvents(j,recs){
@@ -929,7 +958,7 @@ async function loadScores(lg){
   if(lg==="nba")return loadNbaScores();
   if(lg==="soc")return loadSoccerScores();
   const j=await getJSON(`${ESPN}/site/v2/sports/${PATH[lg]}/scoreboard`+(lg==="cfb"?"?groups=80&limit=300":""));
-  const recs={};const games=parseEvents(j,recs);
+  const recs={};const games=parseEvents(j,recs);if(lg==="cfb"&&j.week&&j.week.number)D.cfb.week=+j.week.number;
   D[lg].recs=recs;D[lg].live={games};D[lg].liveAt=Date.now();cache.set(lg+"-live",{live:D[lg].live,recs,at:D[lg].liveAt});
 }
 let feedErr=false,fcTimer=null;
@@ -945,7 +974,7 @@ async function refresh(force){
   feedErr=false;await Promise.all(jobs);setTag();renderGames();if(!$("p-props").hidden&&typeof renderLiveTd==="function")renderLiveTd();if(!$("p-live").hidden&&typeof renderLive==="function")renderLive();if(typeof fillGameSelect==="function"){fillGameSelect();autoSettle()}
 }
 function initData(){
-  Object.keys(LEAGUES).forEach(lg=>{const t=cache.get(lg+"-teams");if(t)D[lg].teams=t;const l=cache.get(lg+"-live");if(l){D[lg].live=l.live;D[lg].recs=l.recs;D[lg].liveAt=l.at}});
+  Object.keys(LEAGUES).forEach(lg=>{const t=cache.get(lg+"-teams");if(t)D[lg].teams=t;if(lg==="cfb"&&t&&t.fit)cfbSpread(t.fit);const l=cache.get(lg+"-live");if(l){D[lg].live=l.live;D[lg].recs=l.recs;D[lg].liveAt=l.at}});
   setTag();renderGames();refresh(false);
   setInterval(()=>{if(!document.hidden)refresh(false)},60000);
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh(false)});
@@ -1199,7 +1228,8 @@ function lgAvgPts(lg){const T=D[lg].teams&&D[lg].teams.teams;const a=T?Object.va
 function teamOD(lg,id){const t=teamInfo(lg,id);if(!t)return null;if(t.off!=null&&t.def!=null)return{off:t.off,def:t.def};
   if(t.pf==null||t.pa==null||!t.gp)return null;const avg=lgAvgPts(lg),w=t.gp/(t.gp+3);return{off:avg+(t.pf/t.gp-avg)*w,def:avg+(t.pa/t.gp-avg)*w}}
 function gameProj(g){const H=teamOD(g.lg,g.home),A=teamOD(g.lg,g.away),md=model(g);if(!H||!A||!md)return null;
-  let tot=(H.off+A.def+A.off+H.def)/2;if(g.lg==="nba")tot-=(g.b2bH?1:0)+(g.b2bA?1:0);
+  const FT=D[g.lg].teams&&D[g.lg].teams.fit,fh=teamInfo(g.lg,g.home),fa=teamInfo(g.lg,g.away);
+  let tot=FT&&fh&&fa&&fh.fit&&fa.fit?H.off+A.def+A.off+H.def-2*FT.mu:(H.off+A.def+A.off+H.def)/2;if(g.lg==="nba")tot-=(g.b2bH?1:0)+(g.b2bA?1:0);
   const m=md.m,preH=tot/2+m/2,preA=tot/2-m/2;
   if(isLive(g)&&g.score){const r=remaining(g),sh=+g.score[g.home]||0,sa=+g.score[g.away]||0;
     return{live:true,r,m,preH,preA,preTot:tot,h:sh+preH*r,a:sa+preA*r,tot:sh+sa+tot*r,curH:sh,curA:sa,sdF:Math.sqrt(Math.max(r,1e-4))}}
