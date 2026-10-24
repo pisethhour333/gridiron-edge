@@ -825,9 +825,9 @@ async function loadAdj(force){if(adjBusy||(!force&&Date.now()-adjAt<10*60e3))ret
     cache.set("adj",ADJ)}finally{adjBusy=false}
   if(changed){renderGames();try{if(!$("p-live").hidden)renderLive()}catch(e){}}}
 function dkLink(g,tid){const k=g.lg+":"+g.id,c=DKC[k]&&DKC[k].v;if(c&&c.ev)return c.ev;return dkUrl({lg:g.lg,tname:tid!=null?tname(g,tid):tname(g,g.home)})}
-function dkA(g,tid,cls){return`<a class="rab dk${cls?" "+cls:""}" href="${esc(dkLink(g,tid))}" target="_blank" rel="noopener" aria-label="Open in DraftKings">DK<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>`}
-function tkQ(g,tid,pick,p,type){return esc(JSON.stringify({key:g.lg+":"+g.id,pick,p:p==null?null:+(+p).toFixed(4),type:type||"Prop",tid:tid==null?null:String(tid)}))}
-function rowAct(g,tid,pick,p,type){return`<span class="ra"><button type="button" class="rab add" data-tkq="${tkQ(g,tid,pick,p,type)}" aria-label="Add ${esc(pick)} to ticket">+</button>${dkA(g,tid)}</span>`}
+function dkA(g,tid,cls,player){const s=DKSP[g.lg];const href=player&&s?`${DKB}/teams/${s[0]}/${s[1]}/${slugify(player)}--odds`:dkLink(g,tid);return`<a class="rab dk${cls?" "+cls:""}" href="${esc(href)}" target="_blank" rel="noopener" aria-label="Open in DraftKings">DK<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>`}
+function tkQ(g,tid,pick,p,type,player){return esc(JSON.stringify({key:g.lg+":"+g.id,pick,p:p==null?null:+(+p).toFixed(4),type:type||"Prop",tid:tid==null?null:String(tid),player:player||null}))}
+function rowAct(g,tid,pick,p,type,player){return`<span class="ra"><button type="button" class="rab add" data-tkq="${tkQ(g,tid,pick,p,type,player)}" aria-label="Add ${esc(pick)} to ticket">+</button>${dkA(g,tid,"",player)}</span>`}
 function hasHA(g){return !g.field&&g.lg!=="ten"&&g.lg!=="mma"}
 function haTag(g,c){if(!hasHA(g))return"";const hm=c===g.home;return`<span class="ha${hm?" hm":""}">${g.neutral?(hm?"Home*":"Away*"):hm?"Home":"Away"}</span>`}
 function whenTxt(g){return new Date(g.start_time).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})}
@@ -1496,7 +1496,7 @@ async function renderMlbProps(){const box=$("propList-mlb"),bd=$("tdBoard-mlb");
     const teams=[g.away,g.home].map(side).join("");
     return`<details class="gm"${gi<2?" open":""}><summary class="meta"><span>${esc(whenTxt(g))}</span><span>${esc(short(g,g.away))} @ ${esc(short(g,g.home))}</span></summary>${teams}${opts.length?xChecker(opts.join(""),"mlb:"+g.id):""}</details>`}).join("");
   const seen=new Set(),top=board.filter(x=>!seen.has(x.p.id)&&seen.add(x.p.id)).sort((a,b)=>b.p.hr-a.p.hr).slice(0,10);
-  bd.innerHTML=top.length?`<ol class="tdl">${top.map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · 1+ hit ${pct(pge(t.p.h,1),0)}</span></span><span class="pv">${pct(pge(t.p.hr,1),0)}${rowAct(t.g,t.tid,t.p.name+" to hit a home run",pge(t.p.hr,1))}</span></li>`).join("")}</ol>`:`<p class="note">No batter data yet.</p>`}
+  bd.innerHTML=top.length?`<ol class="tdl">${top.map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · 1+ hit ${pct(pge(t.p.h,1),0)}</span></span><span class="pv">${pct(pge(t.p.hr,1),0)}${rowAct(t.g,t.tid,t.p.name+" to hit a home run",pge(t.p.hr,1),"Prop",t.p.name)}</span></li>`).join("")}</ol>`:`<p class="note">No batter data yet.</p>`}
 async function renderNhlProps(){const box=$("propList-nhl"),bd=$("tdBoard-nhl");const gs=propGamesFor("nhl");
   if(!gs){box.innerHTML=`<div class="empty">NHL props are for games that haven't started. Pick Today or All at the top.</div>`;bd.innerHTML="";return}
   if(!gs.length){box.innerHTML=`<div class="empty">No upcoming NHL games for this filter.</div>`;bd.innerHTML="";return}
@@ -1517,7 +1517,7 @@ async function renderNhlProps(){const box=$("propList-nhl"),bd=$("tdBoard-nhl");
     const teams=[g.away,g.home].map(side).join("");
     return`<details class="gm"${gi<2?" open":""}><summary class="meta"><span>${esc(whenTxt(g))}</span><span>${esc(short(g,g.away))} @ ${esc(short(g,g.home))}</span></summary>${teams}${opts.length?xChecker(opts.join(""),"nhl:"+g.id):""}</details>`}).join("");
   const seen=new Set(),top=board.filter(x=>!seen.has(x.p.id)&&seen.add(x.p.id)).sort((a,b)=>b.p.g-a.p.g).slice(0,10);
-  bd.innerHTML=top.length?`<ol class="tdl">${top.map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · 1+ point ${pct(pge(t.p.pts,1),0)}</span></span><span class="pv">${pct(pge(t.p.g,1),0)}${rowAct(t.g,t.tid,t.p.name+" anytime goal",pge(t.p.g,1))}</span></li>`).join("")}</ol>`:`<p class="note">No skater data yet.</p>`}
+  bd.innerHTML=top.length?`<ol class="tdl">${top.map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · 1+ point ${pct(pge(t.p.pts,1),0)}</span></span><span class="pv">${pct(pge(t.p.g,1),0)}${rowAct(t.g,t.tid,t.p.name+" anytime goal",pge(t.p.g,1),"Prop",t.p.name)}</span></li>`).join("")}</ol>`:`<p class="note">No skater data yet.</p>`}
 /* --- soccer player props --- */
 const SOCP={};
 async function loadSocLeaders(){await Promise.all(SOCCER.map(async([k])=>{if(SOCP[k])return;const c=cache.get("socp-"+k);if(c&&Date.now()-c.at<6*3600e3){SOCP[k]=c.v;return}
@@ -1550,7 +1550,7 @@ async function renderSocProps(){
       <div class="note"><b>${esc(A)} @ ${esc(H)}</b> · expected goals ${P.la.toFixed(1)} – ${P.lh.toFixed(1)}${live?" · live columns ignore goals already scored":""}</div>${teams}
       <div class="row"><button class="btn sm ghost" data-log="${esc(JSON.stringify({type:"Prop",key:"soc:"+g.id}))}">Log a scorer bet</button></div></details>`}).join("")+(gs.length>40?`<p class="note">Showing the first 40 matches. Pick a day at the top to see the rest.</p>`:"");
   const seen=new Set();const top=board.filter(x=>{if(seen.has(x.p.id))return false;seen.add(x.p.id);return true}).sort((x,y)=>y.p.o.any-x.p.o.any).slice(0,10);
-  $("tdBoard-soc").innerHTML=top.length?`<ol class="tdl">${top.map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · first ${b(t.p.o.first)}</span></span><span class="pv">${b(t.p.o.any)}${rowAct(t.g,t.tid,t.p.name+" anytime goalscorer",t.p.o.any)}</span></li>`).join("")}</ol>`:`<p class="note">No goalscorer data yet.</p>`;
+  $("tdBoard-soc").innerHTML=top.length?`<ol class="tdl">${top.map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · first ${b(t.p.o.first)}</span></span><span class="pv">${b(t.p.o.any)}${rowAct(t.g,t.tid,t.p.name+" anytime goalscorer",t.p.o.any,"Prop",t.p.name)}</span></li>`).join("")}</ol>`:`<p class="note">No goalscorer data yet.</p>`;
 }
 /* --- color themes --- */
 const SKINS={midnight:{name:"Midnight",note:"Navy with amber, like stadium scoreboard lights. Easiest on the eyes at night, and numbers stand out.",c:["#0B1220","#F5A524","#45D1C9"],bar:"#0B1220"},
@@ -1674,10 +1674,10 @@ async function renderNflProps(){
     const teams=[g.away,g.home].map(tid=>{const ps=(pg[tid]||[]);
       const rows=ps.map((p,i)=>{const pr=projFor(g,tid,p);if(!pr)return"";const cfg=PROPCFG[p.kind];
         if(pr.anyTD!=null&&p.td>0)tds.push({p,g,tid,ch:pr.anyTD});
-        return`<div class="prop" data-kind="${esc(p.kind)}" data-td="${pr.anyTD!=null?1:0}"><div class="ph"><span><b>${esc(p.name)}</b> <span class="note">${esc(p.pos)} · ${esc(p.line)}</span></span>${dkA(g,tid)}</div>
+        return`<div class="prop" data-kind="${esc(p.kind)}" data-td="${pr.anyTD!=null?1:0}"><div class="ph"><span><b>${esc(p.name)}</b> <span class="note">${esc(p.pos)} · ${esc(p.line)}</span></span>${dkA(g,tid,"",p.name)}</div>
           <div class="pr"><span class="lab">${cfg.label}</span><span class="pv">Proj ${Math.round(pr.proj)}</span></div>
-          <div class="chips">${cfg.lines.map(L=>`<button type="button" class="chip tap" data-tkq="${tkQ(g,tid,`${p.name} ${L}+ ${cfg.label.toLowerCase()}`,overP(pr,L))}">${L}+ <b>${pct(overP(pr,L),0)}</b><i>+</i></button>`).join("")}
-          ${pr.anyTD!=null?`<button type="button" class="chip td tap" data-tkq="${tkQ(g,tid,p.name+" anytime TD",pr.anyTD)}">Anytime TD <b>${pct(pr.anyTD,0)}</b><i>+</i></button>`:""}${pr.anyTD!=null?(()=>{const nt=nextTD(g),gp=teamGp(tid);if(!nt||!gp)return"";const f=(String(tid)===String(g.home)?nt.h:nt.a)*tdShare(tid,p.td,p.yds,gp);return`<button type="button" class="chip td tap" data-tkq="${tkQ(g,tid,p.name+" first TD",f)}">First TD <b>${pct(f,0)}</b><i>+</i></button>`})():""}${pr.twoPass!=null?`<button type="button" class="chip td tap" data-tkq="${tkQ(g,tid,p.name+" 2+ passing TDs",pr.twoPass)}">2+ pass TD <b>${pct(pr.twoPass,0)}</b><i>+</i></button>`:""}</div>
+          <div class="chips">${cfg.lines.map(L=>`<button type="button" class="chip tap" data-tkq="${tkQ(g,tid,`${p.name} ${L}+ ${cfg.label.toLowerCase()}`,overP(pr,L),"Prop",p.name)}">${L}+ <b>${pct(overP(pr,L),0)}</b><i>+</i></button>`).join("")}
+          ${pr.anyTD!=null?`<button type="button" class="chip td tap" data-tkq="${tkQ(g,tid,p.name+" anytime TD",pr.anyTD,"Prop",p.name)}">Anytime TD <b>${pct(pr.anyTD,0)}</b><i>+</i></button>`:""}${pr.anyTD!=null?(()=>{const nt=nextTD(g),gp=teamGp(tid);if(!nt||!gp)return"";const f=(String(tid)===String(g.home)?nt.h:nt.a)*tdShare(tid,p.td,p.yds,gp);return`<button type="button" class="chip td tap" data-tkq="${tkQ(g,tid,p.name+" first TD",f,"Prop",p.name)}">First TD <b>${pct(f,0)}</b><i>+</i></button>`})():""}${pr.twoPass!=null?`<button type="button" class="chip td tap" data-tkq="${tkQ(g,tid,p.name+" 2+ passing TDs",pr.twoPass,"Prop",p.name)}">2+ pass TD <b>${pct(pr.twoPass,0)}</b><i>+</i></button>`:""}</div>
           <div class="row chk"><input type="number" inputmode="decimal" step="0.5" placeholder="Your line, e.g. ${cfg.lines[1]-0.5}" id="ln-${esc(g.id)}-${esc(tid)}-${i}" data-proj="${pr.proj.toFixed(2)}" data-sd="${pr.sd.toFixed(2)}" class="lineIn" aria-label="Check a ${cfg.label} line for ${esc(p.name)}"><span class="note lineOut"></span><button type="button" class="btn sm ghost logprop" data-key="${esc("nfl:"+g.id)}" data-name="${esc(p.name)}" data-lab="${esc(cfg.label.toLowerCase())}">Log bet</button><button type="button" class="btn sm tkb" data-tkprop data-key="${esc("nfl:"+g.id)}" data-name="${esc(p.name)}" data-lab="${esc(cfg.label.toLowerCase())}" data-team="${esc(tid)}">+ Ticket</button></div></div>`}).join("");
       return`<div class="pteam"><h3>${esc(tname(g,tid))}</h3>${rows||`<p class="note">Player stats not available yet.</p>`}<p class="note pfnone" hidden></p></div>`}).join("");
     return`<div class="gm"><div class="meta"><span>${esc(whenTxt(g))}</span><span>${esc(short(g,g.away))} @ ${esc(short(g,g.home))}</span></div>${teams}</div>`}).join("");
@@ -1687,7 +1687,7 @@ async function renderNflProps(){
     startLog({type:"Prop",key:b.dataset.key,pick:`${b.dataset.name} ${L?"Over "+L+" ":""}${b.dataset.lab}`})}));
   applyNflFilter();
   tds.sort((a,b)=>b.ch-a.ch);
-  $("tdBoard-nfl").innerHTML=tds.length?`<ol class="tdl">${tds.slice(0,10).map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(t.p.pos)}, ${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))}</span></span><span class="pv">${pct(t.ch,0)}${rowAct(t.g,t.tid,t.p.name+" anytime TD",t.ch)}</span></li>`).join("")}</ol>`:`<p class="note">No touchdown data yet.</p>`;
+  $("tdBoard-nfl").innerHTML=tds.length?`<ol class="tdl">${tds.slice(0,10).map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(t.p.pos)}, ${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))}</span></span><span class="pv">${pct(t.ch,0)}${rowAct(t.g,t.tid,t.p.name+" anytime TD",t.ch,"Prop",t.p.name)}</span></li>`).join("")}</ol>`:`<p class="note">No touchdown data yet.</p>`;
 }
 document.querySelector('nav button[data-tab="props"]').addEventListener("click",()=>renderProps());
 if(!$("p-props").hidden)setTimeout(renderProps,500);
@@ -1800,7 +1800,7 @@ async function renderNbaProps(){
   $("propList-nba").querySelectorAll(".sprIn").forEach(inp=>inp.addEventListener("input",()=>{const L=parseFloat(inp.value),o=inp.closest(".chk,.row").querySelector(".sout");if(!isFinite(L)){o.textContent="";return}const p=Phi((+inp.dataset.m+L)/LEAGUES.nba.sd);o.innerHTML=`Covers <b>${pct(p,0)}</b> · Other side <b>${pct(1-p,0)}</b>`}));
   const seenB=new Set();board.splice(0,board.length,...board.filter(t=>{if(seenB.has(t.p.id))return false;seenB.add(t.p.id);return true}));
   board.sort((a,b)=>b.s.pts.proj-a.s.pts.proj);
-  $("tdBoard-nba").innerHTML=board.length?`<ol class="tdl">${board.slice(0,10).map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · 25+ ${pct(geP(t.s.pts,25),0)}</span></span><span class="pv">${one(t.s.pts.proj)}${rowAct(t.g,t.tid,t.p.name+" 25+ points",geP(t.s.pts,25))}</span></li>`).join("")}</ol>`:`<p class="note">No player data yet.</p>`;
+  $("tdBoard-nba").innerHTML=board.length?`<ol class="tdl">${board.slice(0,10).map(t=>`<li><span><b>${esc(t.p.name)}</b> <span class="note">${esc(short(t.g,t.tid))} · ${esc(whenTxt(t.g))} · 25+ ${pct(geP(t.s.pts,25),0)}</span></span><span class="pv">${one(t.s.pts.proj)}${rowAct(t.g,t.tid,t.p.name+" 25+ points",geP(t.s.pts,25),"Prop",t.p.name)}</span></li>`).join("")}</ol>`:`<p class="note">No player data yet.</p>`;
 }
 
 setInterval(()=>{if(!document.hidden)renderGames()},60000);
@@ -2010,8 +2010,8 @@ armAll();
 /* --- ticket: build picks here, copy them into DraftKings --- */
 let TK=[];try{TK=JSON.parse(localStorage.getItem("ge-ticket")||"[]")||[]}catch(e){TK=[]}
 function tkSave(){try{localStorage.setItem("ge-ticket",JSON.stringify(TK))}catch(e){}tkFab()}
-function dkUrl(l){if(l.ev)return l.ev;const s=DKSP[l.lg];if(s&&l.tname)return`${DKB}/teams/${s[0]}/${s[1]}/${slugify(l.tname)}--odds`;if(s)return`${DKB}/leagues/${s[0]}/${s[1]}`;return DKB+(DKLG[l.lg]||"")}
-function dkPath(l){if(!l.ev&&l.type==="Prop")return`Team page › tap the ${l.game} game › Player props`;const where=l.type==="Prop"?"Player props":l.type==="Total"?"Game lines › Total":l.type==="Spread"?"Game lines › Spread":"Game lines › Moneyline";return`${LEAGUES[l.lg]?LEAGUES[l.lg].label:""} › ${l.game} › ${where}`}
+function dkUrl(l){const s=DKSP[l.lg];if(l.player&&s)return`${DKB}/teams/${s[0]}/${s[1]}/${slugify(l.player)}--odds`;if(l.ev)return l.ev;if(s&&l.tname)return`${DKB}/teams/${s[0]}/${s[1]}/${slugify(l.tname)}--odds`;if(s)return`${DKB}/leagues/${s[0]}/${s[1]}`;return DKB+(DKLG[l.lg]||"")}
+function dkPath(l){if(l.player&&DKSP[l.lg])return`DraftKings search for ${l.player} › pick the prop`;if(!l.ev&&l.type==="Prop")return`Team page › tap the ${l.game} game › Player props`;const where=l.type==="Prop"?"Player props":l.type==="Total"?"Game lines › Total":l.type==="Spread"?"Game lines › Spread":"Game lines › Moneyline";return`${LEAGUES[l.lg]?LEAGUES[l.lg].label:""} › ${l.game} › ${where}`}
 function tkToast(t){let el=$("tkToast");if(!el){el=document.createElement("div");el.id="tkToast";el.setAttribute("role","status");document.body.appendChild(el)}el.textContent=t;el.classList.add("on");clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("on"),1800)}
 function tkAdd(leg){if(TK.some(x=>x.key===leg.key&&x.pick===leg.pick)){tkToast("Already on your ticket");return}
   const nl={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),done:false,...leg};TK.push(nl);tkSave();tkToast("Added: "+leg.pick);tkEv(nl)}
@@ -2083,14 +2083,14 @@ function tkProp(btn){const box=btn.closest(".chk,.xchk,.row");if(!box)return;con
   const m=out&&out.textContent.match(/Over\s*(\d+)%/);const p=m?+m[1]/100:null;const key=btn.dataset.key;const g=findGame(key);if(!g)return;
   let who=btn.dataset.name||"",stat=btn.dataset.lab||"";const sel=box.querySelector("select");if(sel&&sel.selectedOptions[0]){const t=sel.selectedOptions[0].textContent;if(who)stat=t.toLowerCase();else{who=t}}
   const team=btn.dataset.team?tname(g,btn.dataset.team):tname(g,g.home);
-  tkAdd({...legBase(g),type:"Prop",pick:`${who} over ${L}${stat?" "+stat:""}`.replace(/\s+/g," ").trim(),p,tname:team})}
+  const plyr=btn.dataset.name||(who.split(/ [-–—·(]| over | \d/)[0]||"").trim();tkAdd({...legBase(g),type:"Prop",pick:`${who} over ${L}${stat?" "+stat:""}`.replace(/\s+/g," ").trim(),p,tname:team,player:plyr||undefined})}
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-tkgame],[data-tkprop],[data-tkparlay]");if(!t)return;e.preventDefault();
   if(t.dataset.tkgame)tkGame(t.dataset.tkgame);else if(t.dataset.tkprop!=null)tkProp(t);
   else{try{const legs=JSON.parse(t.dataset.tkparlay);let n=0;legs.forEach(x=>{const g=findGame(x.key);if(!g)return;const md=model(g);const c=x.team;
     const leg={...legBase(g),type:"Moneyline",pick:`${short(g,c)} ${g.lg==="ten"||g.lg==="mma"?"to win":"ML"}`,p:md?(c===g.home?md.pH:md.pA):null,tname:tname(g,c)};
     if(!TK.some(y=>y.key===leg.key&&y.pick===leg.pick)){TK.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),done:false,...leg});n++}});tkSave();tkToast(n?`Added ${n} pick${n===1?"":"s"} to your ticket`:"Already on your ticket")}catch(err){}}});
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-tkq]");if(!t)return;e.preventDefault();e.stopPropagation();
-  try{const q=JSON.parse(t.dataset.tkq);const g=findGame(q.key);if(!g)return;tkAdd({...legBase(g),type:q.type,pick:q.pick,p:q.p,tname:q.tid?tname(g,q.tid):tname(g,g.home)});t.classList.add("on");setTimeout(()=>t.classList.remove("on"),900)}catch(err){}});
+  try{const q=JSON.parse(t.dataset.tkq);const g=findGame(q.key);if(!g)return;tkAdd({...legBase(g),type:q.type,pick:q.pick,p:q.p,tname:q.tid?tname(g,q.tid):tname(g,g.home),player:q.player||undefined});t.classList.add("on");setTimeout(()=>t.classList.remove("on"),900)}catch(err){}});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")sheetClose()});
 tkFab();
 /* --- quick logging & auto-grading --- */
