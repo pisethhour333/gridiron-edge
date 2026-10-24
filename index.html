@@ -786,8 +786,8 @@ function model(g){
 const tname=(g,c)=>(g.teams&&g.teams[c]&&g.teams[c].name)||(teamInfo(g.lg,c)||{}).name||c;
 const short=(g,c)=>{const n=tname(g,c);if(g.lg==="cfb"){const w=n.split(" ");return w.length>2?w.slice(0,-1).join(" "):w[0]}return n.split(" ").slice(-1)[0]};
 const DKB="https://sportsbook.draftkings.com";
-const DKSP={nfl:["football","nfl"],nba:["basketball","nba"],wnba:["basketball","wnba"],mlb:["baseball","mlb"],nhl:["hockey","nhl"]};
-const DKLG={cfb:"/leagues/football/ncaaf",ncaab:"/leagues/basketball/ncaab",ncaaw:"/leagues/basketball/ncaaw",soc:"/sports/soccer",ten:"/sports/tennis",mma:"/sports/mma",golf:"/sports/golf",f1:"/sports/motorsports",nas:"/sports/motorsports"};
+const DKSP={nfl:["football","nfl"],nba:["basketball","nba"],wnba:["basketball","wnba"],mlb:["baseball","mlb"],nhl:["hockey","nhl"],cfb:["football","cfb"],ncaab:["basketball","cbb"]};
+const DKLG={ncaaw:"/leagues/basketball/ncaaw",soc:"/sports/soccer",ten:"/sports/tennis",mma:"/sports/mma",golf:"/sports/golf",f1:"/sports/motorsports",nas:"/sports/motorsports"};
 const slugify=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 const DKC={};
 /* --- game adjustments: weather (football) and starting-QB injuries (NFL) --- */
