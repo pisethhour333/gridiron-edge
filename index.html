@@ -252,6 +252,29 @@ nav button[aria-selected="true"]{color:var(--turf)!important;background:color-mi
 .ha.hm{color:var(--turf);border-color:color-mix(in srgb,var(--turf) 50%,transparent)}
 .at{font-style:normal;font-weight:600;color:var(--muted);margin-right:1px;font-size:.8em}
 .pfcard{padding:10px 12px!important;gap:8px}.pfsel button[aria-pressed="true"]{background:var(--turf);color:var(--bg)}
+.tkb{background:var(--turf)!important;color:var(--bg)!important;border-color:var(--turf)!important}
+#tkFab{position:fixed;right:14px;bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:21;display:flex;align-items:center;gap:7px;padding:10px 14px;border-radius:99px;border:0;background:var(--turf);color:var(--bg);font:700 .85rem var(--body);box-shadow:0 6px 18px rgba(0,0,0,.45);cursor:pointer}
+#tkFab b{background:var(--bg);color:var(--turf);border-radius:99px;min-width:1.5em;padding:0 6px;font-size:.78rem;line-height:1.5em;text-align:center}
+#tkFab[hidden]{display:none}
+#tkSheet{position:fixed;inset:0;z-index:40;display:none}#tkSheet.on{display:block}
+#tkSheet .tkbg{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+#tkSheet .tkpanel{position:absolute;left:0;right:0;bottom:0;max-width:760px;margin:0 auto;max-height:86vh;overflow:auto;background:var(--surface);color:var(--ink);border-radius:16px 16px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.5)}
+.tkhead{display:flex;justify-content:space-between;align-items:center}.tkhead h2{margin:0}.tkhead h2 .note{font-family:var(--body);font-size:.8rem;text-transform:none;letter-spacing:0;margin-left:6px}
+.tkx{border:0;background:transparent;color:var(--muted);font-size:1.8rem;line-height:1;cursor:pointer;padding:0 4px}
+.tkopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:6px 0 4px}
+.tkopt{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:600 .92rem var(--body);cursor:pointer;text-align:left}
+.tkopt b{font-family:var(--mono);color:var(--turf)}.tkopt:active{border-color:var(--turf)}
+#tkSheet h3{margin:12px 0 2px}
+.tklist{list-style:none;padding:0;margin:8px 0;display:flex;flex-direction:column;gap:8px}
+.tklist li{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.tklist li.done{opacity:.6}.tklist li.done .tkpick b{text-decoration:line-through}
+.tkchk input{width:22px;height:22px;accent-color:var(--turf);margin-top:2px}
+.tkpick{display:flex;align-items:center;gap:6px;font-size:.98rem}.tkpick svg{width:16px;height:16px;color:var(--turf);flex:0 0 auto}.tkp{margin-left:auto;font:700 .9rem var(--mono);color:var(--turf)}
+.tkpath{font-size:.75rem}
+.tksum{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}.tksum div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column}.tksum span{font-size:.75rem;color:var(--muted)}.tksum b{font:700 1.2rem var(--mono);color:var(--turf)}
+.tkacts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.tkacts .btn{flex:1 1 auto;text-align:center;text-decoration:none}
+#tkToast{position:fixed;left:50%;bottom:calc(140px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;z-index:50;background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:99px;font:600 .85rem var(--body);transition:all .2s;max-width:86vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tkToast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 
 </head>
@@ -529,6 +552,7 @@ nav button[aria-selected="true"]{color:var(--turf)!important;background:color-mi
   </div>
   <div class="card">
     <h2>Bet types, plainly</h2>
+    <details><summary>Ticket: copying picks into DraftKings</summary><p>Tap <b>+ Ticket</b> on a game, a parlay or a player prop to collect picks. The gold <b>Ticket</b> button at the bottom right opens your list with each pick's chance, the combined chance and the fair parlay odds. <b>Find in DraftKings</b> opens that team's odds page in DraftKings, and the gray line under each pick shows where to tap there. Tick each pick off as you add it. DraftKings doesn't let outside apps fill in your betslip, so you still tap the picks in DraftKings yourself. When you've placed the bet, tap <b>Log to Tracker</b> and enter the odds and stake from your DraftKings slip.</p></details>
     <details><summary>Who is home and who is away</summary><p>Games are always listed away team first, home team second, the same as "Cowboys @ Packers" on DraftKings. Each team also has an <b>Away</b> or <b>Home</b> tag, and live tiles put an <b>@</b> in front of the home team. A tag with a * means the game is at a neutral site, so neither team really has home advantage and the app doesn't give one.</p></details>
     <details><summary>Live tab and player status</summary><p>The Live tab follows the sport picked at the top. It has two sub-tabs. <b>Scores</b> shows every game as a small tile: live games with their win chances, games starting in the next 3 hours and today's finals. Tap a tile for details. <b>Player status</b> shows the injury report. <b>Upset watch</b> flags a pregame favorite that is losing. <b>Close finish</b> flags a late game that is still near 50/50. Player status lists each team's injury report: Out and Suspended players won't play, Doubtful players probably won't, Questionable is close to a coin flip, and Day-to-day is minor. <b>Left early</b> means a news note says the player exited a game in the last day. Check status before betting a player prop. Books usually void a prop if the player doesn't play at all, but not if he leaves early.</p></details>
     <details open><summary>Moneyline</summary><p>Pick who wins. Negative odds show what you risk to win $100; positive odds show what $100 wins.</p><div class="ex-line">-150: bet $150 to win $100 · +130: bet $100 to win $130</div></details>
@@ -798,7 +822,7 @@ function renderGames(){
       ${md&&g.lg!=="soc"?`<div class="bar" aria-hidden="true"><i style="width:${(md.pA*100).toFixed(1)}%;opacity:.45"></i></div>`:""}
       ${!fin?(g.lg==="soc"?soccerHtml(g):g.lg==="ten"?tennisHtml(g):g.lg==="mma"?mmaHtml(g):totalsHtml(g)+periodsHtml(g)):(g.lg==="ten"&&g.sets?`<div class="note">Sets: ${g.sets.h.map((v,i)=>`${v}-${g.sets.a[i]??0}`).join(", ")}</div>`:"")}${liveTdLine(g)}
       <div class="row" style="justify-content:space-between"><span class="note">${md?(g.lg==="ten"?(live?"Live match chance":"Match winner chance"):g.lg==="mma"?"Fight winner chance":g.lg==="soc"?(live?"Live win and draw chances":"Win and draw chances"):live?"Live win chance":(g.lg==="mlb"||g.lg==="nhl")?altLine(g,md):`Model line: ${esc(short(g,md.m>0?g.home:g.away))} ${sp?"-"+sp:"pick'em"}`):(fin?"Final score":"No stats for one of these teams yet")}</span>
-      <span class="row" style="gap:6px">${g.lg!=="nfl"&&g.lg!=="cfb"?"":`<button class="btn sm ghost dig" data-id="${esc(g.id)}">Dig in</button>`}<button class="btn sm ghost" data-log="${esc(JSON.stringify({key:g.lg+":"+g.id}))}">Log bet</button></span></div></div>`}).join("");
+      <span class="row" style="gap:6px">${g.lg!=="nfl"&&g.lg!=="cfb"?"":`<button class="btn sm ghost dig" data-id="${esc(g.id)}">Dig in</button>`}<button class="btn sm ghost" data-log="${esc(JSON.stringify({key:g.lg+":"+g.id}))}">Log bet</button>${fin?"":`<button type="button" class="btn sm tkb" data-tkgame="${esc(g.lg+":"+g.id)}">+ Ticket</button>`}</span></div></div>`}).join("");
   document.querySelectorAll(".dig").forEach(b=>b.addEventListener("click",()=>digIn(shown.find(g=>g.id===b.dataset.id))));
   document.querySelectorAll("#gameList .pchk").forEach(pchkCalc);
   document.querySelectorAll("#gameList .fev").forEach(fchkCalc);
@@ -824,7 +848,7 @@ function renderParlays(gs){
   [2,3,4].forEach(n=>{if(L.length<n)return;const set=L.slice(0,n);const p=set.reduce((s,l)=>s*l.p,1);
     out.push(`<div class="pl"><div class="hd"><h3>${n}-team parlay</h3><span class="chance">${pct(p,0)} to hit</span></div>
     <ul>${set.map(l=>`<li><b>${esc(tname(l.g,l.team))}</b> to win <span class="note">(${pct(l.p,0)}, ${esc(LEAGUES[l.g.lg].label)}, ${esc(whenTxt(l.g))})</span></li>`).join("")}</ul>
-    <div class="row" style="justify-content:space-between"><span class="note">Fair odds ${fairOdds(p)}. Only bet it if DraftKings pays more.</span><button class="btn sm ghost" data-log="${esc(JSON.stringify({type:"Parlay",game:n+"-team parlay",pick:set.map(l=>short(l.g,l.team)).join(" + "),date:localDate(set[0].g.start_time)}))}">Log bet</button></div></div>`)});
+    <div class="row" style="justify-content:space-between"><span class="note">Fair odds ${fairOdds(p)}. Only bet it if DraftKings pays more.</span><button class="btn sm ghost" data-log="${esc(JSON.stringify({type:"Parlay",game:n+"-team parlay",pick:set.map(l=>short(l.g,l.team)).join(" + "),date:localDate(set[0].g.start_time)}))}">Log bet</button><button type="button" class="btn sm tkb" data-tkparlay="${esc(JSON.stringify(set.map(l=>({key:l.g.lg+":"+l.g.id,team:l.team}))))}">+ Ticket</button></div></div>`)});
   $("bestParlays").innerHTML=out.join("")||`<div class="empty">Need at least two upcoming games with stats.</div>`;
   const up=gs.filter(g=>upcoming(g)&&model(g));
   Object.keys(picks).forEach(id=>{if(!up.some(g=>g.id===id))delete picks[id]});
@@ -833,7 +857,7 @@ function renderParlays(gs){
   const chosen=up.filter(g=>picks[g.id]).map(g=>{const md=model(g);return{g,team:picks[g.id],p:picks[g.id]===g.home?md.pH:md.pA}});
   if(chosen.length<2){$("myParlay").innerHTML=`<p class="note">${chosen.length?"Add at least one more team.":"No legs picked yet."}</p>`;return}
   const p=chosen.reduce((s,l)=>s*l.p,1);
-  $("myParlay").innerHTML=`<div class="pl"><div class="hd"><h3>Your ${chosen.length}-team parlay</h3><span class="chance">${pct(p,0)} to hit</span></div><div class="note">${chosen.map(l=>esc(short(l.g,l.team))).join(" + ")} · Fair odds ${fairOdds(p)}</div></div>`;
+  $("myParlay").innerHTML=`<div class="pl"><div class="hd"><h3>Your ${chosen.length}-team parlay</h3><span class="chance">${pct(p,0)} to hit</span></div><div class="note">${chosen.map(l=>esc(short(l.g,l.team))).join(" + ")} · Fair odds ${fairOdds(p)}</div><div class="row" style="justify-content:flex-end;margin-top:6px"><button type="button" class="btn sm tkb" data-tkparlay="${esc(JSON.stringify(chosen.map(l=>({key:l.g.lg+":"+l.g.id,team:l.team}))))}">+ Ticket</button></div></div>`;
 }
 
 const ESPN="https://site.api.espn.com/apis";
@@ -1358,7 +1382,7 @@ function oppF(lg,opp,w){const t=teamOD(lg,opp);if(!t)return 1;return Math.min(1.
 function lgAvgOff(lg){const T=D[lg].teams&&D[lg].teams.teams;const a=T?Object.values(T).filter(t=>t.def!=null):[];return a.length?a.reduce((s,t)=>s+t.def,0)/a.length:LEAGUES[lg].avg}
 const pge=(l,k)=>poisGE(l,k),nge=(m,sd,k)=>Phi((m-(k-0.5))/sd);
 function xOpt(label,mode,m,sd){return`<option data-mode="${mode}" data-m="${m.toFixed(3)}" data-sd="${(sd||0).toFixed(3)}">${esc(label)}</option>`}
-function xChecker(opts,key){return`<div class="xchk row chk"><select class="xSel" aria-label="Player and stat">${opts}</select><input type="number" inputmode="decimal" step="0.5" class="xIn" placeholder="Line, e.g. 0.5" aria-label="Line"><span class="note xOut"></span><button type="button" class="btn sm ghost" data-log="${esc(JSON.stringify({type:"Prop",key}))}">Log bet</button></div>`}
+function xChecker(opts,key){return`<div class="xchk row chk"><select class="xSel" aria-label="Player and stat">${opts}</select><input type="number" inputmode="decimal" step="0.5" class="xIn" placeholder="Line, e.g. 0.5" aria-label="Line"><span class="note xOut"></span><button type="button" class="btn sm ghost" data-log="${esc(JSON.stringify({type:"Prop",key}))}">Log bet</button><button type="button" class="btn sm tkb" data-tkprop data-key="${esc(key)}">+ Ticket</button></div>`}
 ["input","change"].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(!t.classList||!(t.classList.contains("xIn")||t.classList.contains("xSel")))return;const box=t.closest(".xchk"),op=box.querySelector(".xSel").selectedOptions[0],L=parseFloat(box.querySelector(".xIn").value),o=box.querySelector(".xOut");
   if(!op||!isFinite(L)){o.textContent="";return}const m=+op.dataset.m,p=op.dataset.mode==="pois"?poisGE(m,Math.floor(L)+1):Phi((m-(Number.isInteger(L)?L+0.5:L))/+op.dataset.sd);o.innerHTML=`Over <b>${pct(p,0)}</b> · Under <b>${pct(1-p,0)}</b>`}));
 function propGamesFor(lg){if(DF==="live")return null;return dateFilter(lgSlate(lg)).filter(upcoming)}
@@ -1484,8 +1508,8 @@ document.addEventListener("click",async e=>{const b=e.target.closest&&e.target.c
   setTimeout(renderGames,60)});
 /* --- tap-to-adjust buttons for every line, odds and stake box --- */
 const STEPCFG=[
-  [".ouIn,.pTot,.socIn,.xIn,.nline,.totIn,.lineIn",{step:0.5}],
-  [".pSpr,.sprIn,.spIn,#h-sp,#q-line",{step:0.5,sign:true}],
+  [".ouIn,.pTot,.socIn,.xIn,.nline,.totIn,.lineIn,#tkTot",{step:0.5}],
+  [".pSpr,.sprIn,.spIn,#h-sp,#q-line,#tkSp",{step:0.5,sign:true}],
   ["#b-odds,#a-ml,#h-ml,#o-odds,#v-a,#v-b",{step:5,sign:true,odds:true}],
   [".fOdds",{step:50,sign:true,odds:true,start:500}],
   ["#b-stake,#o-stake,#pl-stake",{step:5,min:0}],
@@ -1568,7 +1592,7 @@ async function renderNflProps(){
           <div class="pr"><span class="lab">${cfg.label}</span><span class="pv">Proj ${Math.round(pr.proj)}</span></div>
           <div class="chips">${cfg.lines.map(L=>`<span class="chip">${L}+ <b>${pct(overP(pr,L),0)}</b></span>`).join("")}
           ${pr.anyTD!=null?`<span class="chip td">Anytime TD <b>${pct(pr.anyTD,0)}</b></span>`:""}${pr.anyTD!=null?(()=>{const nt=nextTD(g),gp=teamGp(tid);if(!nt||!gp)return"";const f=(String(tid)===String(g.home)?nt.h:nt.a)*tdShare(tid,p.td,p.yds,gp);return`<span class="chip td">First TD <b>${pct(f,0)}</b></span>`})():""}${pr.twoPass!=null?`<span class="chip td">2+ pass TD <b>${pct(pr.twoPass,0)}</b></span>`:""}</div>
-          <div class="row chk"><input type="number" inputmode="decimal" step="0.5" placeholder="Your line, e.g. ${cfg.lines[1]-0.5}" id="ln-${esc(g.id)}-${esc(tid)}-${i}" data-proj="${pr.proj.toFixed(2)}" data-sd="${pr.sd.toFixed(2)}" class="lineIn" aria-label="Check a ${cfg.label} line for ${esc(p.name)}"><span class="note lineOut"></span><button type="button" class="btn sm ghost logprop" data-key="${esc("nfl:"+g.id)}" data-name="${esc(p.name)}" data-lab="${esc(cfg.label.toLowerCase())}">Log bet</button></div></div>`}).join("");
+          <div class="row chk"><input type="number" inputmode="decimal" step="0.5" placeholder="Your line, e.g. ${cfg.lines[1]-0.5}" id="ln-${esc(g.id)}-${esc(tid)}-${i}" data-proj="${pr.proj.toFixed(2)}" data-sd="${pr.sd.toFixed(2)}" class="lineIn" aria-label="Check a ${cfg.label} line for ${esc(p.name)}"><span class="note lineOut"></span><button type="button" class="btn sm ghost logprop" data-key="${esc("nfl:"+g.id)}" data-name="${esc(p.name)}" data-lab="${esc(cfg.label.toLowerCase())}">Log bet</button><button type="button" class="btn sm tkb" data-tkprop data-key="${esc("nfl:"+g.id)}" data-name="${esc(p.name)}" data-lab="${esc(cfg.label.toLowerCase())}" data-team="${esc(tid)}">+ Ticket</button></div></div>`}).join("");
       return`<div class="pteam"><h3>${esc(tname(g,tid))}</h3>${rows||`<p class="note">Player stats not available yet.</p>`}<p class="note pfnone" hidden></p></div>`}).join("");
     return`<div class="gm"><div class="meta"><span>${esc(whenTxt(g))}</span><span>${esc(short(g,g.away))} @ ${esc(short(g,g.home))}</span></div>${teams}</div>`}).join("");
   document.querySelectorAll(".lineIn").forEach(inp=>inp.addEventListener("input",()=>{const L=parseFloat(inp.value),o=inp.closest(".chk,.row").querySelector(".lineOut");if(!isFinite(L)){o.textContent="";return}
@@ -1673,7 +1697,7 @@ async function renderNbaProps(){
           ${ORDER.map(k=>`<div class="pr"><span class="lab">${STL[k]}</span><span class="pv">Proj ${one(s[k].proj)}</span></div><div class="chips">${chipRow(s[k],k)}</div>`).join("")}
           <div class="chips">${d.dd>=0.08?`<span class="chip td">Double-double <b>${pct(d.dd,0)}</b></span>`:""}${d.td>=0.04?`<span class="chip td">Triple-double <b>${pct(d.td,0)}</b></span>`:""}</div>
           <div class="note">${p.gpCur?`${p.gpCur} game${p.gpCur>1?"s":""} this season, blended with last season`:"Based on last season (no games this season yet)"}</div>
-          <div class="row chk"><select class="nsel" aria-label="Stat for ${esc(p.name)}">${opts}</select><input type="number" inputmode="decimal" step="0.5" class="nline" placeholder="Line, e.g. 24.5" aria-label="Line for ${esc(p.name)}"><span class="note nout"></span><button type="button" class="btn sm ghost lognba" data-key="${esc("nba:"+g.id)}" data-name="${esc(p.name)}">Log bet</button></div></details>`}).join("");
+          <div class="row chk"><select class="nsel" aria-label="Stat for ${esc(p.name)}">${opts}</select><input type="number" inputmode="decimal" step="0.5" class="nline" placeholder="Line, e.g. 24.5" aria-label="Line for ${esc(p.name)}"><span class="note nout"></span><button type="button" class="btn sm ghost lognba" data-key="${esc("nba:"+g.id)}" data-name="${esc(p.name)}">Log bet</button><button type="button" class="btn sm tkb" data-tkprop data-key="${esc("nba:"+g.id)}" data-name="${esc(p.name)}">+ Ticket</button></div></details>`}).join("");
       const flags=[out.length?`<b>Out:</b> ${esc(out.join(", "))}`:"",q.length?`<b>Questionable:</b> ${esc(q.join(", "))}`:""].filter(Boolean).join(" · ");
       return`<div class="pteam"><h3>${esc(tname(g,tid))}</h3>${flags?`<p class="note">${flags}</p>`:""}${rows||`<p class="note">Player stats not available yet.</p>`}</div>`}).join("");
     const fav=P&&(P.m>=0?g.home:g.away),sp=P?Math.round(Math.abs(P.m)*2)/2:0;
@@ -1830,7 +1854,7 @@ function lwDetail(g){const fin=DONE.includes(g.status),live=isLive(g),sc=g.score
     ${md&&g.lg!=="soc"?`<div class="bar" aria-hidden="true"><i style="width:${(md.pA*100).toFixed(1)}%;opacity:.45"></i></div>`:""}
     ${(live||fin)?lsTable(g):""}${sit?`<div class="note">${sit}</div>`:""}${sw?`<div>${sw}</div>`:""}
     ${canX?`<div class="lwbody">${lwBody(g)}</div>`:!live&&!fin?`<p class="note">Starts ${esc(whenTxt(g))}. Full pregame markets are on the Games tab.</p>`:""}
-    <div class="row" style="justify-content:flex-end;gap:6px"><button type="button" class="btn sm ghost" data-log="${esc(JSON.stringify({key:g.lg+":"+g.id}))}">Log bet</button></div></div>`}
+    <div class="row" style="justify-content:flex-end;gap:6px"><button type="button" class="btn sm ghost" data-log="${esc(JSON.stringify({key:g.lg+":"+g.id}))}">Log bet</button>${fin?"":`<button type="button" class="btn sm tkb" data-tkgame="${esc(g.lg+":"+g.id)}">+ Ticket</button>`}</div></div>`}
 function lwInjRow(i){return`<div class="injrow"><span class="badge ${stCls(i.st)}">${esc(lwLeftEarly(i)?"Left early":i.st)}</span><span><b>${esc(i.n)}</b> ${esc(i.pos)}${i.why?" · "+esc(i.why):""}${i.ret&&stSev(i.st)<=1?` · back ${esc(new Date(i.ret+"T12:00:00").toLocaleDateString([], {month:"short",day:"numeric"}))}?`:""}</span>${i.c?`<span class="why">${esc(i.c.slice(0,220))}</span>`:""}</div>`}
 async function renderInjuries(gs){const box=$("lwInj"),lb=$("lwLeft");const use=gs.filter(g=>INJLG[g.lg]&&!g.field&&!DONE.includes(g.status));
   if(!use.length){lb.innerHTML="";$("lwStCount").textContent="";box.innerHTML=`<div class="empty">${LG!=="all"&&!INJLG[LG]?`The injury report covers NFL, NBA, WNBA, MLB and NHL. ${esc(LEAGUES[LG].label)} isn't included.`:"No NFL, NBA, WNBA, MLB or NHL games in this filter."}</div>`;return}
@@ -1897,6 +1921,93 @@ function armAll(){document.querySelectorAll(SCSEL).forEach(armScroll)}
 let scT=null;new MutationObserver(()=>{clearTimeout(scT);scT=setTimeout(armAll,80)}).observe(document.body,{childList:true,subtree:true});
 window.addEventListener("resize",()=>document.querySelectorAll(SCSEL).forEach(scUpd));document.addEventListener("visibilitychange",()=>document.querySelectorAll(SCSEL).forEach(scUpd));
 armAll();
+/* --- ticket: build picks here, copy them into DraftKings --- */
+let TK=[];try{TK=JSON.parse(localStorage.getItem("ge-ticket")||"[]")||[]}catch(e){TK=[]}
+function tkSave(){try{localStorage.setItem("ge-ticket",JSON.stringify(TK))}catch(e){}tkFab()}
+const DKB="https://sportsbook.draftkings.com";
+const DKSP={nfl:["football","nfl"],nba:["basketball","nba"],wnba:["basketball","wnba"],mlb:["baseball","mlb"],nhl:["hockey","nhl"]};
+const DKLG={cfb:"/leagues/football/ncaaf",ncaab:"/leagues/basketball/ncaab",ncaaw:"/leagues/basketball/ncaaw",soc:"/sports/soccer",ten:"/sports/tennis",mma:"/sports/mma",golf:"/sports/golf",f1:"/sports/motorsports",nas:"/sports/motorsports"};
+const slugify=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+function dkUrl(l){const s=DKSP[l.lg];if(s&&l.tname)return`${DKB}/teams/${s[0]}/${s[1]}/${slugify(l.tname)}--odds`;if(s)return`${DKB}/leagues/${s[0]}/${s[1]}`;return DKB+(DKLG[l.lg]||"")}
+function dkPath(l){const where=l.type==="Prop"?"Player props":l.type==="Total"?"Game lines › Total":l.type==="Spread"?"Game lines › Spread":"Game lines › Moneyline";return`${LEAGUES[l.lg]?LEAGUES[l.lg].label:""} › ${l.game} › ${where}`}
+function tkToast(t){let el=$("tkToast");if(!el){el=document.createElement("div");el.id="tkToast";el.setAttribute("role","status");document.body.appendChild(el)}el.textContent=t;el.classList.add("on");clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("on"),1800)}
+function tkAdd(leg){if(TK.some(x=>x.key===leg.key&&x.pick===leg.pick)){tkToast("Already on your ticket");return}
+  TK.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),done:false,...leg});tkSave();tkToast("Added: "+leg.pick)}
+function legBase(g){return{lg:g.lg,key:g.lg+":"+g.id,gid:g.id,game:`${short(g,g.away)} @ ${short(g,g.home)}`,when:g.start_time}}
+function tkFab(){let b=$("tkFab");if(!b){b=document.createElement("button");b.id="tkFab";b.type="button";b.setAttribute("aria-label","Open ticket");b.addEventListener("click",tkOpen);document.body.appendChild(b)}
+  const n=TK.length;b.hidden=!n;b.innerHTML=`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 0 4v0a2 2 0 0 0 0 4v2h18v-2a2 2 0 0 1 0-4 2 2 0 0 1 0-4V6H3z" transform="translate(0 -1)"/><path d="M14 5v14" stroke-dasharray="2 2"/></svg><span>Ticket</span><b>${n}</b>`}
+function sheet(html){let s=$("tkSheet");if(!s){s=document.createElement("div");s.id="tkSheet";s.innerHTML=`<div class="tkbg"></div><div class="tkpanel" role="dialog" aria-modal="true"></div>`;document.body.appendChild(s);s.querySelector(".tkbg").addEventListener("click",sheetClose)}
+  s.querySelector(".tkpanel").innerHTML=html;s.classList.add("on");document.body.style.overflow="hidden";return s.querySelector(".tkpanel")}
+function sheetClose(){const s=$("tkSheet");if(s)s.classList.remove("on");document.body.style.overflow=""}
+function tkCombo(){const known=TK.filter(l=>l.p!=null);if(!TK.length)return null;const all=known.length===TK.length;const p=known.reduce((a,l)=>a*l.p,1);return{all,p,unknown:TK.length-known.length}}
+function tkOpen(){const c=tkCombo();const games=new Set(TK.map(l=>l.key));const sameGame=games.size<TK.length;
+  const p=sheet(`<div class="tkhead"><h2>Your ticket <span class="note">${TK.length} pick${TK.length===1?"":"s"}</span></h2><button type="button" class="tkx" aria-label="Close">×</button></div>
+   ${TK.length?`<p class="note">Open DraftKings, add each pick, and tick it off here. Picks are saved until you clear them.</p>
+   <ol class="tklist">${TK.map(l=>`<li class="${l.done?"done":""}"><label class="tkchk"><input type="checkbox" data-id="${l.id}" ${l.done?"checked":""} aria-label="Added in DraftKings"></label>
+     <div class="tkbody"><div class="tkpick">${icon(l.lg)}<b>${esc(l.pick)}</b>${l.p!=null?`<span class="tkp">${pct(l.p,0)}</span>`:""}</div>
+     <div class="note">${esc(l.game)}${l.when?" · "+esc(new Date(l.when).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})):""}</div>
+     <div class="note tkpath">${esc(dkPath(l))}</div>
+     <div class="row" style="gap:6px;margin-top:4px"><a class="btn sm ghost" href="${esc(dkUrl(l))}" target="_blank" rel="noopener">Find in DraftKings ›</a><button type="button" class="btn sm ghost tkrm" data-id="${l.id}">Remove</button></div></div></li>`).join("")}</ol>
+   ${c?`<div class="tksum">${TK.length>1?`<div><span>All ${TK.length} hit</span><b>${c.all?pct(c.p,1):"—"}</b></div><div><span>Fair parlay odds</span><b>${c.all?fairOdds(c.p):"—"}</b></div>`:`<div><span>Chance</span><b>${c.all?pct(c.p,0):"—"}</b></div><div><span>Fair odds</span><b>${c.all?fairOdds(c.p):"—"}</b></div>`}</div>
+     <p class="note">${c.unknown?`${c.unknown} pick${c.unknown===1?" has":"s have"} no model chance, so the total can't be worked out. `:""}${sameGame?"Some picks are from the same game, so they're linked and the real chance can differ. DraftKings calls this a same game parlay. ":""}Only bet it if DraftKings pays more than the fair odds.</p>`:""}
+   <div class="tkacts"><a class="btn" id="tkOpenDk" href="${esc(dkUrl(TK[0]))}" target="_blank" rel="noopener">Open DraftKings</a><button type="button" class="btn ghost" id="tkCopy">Copy list</button><button type="button" class="btn ghost" id="tkLog">Log to Tracker</button><button type="button" class="btn ghost danger" id="tkClear">Clear</button></div>
+   <p class="note" id="tkMsg"></p>`:`<div class="empty">Your ticket is empty. Tap <b>+ Ticket</b> on any game, parlay or player prop to add it.</div>`}`);
+  p.querySelector(".tkx").addEventListener("click",sheetClose);
+  p.querySelectorAll(".tkchk input").forEach(i=>i.addEventListener("change",()=>{const l=TK.find(x=>x.id===i.dataset.id);if(l){l.done=i.checked;tkSave();i.closest("li").classList.toggle("done",i.checked)}}));
+  p.querySelectorAll(".tkrm").forEach(b=>b.addEventListener("click",()=>{TK=TK.filter(x=>x.id!==b.dataset.id);tkSave();tkOpen()}));
+  const cp=$("tkCopy");if(cp)cp.addEventListener("click",async()=>{const txt=TK.map((l,i)=>`${i+1}. ${l.pick} (${l.game})${l.p!=null?" · Linecheck "+pct(l.p,0):""}`).join("\n")+(c&&c.all&&TK.length>1?`\nAll hit ${pct(c.p,1)} · fair odds ${fairOdds(c.p)}`:"");
+    try{await navigator.clipboard.writeText(txt);$("tkMsg").textContent="Copied. Paste it anywhere to keep a note."}catch(e){$("tkMsg").textContent="Couldn't copy on this device."}});
+  const lg=$("tkLog");if(lg)lg.addEventListener("click",()=>{sheetClose();if(TK.length===1){const l=TK[0];startLog({type:l.type==="Prop"?"Prop":l.type,key:l.key,pick:l.pick})}
+    else startLog({type:"Parlay",game:`${TK.length}-leg ticket`,pick:TK.map(l=>l.pick).join(" + "),date:localDate(TK[0].when||Date.now())})});
+  const cl=$("tkClear");if(cl)cl.addEventListener("click",()=>{if(cl.dataset.arm){TK=[];tkSave();tkOpen()}else{cl.dataset.arm=1;cl.textContent="Tap again to clear"}})}
+/* pick sheet for a game */
+function tkGame(key){const g=findGame(key)||(()=>{const i=key.indexOf(":"),lg=key.slice(0,i),id=key.slice(i+1);const s=D[lg];const x=s&&((s.live&&s.live.games)||[]).find(y=>y.id===id);return x?{...x,lg}:null})();if(!g)return;
+  const md=model(g),live=isLive(g),L=LEAGUES[g.lg],base=legBase(g),dk=DKC[key]&&DKC[key].v;const teamSport=!["ten","mma"].includes(g.lg)&&!g.field;
+  const gp=teamSport?gameProj(g):null;
+  let spH=dk&&dk.spread!=null?dk.spread:null;if(spH==null&&md){spH=-Math.round(md.m*2)/2;if(spH===0)spH=-0.5;if(Number.isInteger(spH))spH+=spH<0?-0.5:0.5}
+  if(g.lg==="mlb"||g.lg==="nhl")spH=md&&md.m>0?-1.5:1.5;
+  let tot=dk&&dk.total!=null?dk.total:gp?Math.floor(gp.preTot)+0.5:null;
+  const nm=c=>short(g,c);
+  const p=sheet(`<div class="tkhead"><h2>Add to ticket</h2><button type="button" class="tkx" aria-label="Close">×</button></div>
+    <p class="note">${icon(g.lg)} ${esc(tname(g,g.away))} @ ${esc(tname(g,g.home))} · ${esc(live?fmtClock(g):whenTxt(g))}${dk?` · ${esc(dk.prov)} lines filled in`:""}</p>
+    <h3>${g.lg==="ten"?"Match winner":g.lg==="mma"?"Fight winner":"Moneyline"}</h3><div class="tkopts">
+      ${[g.away,g.home].map(c=>`<button type="button" class="tkopt" data-k="ml" data-c="${esc(c)}"><span>${esc(nm(c))}</span><b>${md?pct(c===g.home?md.pH:md.pA,0):""}</b></button>`).join("")}
+      ${md&&md.pD!=null?`<button type="button" class="tkopt" data-k="draw"><span>Draw</span><b>${pct(md.pD,0)}</b></button>`:""}</div>
+    ${teamSport&&g.lg!=="soc"?`<h3>${g.lg==="mlb"?"Run line":g.lg==="nhl"?"Puck line":"Spread"}</h3><label class="f"><span class="lab">${esc(nm(g.home))} spread</span><input type="number" inputmode="decimal" step="0.5" id="tkSp" value="${spH!=null?spH:""}"></label><div class="tkopts" id="tkSpOpts"></div>`:""}
+    ${teamSport?`<h3>${g.lg==="soc"?"Total goals":"Total"}</h3><label class="f"><span class="lab">Total line</span><input type="number" inputmode="decimal" step="0.5" id="tkTot" value="${tot!=null?tot:""}"></label><div class="tkopts" id="tkTotOpts"></div>`:""}
+    ${live?`<p class="note">This game is live. Spread and total chances aren't shown for live games; the moneyline uses the live score.</p>`:""}`);
+  p.querySelector(".tkx").addEventListener("click",sheetClose);
+  const spOpts=()=>{const box=$("tkSpOpts");if(!box)return;const s=parseFloat($("tkSp").value);if(!isFinite(s)){box.innerHTML="";return}
+    const pH=md&&!live?Phi((md.m+s)/L.sd):null;const lab=v=>v>0?"+"+v:String(v);
+    box.innerHTML=[[g.away,-s,pH!=null?1-pH:null],[g.home,s,pH]].map(([c,v,pp])=>`<button type="button" class="tkopt" data-k="sp" data-c="${esc(c)}" data-v="${v}" data-p="${pp!=null?pp:""}"><span>${esc(nm(c))} ${lab(v)}</span><b>${pp!=null?pct(pp,0):""}</b></button>`).join("");wire(box)};
+  const totOpts=()=>{const box=$("tkTotOpts");if(!box)return;const t=parseFloat($("tkTot").value);if(!isFinite(t)){box.innerHTML="";return}
+    let pO=null;if(gp&&!live){const sd=g.lg==="soc"?Math.sqrt(Math.max(gp.preTot,0.5)):L.tsd;pO=g.lg==="soc"?(()=>{let c=0,k=0,lam=gp.preTot,term=Math.exp(-lam);for(k=0;k<=Math.floor(t);k++){c+=term;term*=lam/(k+1)}return 1-c})():Phi((gp.preTot-t)/sd)}
+    box.innerHTML=[["Over",pO],["Under",pO!=null?1-pO:null]].map(([o,pp])=>`<button type="button" class="tkopt" data-k="tot" data-o="${o}" data-v="${t}" data-p="${pp!=null?pp:""}"><span>${o} ${t}</span><b>${pp!=null?pct(pp,0):""}</b></button>`).join("");wire(box)};
+  const wire=box=>box.querySelectorAll(".tkopt").forEach(b=>b.addEventListener("click",()=>{const k=b.dataset.k,c=b.dataset.c;let leg;
+    if(k==="ml")leg={...base,type:"Moneyline",pick:`${nm(c)} ${g.lg==="ten"||g.lg==="mma"?"to win":"ML"}`,p:md?(c===g.home?md.pH:md.pA):null,tname:tname(g,c)};
+    else if(k==="draw")leg={...base,type:"Moneyline",pick:`Draw (${base.game})`,p:md.pD,tname:tname(g,g.home)};
+    else if(k==="sp"){const v=+b.dataset.v;leg={...base,type:"Spread",pick:`${nm(c)} ${v>0?"+"+v:v}`,p:b.dataset.p?+b.dataset.p:null,tname:tname(g,c)}}
+    else leg={...base,type:"Total",pick:`${b.dataset.o} ${b.dataset.v} (${base.game})`,p:b.dataset.p?+b.dataset.p:null,tname:tname(g,g.home)};
+    tkAdd(leg);sheetClose()}));
+  wire(p.querySelector(".tkopts"));spOpts();totOpts();
+  const a=$("tkSp");if(a)a.addEventListener("input",()=>{a.dataset.ed=1;spOpts()});const b=$("tkTot");if(b)b.addEventListener("input",()=>{b.dataset.ed=1;totOpts()});
+  if(!dk&&teamSport){p.dataset.k=key;loadDK(g).then(v=>{if(!v||p.dataset.k!==key||!$("tkSheet").classList.contains("on"))return;let ch=false;
+    if(a&&!a.dataset.ed&&v.spread!=null&&g.lg!=="mlb"&&g.lg!=="nhl"){a.value=v.spread;ch=true;spOpts()}if(b&&!b.dataset.ed&&v.total!=null){b.value=v.total;ch=true;totOpts()}
+    const n=p.querySelector(".note");if(ch&&n&&!/lines filled/.test(n.textContent))n.insertAdjacentHTML("beforeend",` · ${esc(v.prov)} lines filled in`)}).catch(()=>{})}}
+/* props: read the line and chance from the checker row */
+function tkProp(btn){const box=btn.closest(".chk,.xchk,.row");if(!box)return;const inp=box.querySelector("input[type=number]"),out=box.querySelector(".lineOut,.xOut,.nout");
+  const L=inp&&parseFloat(inp.value);if(!isFinite(L)){if(out)out.innerHTML=`<b>Enter the DraftKings line first</b>`;if(inp)inp.focus();return}
+  const m=out&&out.textContent.match(/Over\s*(\d+)%/);const p=m?+m[1]/100:null;const key=btn.dataset.key;const g=findGame(key);if(!g)return;
+  let who=btn.dataset.name||"",stat=btn.dataset.lab||"";const sel=box.querySelector("select");if(sel&&sel.selectedOptions[0]){const t=sel.selectedOptions[0].textContent;if(who)stat=t.toLowerCase();else{who=t}}
+  const team=btn.dataset.team?tname(g,btn.dataset.team):tname(g,g.home);
+  tkAdd({...legBase(g),type:"Prop",pick:`${who} over ${L}${stat?" "+stat:""}`.replace(/\s+/g," ").trim(),p,tname:team})}
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-tkgame],[data-tkprop],[data-tkparlay]");if(!t)return;e.preventDefault();
+  if(t.dataset.tkgame)tkGame(t.dataset.tkgame);else if(t.dataset.tkprop!=null)tkProp(t);
+  else{try{const legs=JSON.parse(t.dataset.tkparlay);let n=0;legs.forEach(x=>{const g=findGame(x.key);if(!g)return;const md=model(g);const c=x.team;
+    const leg={...legBase(g),type:"Moneyline",pick:`${short(g,c)} ${g.lg==="ten"||g.lg==="mma"?"to win":"ML"}`,p:md?(c===g.home?md.pH:md.pA):null,tname:tname(g,c)};
+    if(!TK.some(y=>y.key===leg.key&&y.pick===leg.pick)){TK.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),done:false,...leg});n++}});tkSave();tkToast(n?`Added ${n} pick${n===1?"":"s"} to your ticket`:"Already on your ticket")}catch(err){}}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")sheetClose()});
+tkFab();
 /* --- quick logging & auto-grading --- */
 var Q={g:null,side:null,ou:null,line:null};
 function localDate(s){const d=new Date(s);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
